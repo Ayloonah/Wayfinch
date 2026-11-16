@@ -133,6 +133,7 @@
   "changeTagColorMenu": "Changer la couleur...",
   "tagColorTitle": "Couleur de « {name} »",
   "customColor": "Couleur personnalisée...",
+  "useDefaultColor": "Couleur par défaut",
   "colorArea": "Saturation et luminosité",
   "colorHue": "Teinte",
   "colorHex": "Hex",

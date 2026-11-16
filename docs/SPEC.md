@@ -51,9 +51,9 @@ Everything is an **item**, and every item is either a task or an event. Items ne
 | createdAt, updatedAt | all | Kept for history and future sync |
 | source | all | manual, ai-import or ics-import (+ ICS UID) |
 
-- **Overdue** is computed, never stored: `due < now && doneAt == null`. Changing the due date clears it instantly. It shows as a special "overdue" auto tag that users can't assign or delete.
+- **Overdue** is computed, never stored: `due < now && doneAt == null`. Changing the due date clears it instantly. It shows as a special "overdue" auto tag that users can't assign or delete, but can recolor (default: the theme's warning color, with "Use default" to go back to it).
 - **Nesting:** unlimited depth in the data. Every level indents further in the UI so subtasks always read as subtasks: a full step for the first 4 levels, then a smaller step per extra level.
-- **Tags** are user-created with a color picked from a curated palette, or any color via a picker. New tags take the next palette color. A tag's color can be changed from three places, all opening the same color dialog: the tag's dot in the sidebar (or right-click → "Change color..."), a tag chip in the detail panel (its menu also has "Remove tag"), and the dot next to the name in the tag's own view. Curated colors have a lighter partner for dark mode; any other color is adjusted so it stays visible on the panel.
+- **Tags** are user-created with a color picked from a curated palette, or any color via a picker. New tags take the next palette color. A tag's color can be changed from three places, all opening the same color dialog: the tag's dot in the sidebar (or right-click → "Change color..."), a tag chip in the detail panel (its menu also has "Remove tag"), and the dot next to the name in the tag's own view. Curated colors have a lighter partner for dark mode; a custom color shows exactly as picked.
 
 ## Core behaviors
 

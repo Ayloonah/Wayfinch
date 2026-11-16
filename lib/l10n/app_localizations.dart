@@ -806,6 +806,12 @@ abstract class AppLocalizations {
   /// **'Custom color...'**
   String get customColor;
 
+  /// No description provided for @useDefaultColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Use default'**
+  String get useDefaultColor;
+
   /// No description provided for @colorArea.
   ///
   /// In en, this message translates to:

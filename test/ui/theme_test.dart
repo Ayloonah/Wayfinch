@@ -129,10 +129,12 @@ void main() {
       expect(light.tagColor(violet.light), Color(violet.light));
     });
 
-    test('any custom color stays visible on the panel', () {
+    test('custom colors show exactly as picked, in light and dark', () {
       final dark = WayfinchColors.resolve(Brightness.dark, AccentChoice.sky);
-      final shown = dark.tagColor(0xFF101010); // near-black tag
-      expect(contrastRatio(shown, dark.panel), greaterThanOrEqualTo(3));
+      final light = WayfinchColors.resolve(Brightness.light, AccentChoice.sky);
+      // A pastel on white used to get darkened until it looked unchanged.
+      expect(light.tagColor(0xFFB9A4EB), const Color(0xFFB9A4EB));
+      expect(dark.tagColor(0xFF123456), const Color(0xFF123456));
     });
 
     test('new tags cycle through the palette', () {

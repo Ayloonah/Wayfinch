@@ -164,6 +164,7 @@
   "tagColorTitle": "Color for \"{name}\"",
   "@tagColorTitle": {"description": "Title of the tag color dialog.", "placeholders": {"name": {"type": "String"}}},
   "customColor": "Custom color...",
+  "useDefaultColor": "Use default",
   "colorArea": "Saturation and brightness",
   "colorHue": "Hue",
   "colorHex": "Hex",

@@ -70,6 +70,13 @@ class Sidebar extends StatelessWidget {
 
 /// "TAGS": one row per tag with its open-item count, then the overdue auto
 /// tag. Scrolls when there are many.
+/// The overdue auto tag's dot: the user's color, or the theme's warning
+/// color by default.
+Color _overdueDot(HomeController controller, WayfinchColors colors) {
+  final picked = controller.overdueTagColor;
+  return picked == null ? colors.warningText : colors.tagColor(picked);
+}
+
 class _TagList extends StatelessWidget {
   const _TagList();
 
@@ -108,11 +115,12 @@ class _TagList extends StatelessWidget {
           ),
         _TagRow(
           label: l10n.overdueTag,
-          dot: colors.warningText,
+          dot: _overdueDot(controller, colors),
           count: controller.overdueCount,
           selected: selectedTag == overdueTagId,
           auto: true,
           onTap: () => controller.openTag(overdueTagId),
+          onChangeColor: () => changeOverdueTagColor(context),
         ),
       ],
     );

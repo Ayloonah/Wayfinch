@@ -474,6 +474,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get customColor => 'Couleur personnalisée...';
 
   @override
+  String get useDefaultColor => 'Couleur par défaut';
+
+  @override
   String get colorArea => 'Saturation et luminosité';
 
   @override

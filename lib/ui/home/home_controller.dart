@@ -72,6 +72,7 @@ class HomeController extends ChangeNotifier {
       }),
       settings.watchAll().listen((values) {
         _bannerSnoozedUntil = DateTime.tryParse(values[_snoozeKey] ?? '');
+        _overdueTagColor = int.tryParse(values[_overdueColorKey] ?? '');
         notifyListeners();
       }),
     ];
@@ -106,6 +107,19 @@ class HomeController extends ChangeNotifier {
   DateTime? _bannerSnoozedUntil;
 
   static const _snoozeKey = 'banner.snoozedUntil';
+  static const _overdueColorKey = 'tag.overdue.color';
+  int? _overdueTagColor;
+
+  /// The color the user picked for the "overdue" auto tag, or null for the
+  /// theme's warning color.
+  int? get overdueTagColor => _overdueTagColor;
+
+  /// Sets the "overdue" auto tag's color (null = back to the default).
+  Future<void> setOverdueTagColor(int? color) {
+    _overdueTagColor = color;
+    notifyListeners();
+    return settings.setValue(_overdueColorKey, color?.toString());
+  }
 
   /// The tag shown by [Destination.tag]: a tag id, or [overdueTagId].
   String? get tagFilter => _tagFilter;

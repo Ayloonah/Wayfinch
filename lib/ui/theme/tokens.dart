@@ -440,16 +440,17 @@ class WayfinchColors extends ThemeExtension<WayfinchColors> {
     Priority.none => null,
   };
 
-  /// How tag color [stored] (as saved, a light-theme value) shows in this
-  /// theme: curated colors switch to their dark-mode partner, and any other
-  /// color is lightened or darkened until it stands out from the panel.
+  /// How tag color [stored] shows in this theme: curated colors switch to
+  /// their dark-mode partner; any color the user picked shows exactly as
+  /// picked (a tag's dot is decoration next to its name, so it doesn't need
+  /// adjusting, and adjusting it made custom picks look unchanged).
   Color tagColor(int stored) {
     if (isDarkMode) {
       for (final pair in tagPalette) {
         if (pair.light == stored) return Color(pair.dark);
       }
     }
-    return readableOn(Color(stored), panel, target: 3);
+    return Color(stored);
   }
 
   /// Reads the colors from [context]'s theme.

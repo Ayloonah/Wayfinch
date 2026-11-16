@@ -594,6 +594,48 @@ void main() {
     await finish(tester, h);
   });
 
+  testWidgets('a custom tag color from the picker is saved', (tester) async {
+    final h = await pumpApp(
+      tester,
+      seed: (h) =>
+          h.tags.findOrCreate('school', colorFor: (_) => tagPalette[0].light),
+    );
+    await tester.tap(find.byTooltip('Change color').first);
+    await settle(tester);
+    await tester.tap(find.text('Custom color...'));
+    await settle(tester);
+    await tester.enterText(find.widgetWithText(TextField, 'Hex'), '#123456');
+    await tester.pump();
+    await tester.tap(find.text('Save'));
+    await settle(tester);
+    expect(find.text('Color for "school"'), findsNothing);
+    expect(h.controller.tagsById.values.single.color, 0xFF123456);
+    await finish(tester, h);
+  });
+
+  testWidgets('the overdue tag color can be changed and reset', (tester) async {
+    final h = await pumpApp(tester);
+    // The overdue row's dot is the last "Change color" button (no user tags).
+    await tester.tap(find.byTooltip('Change color').last);
+    await settle(tester);
+    expect(find.text('Color for "overdue"'), findsOneWidget);
+    expect(find.text('Use default'), findsNothing);
+    await tester.tap(find.byType(Swatch).at(4));
+    await settle(tester);
+    expect(h.controller.overdueTagColor, tagPalette[4].light);
+    expect(
+      await pumpUntilDone(tester, h.settings.getValue('tag.overdue.color')),
+      '${tagPalette[4].light}',
+    );
+
+    await tester.tap(find.byTooltip('Change color').last);
+    await settle(tester);
+    await tester.tap(find.text('Use default'));
+    await settle(tester);
+    expect(h.controller.overdueTagColor, isNull);
+    await finish(tester, h);
+  });
+
   testWidgets('French UI', (tester) async {
     final h = await pumpApp(tester, locale: const Locale('fr'));
     expect(find.text('Bonjour'), findsOneWidget);

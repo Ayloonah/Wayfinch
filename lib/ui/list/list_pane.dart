@@ -84,6 +84,10 @@ class _Header extends StatelessWidget {
           TagColorButton(tag: tag),
           const SizedBox(width: 12),
         ],
+        if (isOverdueTag) ...[
+          const OverdueTagColorButton(),
+          const SizedBox(width: 12),
+        ],
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
