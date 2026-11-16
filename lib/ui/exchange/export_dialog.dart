@@ -131,13 +131,16 @@ class _ExportDialogState extends State<ExportDialog> {
   Future<void> _copy(ExportText text) async {
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
+    final controller = HomeScope.of(context);
     await Clipboard.setData(ClipboardData(text: text.full));
     messenger.showSnackBar(SnackBar(content: Text(l10n.exportCopied)));
+    await controller.markExported();
   }
 
   Future<void> _save(ExportText text) async {
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
+    final controller = HomeScope.of(context);
     final location = await getSaveLocation(
       suggestedName: 'wayfinch-for-ai.txt',
       acceptedTypeGroups: const [
@@ -147,6 +150,7 @@ class _ExportDialogState extends State<ExportDialog> {
     if (location == null) return;
     await File(location.path).writeAsString(text.full);
     messenger.showSnackBar(SnackBar(content: Text(l10n.exportSaved)));
+    await controller.markExported();
   }
 
   @override

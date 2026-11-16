@@ -47,6 +47,11 @@ class Sidebar extends StatelessWidget {
             onTap: () => showImportDialog(context),
           ),
           _NavButton(
+            destination: Destination.help,
+            icon: Icons.help_outline,
+            label: l10n.navHelp,
+          ),
+          _NavButton(
             destination: Destination.settings,
             icon: Icons.tune,
             label: l10n.navSettings,
@@ -363,32 +368,44 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = WayfinchColors.of(context);
-    final greeting = now.hour < 12
-        ? l10n.greetingMorning
-        : now.hour < 18
-        ? l10n.greetingAfternoon
-        : l10n.greetingEvening;
+    final name = HomeScope.of(context).firstName;
+    final greeting = name.isEmpty
+        ? (now.hour < 12
+              ? l10n.greetingMorning
+              : now.hour < 18
+              ? l10n.greetingAfternoon
+              : l10n.greetingEvening)
+        : (now.hour < 12
+              ? l10n.greetingMorningName(name)
+              : now.hour < 18
+              ? l10n.greetingAfternoonName(name)
+              : l10n.greetingEveningName(name));
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(
         children: [
           const FinchLogo(),
           const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.appTitle,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
+          // Long names shrink with an ellipsis instead of overflowing.
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.appTitle,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-              ),
-              Text(
-                greeting,
-                style: TextStyle(fontSize: 13, color: colors.muted),
-              ),
-            ],
+                Text(
+                  greeting,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 13, color: colors.muted),
+                ),
+              ],
+            ),
           ),
         ],
       ),

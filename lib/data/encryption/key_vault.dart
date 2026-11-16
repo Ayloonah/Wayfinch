@@ -239,6 +239,21 @@ class KeyVaultService {
     recoveryWrap: vault.recoveryWrap,
   );
 
+  /// Returns a vault with a fresh recovery code for [dbKey] (the old code
+  /// stops working; the password keeps working), and that code.
+  Future<(KeyVault, String)> newRecoveryCode(
+    KeyVault vault, {
+    required Uint8List dbKey,
+  }) async {
+    final code = generateRecoveryCode();
+    final next = KeyVault(
+      kdf: vault.kdf,
+      passwordWrap: vault.passwordWrap,
+      recoveryWrap: await _wrap(dbKey, _recoveryBytes(code), vault.kdf),
+    );
+    return (next, code);
+  }
+
   /// Generates a recovery code like `7K2M-9QXA-3BHD-T0WE-56RZ`.
   String generateRecoveryCode() {
     final chars = List.generate(

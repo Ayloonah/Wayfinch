@@ -1639,6 +1639,696 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Backup restored.'**
   String get backupRestored;
+
+  /// No description provided for @greetingMorningName.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning, {name}'**
+  String greetingMorningName(String name);
+
+  /// No description provided for @greetingAfternoonName.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon, {name}'**
+  String greetingAfternoonName(String name);
+
+  /// No description provided for @greetingEveningName.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening, {name}'**
+  String greetingEveningName(String name);
+
+  /// No description provided for @navHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get navHelp;
+
+  /// No description provided for @onboardingStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s start'**
+  String get onboardingStart;
+
+  /// No description provided for @onboardingNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get onboardingNext;
+
+  /// No description provided for @onboardingBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get onboardingBack;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s go!'**
+  String get onboardingFinish;
+
+  /// No description provided for @onboardingWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi, I\'m Wayfinch!'**
+  String get onboardingWelcomeTitle;
+
+  /// No description provided for @onboardingWelcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A calm to-do list that works with your AI. Ask your AI to plan something, bring the plan here, and I\'ll help you keep track of it. Setup takes about a minute.'**
+  String get onboardingWelcomeBody;
+
+  /// No description provided for @onboardingNameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What should I call you?'**
+  String get onboardingNameTitle;
+
+  /// No description provided for @onboardingNameBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Just your first name. It\'s used for greetings and stays on this computer.'**
+  String get onboardingNameBody;
+
+  /// No description provided for @onboardingNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get onboardingNameLabel;
+
+  /// No description provided for @onboardingPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Want a password?'**
+  String get onboardingPasswordTitle;
+
+  /// No description provided for @onboardingPasswordBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s optional. With a password, your list is encrypted on disk, so nobody can read the file without it. You can add or remove one later in Settings.'**
+  String get onboardingPasswordBody;
+
+  /// No description provided for @onboardingVibeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick your vibe'**
+  String get onboardingVibeTitle;
+
+  /// No description provided for @onboardingVibeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Light or dark, and a color you like. You can make your own theme later in Settings.'**
+  String get onboardingVibeBody;
+
+  /// No description provided for @onboardingPreviewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview of the app in these colors'**
+  String get onboardingPreviewLabel;
+
+  /// No description provided for @onboardingPreviewItem1.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish the report'**
+  String get onboardingPreviewItem1;
+
+  /// No description provided for @onboardingPreviewItem2.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan the trip'**
+  String get onboardingPreviewItem2;
+
+  /// No description provided for @onboardingPreviewItem3.
+  ///
+  /// In en, this message translates to:
+  /// **'Water the plants'**
+  String get onboardingPreviewItem3;
+
+  /// No description provided for @onboardingNotifTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get onboardingNotifTitle;
+
+  /// No description provided for @onboardingNotifBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Gentle nudges before things are due. You can change all of this later, and per item.'**
+  String get onboardingNotifBody;
+
+  /// No description provided for @onboardingAiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to use it with your AI'**
+  String get onboardingAiTitle;
+
+  /// No description provided for @onboardingAiBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Wayfinch doesn\'t talk to any AI by itself: you stay in control of what\'s shared.'**
+  String get onboardingAiBody;
+
+  /// No description provided for @aiLoopStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Export for AI'**
+  String get aiLoopStep1Title;
+
+  /// No description provided for @aiLoopStep1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy your list with the format rules and your instructions.'**
+  String get aiLoopStep1Body;
+
+  /// No description provided for @aiLoopStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Ask your AI'**
+  String get aiLoopStep2Title;
+
+  /// No description provided for @aiLoopStep2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste it into any chatbot with your request.'**
+  String get aiLoopStep2Body;
+
+  /// No description provided for @aiLoopStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Import'**
+  String get aiLoopStep3Title;
+
+  /// No description provided for @aiLoopStep3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the reply back, review every change, then apply.'**
+  String get aiLoopStep3Body;
+
+  /// No description provided for @notifTaskReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me before tasks are due'**
+  String get notifTaskReminder;
+
+  /// No description provided for @notifEventReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me before events start'**
+  String get notifEventReminder;
+
+  /// No description provided for @notifDigest.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning digest'**
+  String get notifDigest;
+
+  /// No description provided for @notifDigestBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A short summary of your day.'**
+  String get notifDigestBody;
+
+  /// No description provided for @notifDigestTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Digest time'**
+  String get notifDigestTime;
+
+  /// No description provided for @notifLaunchAtStartup.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Wayfinch with Windows'**
+  String get notifLaunchAtStartup;
+
+  /// No description provided for @notifLaunchAtStartupBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders only arrive while Wayfinch is running.'**
+  String get notifLaunchAtStartupBody;
+
+  /// No description provided for @notifTrayNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing the window will keep Wayfinch running quietly in the system tray, so reminders still arrive.'**
+  String get notifTrayNote;
+
+  /// No description provided for @reminderNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No reminder'**
+  String get reminderNone;
+
+  /// No description provided for @reminderMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 minute before} other{{count} minutes before}}'**
+  String reminderMinutes(int count);
+
+  /// No description provided for @reminderHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hour before} other{{count} hours before}}'**
+  String reminderHours(int count);
+
+  /// No description provided for @reminderDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day before} other{{count} days before}}'**
+  String reminderDays(int count);
+
+  /// No description provided for @passwordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get passwordLabel;
+
+  /// No description provided for @passwordConfirmLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type it again'**
+  String get passwordConfirmLabel;
+
+  /// No description provided for @passwordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'These don\'t match yet.'**
+  String get passwordMismatch;
+
+  /// No description provided for @passwordShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get passwordShow;
+
+  /// No description provided for @passwordHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get passwordHide;
+
+  /// No description provided for @passwordWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'If you forget your password and lose your recovery code, your list can\'t be recovered. Not by you, not by anyone.'**
+  String get passwordWarning;
+
+  /// No description provided for @recoveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your recovery code'**
+  String get recoveryTitle;
+
+  /// No description provided for @recoveryExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'If you ever forget your password, this code unlocks your list instead. It\'s shown only once: save it somewhere safe (a password manager, or printed and put away).'**
+  String get recoveryExplain;
+
+  /// No description provided for @recoveryCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get recoveryCopy;
+
+  /// No description provided for @recoveryCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery code copied.'**
+  String get recoveryCopied;
+
+  /// No description provided for @recoverySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as file'**
+  String get recoverySave;
+
+  /// No description provided for @recoveryFileHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Wayfinch recovery code. Keep it somewhere safe.'**
+  String get recoveryFileHeader;
+
+  /// No description provided for @recoverySavedCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'I saved my recovery code'**
+  String get recoverySavedCheck;
+
+  /// No description provided for @recoveryDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get recoveryDone;
+
+  /// No description provided for @recoveryCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery code'**
+  String get recoveryCodeLabel;
+
+  /// No description provided for @unlockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get unlockTitle;
+
+  /// No description provided for @unlockHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password to open your list.'**
+  String get unlockHint;
+
+  /// No description provided for @unlockRecoveryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the recovery code you saved when you set your password.'**
+  String get unlockRecoveryHint;
+
+  /// No description provided for @unlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get unlock;
+
+  /// No description provided for @unlockWrongPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'That password didn\'t work.'**
+  String get unlockWrongPassword;
+
+  /// No description provided for @unlockWrongCode.
+  ///
+  /// In en, this message translates to:
+  /// **'That code didn\'t work.'**
+  String get unlockWrongCode;
+
+  /// No description provided for @unlockUseRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot your password? Use your recovery code'**
+  String get unlockUseRecovery;
+
+  /// No description provided for @unlockUsePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Use my password instead'**
+  String get unlockUsePassword;
+
+  /// No description provided for @newPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a new password'**
+  String get newPasswordTitle;
+
+  /// No description provided for @newPasswordBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You opened your list with your recovery code. Pick a new password so next time is easy. Your recovery code keeps working.'**
+  String get newPasswordBody;
+
+  /// No description provided for @newPasswordSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save password'**
+  String get newPasswordSave;
+
+  /// No description provided for @newPasswordKeepOld.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep my old password'**
+  String get newPasswordKeepOld;
+
+  /// No description provided for @settingsProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get settingsProfile;
+
+  /// No description provided for @profilePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get profilePassword;
+
+  /// No description provided for @profilePasswordOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On: your list is encrypted on this computer.'**
+  String get profilePasswordOn;
+
+  /// No description provided for @profilePasswordOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off: anyone with access to this computer could read the file.'**
+  String get profilePasswordOff;
+
+  /// No description provided for @profileSetPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a password'**
+  String get profileSetPassword;
+
+  /// No description provided for @profileChangePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get profileChangePassword;
+
+  /// No description provided for @profileRemovePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove password'**
+  String get profileRemovePassword;
+
+  /// No description provided for @profileNewRecoveryCode.
+  ///
+  /// In en, this message translates to:
+  /// **'New recovery code'**
+  String get profileNewRecoveryCode;
+
+  /// No description provided for @profileCurrentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password'**
+  String get profileCurrentPassword;
+
+  /// No description provided for @profileRemoveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your list will no longer be encrypted. You can set a password again anytime.'**
+  String get profileRemoveBody;
+
+  /// No description provided for @profileNewCodeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your old recovery code will stop working.'**
+  String get profileNewCodeBody;
+
+  /// No description provided for @profileTurnOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on password'**
+  String get profileTurnOn;
+
+  /// No description provided for @profilePasswordChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed.'**
+  String get profilePasswordChanged;
+
+  /// No description provided for @tutorialTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting started with Wayfinch'**
+  String get tutorialTitle;
+
+  /// No description provided for @tutorialFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'You finished \"Getting started\". Nice work!'**
+  String get tutorialFinished;
+
+  /// No description provided for @tutorialNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'These steps teach the basics by doing them. Mark this task done anytime to skip the rest.'**
+  String get tutorialNotes;
+
+  /// No description provided for @tutorialCheckOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Check this off'**
+  String get tutorialCheckOff;
+
+  /// No description provided for @tutorialCheckOffNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Click the box next to this step. Done items hide themselves; you\'ll find them in Done.'**
+  String get tutorialCheckOffNotes;
+
+  /// No description provided for @tutorialAddSubtask.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a subtask'**
+  String get tutorialAddSubtask;
+
+  /// No description provided for @tutorialAddSubtaskNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Open this step (or \"Getting started\") and use \"+ Add subtask\", or hover it in the list and click the +.'**
+  String get tutorialAddSubtaskNotes;
+
+  /// No description provided for @tutorialTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Give this a tag'**
+  String get tutorialTag;
+
+  /// No description provided for @tutorialTagNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Open this step (or \"Getting started\") and click \"+ Tag\" in its details. Pick a tag or type a new one.'**
+  String get tutorialTagNotes;
+
+  /// No description provided for @tutorialExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export your list for AI'**
+  String get tutorialExport;
+
+  /// No description provided for @tutorialExportNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Click \"Export for AI\" in the sidebar, then Copy. Paste it into your AI with a request, and bring the reply back with Import.'**
+  String get tutorialExportNotes;
+
+  /// No description provided for @helpSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search help'**
+  String get helpSearch;
+
+  /// No description provided for @helpNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found. Try another word.'**
+  String get helpNoResults;
+
+  /// No description provided for @helpBasicsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting around'**
+  String get helpBasicsTitle;
+
+  /// No description provided for @helpBasicsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Today shows overdue items first, then what\'s due or happening today. Upcoming shows the next 7 days, All shows everything as a tree, and Done keeps what you finished, with your weekly count. Drag views and tags in the sidebar to reorder them, and pick the view Wayfinch opens in under Settings › General.\n\nQuick add understands dates, times, tags and priority, in English and French: try \"Lab report Friday 5pm #school !high\" or \"Rapport vendredi 17h #école !haute\".'**
+  String get helpBasicsBody;
+
+  /// No description provided for @helpItemsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks and events'**
+  String get helpItemsTitle;
+
+  /// No description provided for @helpItemsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks are due by a date (with an optional time); events run from a start to an end. Click an item to edit it in the panel on the right; changes save as you go. Date and time are set together in one dialog. Deleting shows an Undo for 10 seconds.'**
+  String get helpItemsBody;
+
+  /// No description provided for @helpNestingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtasks'**
+  String get helpNestingTitle;
+
+  /// No description provided for @helpNestingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Break things down as far as you like: use \"+ Add subtask\" in the details, or the + on a list row. A few situations ask first: pushing a parent\'s date when a subtask goes past it, closing open subtasks when a parent is done, and marking a parent done when its last subtask is. Tick \"don\'t ask again\" to remember your answer; change it anytime in Settings › Prompts.'**
+  String get helpNestingBody;
+
+  /// No description provided for @helpRecurringTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeating items'**
+  String get helpRecurringTitle;
+
+  /// No description provided for @helpRecurringBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Repeat in the details: daily, weekdays, weekly, every 2 weeks, monthly or yearly. Completing a repeating task creates the next one, with fresh copies of its subtasks. Repeating events roll forward on their own once they end.'**
+  String get helpRecurringBody;
+
+  /// No description provided for @helpTagsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags and overdue'**
+  String get helpTagsTitle;
+
+  /// No description provided for @helpTagsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add tags from an item\'s details. Click a tag in the sidebar to see everything with it. Change a tag\'s color from its dot in the sidebar, by right-clicking it, or from a tag chip\'s menu. Overdue items get the automatic \"overdue\" tag, and a banner offers to review them or snooze it until tomorrow.'**
+  String get helpTagsBody;
+
+  /// No description provided for @helpAiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Using Wayfinch with your AI'**
+  String get helpAiTitle;
+
+  /// No description provided for @helpAiBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Export for AI copies your list with the format rules below and your own instructions. Paste it into any AI with a request (\"plan my final project\"), then paste the reply into Import. You\'ll see what\'s new, changed and removed before anything happens. Add only adds new items; Replace makes your list match the AI\'s version (done items are never removed). Your list is backed up first, and you can undo.'**
+  String get helpAiBody;
+
+  /// No description provided for @helpThemesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Themes'**
+  String get helpThemesTitle;
+
+  /// No description provided for @helpThemesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings › Appearance has light, dark or system, five accent colors, and a custom theme builder that warns you when text may be hard to read.'**
+  String get helpThemesBody;
+
+  /// No description provided for @helpPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Password and recovery code'**
+  String get helpPasswordTitle;
+
+  /// No description provided for @helpPasswordBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A password encrypts your list on this computer. When you set one, you get a recovery code: it can unlock your list if you forget the password. If you lose both, your list can\'t be recovered. Manage both in Settings › Profile.'**
+  String get helpPasswordBody;
+
+  /// No description provided for @helpBackupsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups and undo'**
+  String get helpBackupsTitle;
+
+  /// No description provided for @helpBackupsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your list is backed up before every import. Undo the last import from the Import dialog, or restore any of the last 10 backups from Settings › Import history. Restoring backs up your current list first, so you can change your mind.'**
+  String get helpBackupsBody;
 }
 
 class _AppLocalizationsDelegate

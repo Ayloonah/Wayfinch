@@ -1024,4 +1024,412 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupRestored => 'Backup restored.';
+
+  @override
+  String greetingMorningName(String name) {
+    return 'Good morning, $name';
+  }
+
+  @override
+  String greetingAfternoonName(String name) {
+    return 'Good afternoon, $name';
+  }
+
+  @override
+  String greetingEveningName(String name) {
+    return 'Good evening, $name';
+  }
+
+  @override
+  String get navHelp => 'Help';
+
+  @override
+  String get onboardingStart => 'Let\'s start';
+
+  @override
+  String get onboardingNext => 'Next';
+
+  @override
+  String get onboardingBack => 'Back';
+
+  @override
+  String get onboardingSkip => 'Skip for now';
+
+  @override
+  String get onboardingFinish => 'Let\'s go!';
+
+  @override
+  String get onboardingWelcomeTitle => 'Hi, I\'m Wayfinch!';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'A calm to-do list that works with your AI. Ask your AI to plan something, bring the plan here, and I\'ll help you keep track of it. Setup takes about a minute.';
+
+  @override
+  String get onboardingNameTitle => 'What should I call you?';
+
+  @override
+  String get onboardingNameBody =>
+      'Just your first name. It\'s used for greetings and stays on this computer.';
+
+  @override
+  String get onboardingNameLabel => 'First name';
+
+  @override
+  String get onboardingPasswordTitle => 'Want a password?';
+
+  @override
+  String get onboardingPasswordBody =>
+      'It\'s optional. With a password, your list is encrypted on disk, so nobody can read the file without it. You can add or remove one later in Settings.';
+
+  @override
+  String get onboardingVibeTitle => 'Pick your vibe';
+
+  @override
+  String get onboardingVibeBody =>
+      'Light or dark, and a color you like. You can make your own theme later in Settings.';
+
+  @override
+  String get onboardingPreviewLabel => 'Preview of the app in these colors';
+
+  @override
+  String get onboardingPreviewItem1 => 'Finish the report';
+
+  @override
+  String get onboardingPreviewItem2 => 'Plan the trip';
+
+  @override
+  String get onboardingPreviewItem3 => 'Water the plants';
+
+  @override
+  String get onboardingNotifTitle => 'Reminders';
+
+  @override
+  String get onboardingNotifBody =>
+      'Gentle nudges before things are due. You can change all of this later, and per item.';
+
+  @override
+  String get onboardingAiTitle => 'How to use it with your AI';
+
+  @override
+  String get onboardingAiBody =>
+      'Wayfinch doesn\'t talk to any AI by itself: you stay in control of what\'s shared.';
+
+  @override
+  String get aiLoopStep1Title => '1. Export for AI';
+
+  @override
+  String get aiLoopStep1Body =>
+      'Copy your list with the format rules and your instructions.';
+
+  @override
+  String get aiLoopStep2Title => '2. Ask your AI';
+
+  @override
+  String get aiLoopStep2Body => 'Paste it into any chatbot with your request.';
+
+  @override
+  String get aiLoopStep3Title => '3. Import';
+
+  @override
+  String get aiLoopStep3Body =>
+      'Paste the reply back, review every change, then apply.';
+
+  @override
+  String get notifTaskReminder => 'Remind me before tasks are due';
+
+  @override
+  String get notifEventReminder => 'Remind me before events start';
+
+  @override
+  String get notifDigest => 'Morning digest';
+
+  @override
+  String get notifDigestBody => 'A short summary of your day.';
+
+  @override
+  String get notifDigestTime => 'Digest time';
+
+  @override
+  String get notifLaunchAtStartup => 'Start Wayfinch with Windows';
+
+  @override
+  String get notifLaunchAtStartupBody =>
+      'Reminders only arrive while Wayfinch is running.';
+
+  @override
+  String get notifTrayNote =>
+      'Closing the window will keep Wayfinch running quietly in the system tray, so reminders still arrive.';
+
+  @override
+  String get reminderNone => 'No reminder';
+
+  @override
+  String reminderMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minutes before',
+      one: '1 minute before',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hours before',
+      one: '1 hour before',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days before',
+      one: '1 day before',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passwordLabel => 'Password';
+
+  @override
+  String get passwordConfirmLabel => 'Type it again';
+
+  @override
+  String get passwordMismatch => 'These don\'t match yet.';
+
+  @override
+  String get passwordShow => 'Show password';
+
+  @override
+  String get passwordHide => 'Hide password';
+
+  @override
+  String get passwordWarning =>
+      'If you forget your password and lose your recovery code, your list can\'t be recovered. Not by you, not by anyone.';
+
+  @override
+  String get recoveryTitle => 'Your recovery code';
+
+  @override
+  String get recoveryExplain =>
+      'If you ever forget your password, this code unlocks your list instead. It\'s shown only once: save it somewhere safe (a password manager, or printed and put away).';
+
+  @override
+  String get recoveryCopy => 'Copy';
+
+  @override
+  String get recoveryCopied => 'Recovery code copied.';
+
+  @override
+  String get recoverySave => 'Save as file';
+
+  @override
+  String get recoveryFileHeader =>
+      'Wayfinch recovery code. Keep it somewhere safe.';
+
+  @override
+  String get recoverySavedCheck => 'I saved my recovery code';
+
+  @override
+  String get recoveryDone => 'Done';
+
+  @override
+  String get recoveryCodeLabel => 'Recovery code';
+
+  @override
+  String get unlockTitle => 'Welcome back';
+
+  @override
+  String get unlockHint => 'Enter your password to open your list.';
+
+  @override
+  String get unlockRecoveryHint =>
+      'Enter the recovery code you saved when you set your password.';
+
+  @override
+  String get unlock => 'Unlock';
+
+  @override
+  String get unlockWrongPassword => 'That password didn\'t work.';
+
+  @override
+  String get unlockWrongCode => 'That code didn\'t work.';
+
+  @override
+  String get unlockUseRecovery =>
+      'Forgot your password? Use your recovery code';
+
+  @override
+  String get unlockUsePassword => 'Use my password instead';
+
+  @override
+  String get newPasswordTitle => 'Choose a new password';
+
+  @override
+  String get newPasswordBody =>
+      'You opened your list with your recovery code. Pick a new password so next time is easy. Your recovery code keeps working.';
+
+  @override
+  String get newPasswordSave => 'Save password';
+
+  @override
+  String get newPasswordKeepOld => 'Keep my old password';
+
+  @override
+  String get settingsProfile => 'Profile';
+
+  @override
+  String get profilePassword => 'Password';
+
+  @override
+  String get profilePasswordOn =>
+      'On: your list is encrypted on this computer.';
+
+  @override
+  String get profilePasswordOff =>
+      'Off: anyone with access to this computer could read the file.';
+
+  @override
+  String get profileSetPassword => 'Set a password';
+
+  @override
+  String get profileChangePassword => 'Change password';
+
+  @override
+  String get profileRemovePassword => 'Remove password';
+
+  @override
+  String get profileNewRecoveryCode => 'New recovery code';
+
+  @override
+  String get profileCurrentPassword => 'Current password';
+
+  @override
+  String get profileRemoveBody =>
+      'Your list will no longer be encrypted. You can set a password again anytime.';
+
+  @override
+  String get profileNewCodeBody => 'Your old recovery code will stop working.';
+
+  @override
+  String get profileTurnOn => 'Turn on password';
+
+  @override
+  String get profilePasswordChanged => 'Password changed.';
+
+  @override
+  String get tutorialTitle => 'Getting started with Wayfinch';
+
+  @override
+  String get tutorialFinished => 'You finished \"Getting started\". Nice work!';
+
+  @override
+  String get tutorialNotes =>
+      'These steps teach the basics by doing them. Mark this task done anytime to skip the rest.';
+
+  @override
+  String get tutorialCheckOff => 'Check this off';
+
+  @override
+  String get tutorialCheckOffNotes =>
+      'Click the box next to this step. Done items hide themselves; you\'ll find them in Done.';
+
+  @override
+  String get tutorialAddSubtask => 'Add a subtask';
+
+  @override
+  String get tutorialAddSubtaskNotes =>
+      'Open this step (or \"Getting started\") and use \"+ Add subtask\", or hover it in the list and click the +.';
+
+  @override
+  String get tutorialTag => 'Give this a tag';
+
+  @override
+  String get tutorialTagNotes =>
+      'Open this step (or \"Getting started\") and click \"+ Tag\" in its details. Pick a tag or type a new one.';
+
+  @override
+  String get tutorialExport => 'Export your list for AI';
+
+  @override
+  String get tutorialExportNotes =>
+      'Click \"Export for AI\" in the sidebar, then Copy. Paste it into your AI with a request, and bring the reply back with Import.';
+
+  @override
+  String get helpSearch => 'Search help';
+
+  @override
+  String get helpNoResults => 'Nothing found. Try another word.';
+
+  @override
+  String get helpBasicsTitle => 'Getting around';
+
+  @override
+  String get helpBasicsBody =>
+      'Today shows overdue items first, then what\'s due or happening today. Upcoming shows the next 7 days, All shows everything as a tree, and Done keeps what you finished, with your weekly count. Drag views and tags in the sidebar to reorder them, and pick the view Wayfinch opens in under Settings › General.\n\nQuick add understands dates, times, tags and priority, in English and French: try \"Lab report Friday 5pm #school !high\" or \"Rapport vendredi 17h #école !haute\".';
+
+  @override
+  String get helpItemsTitle => 'Tasks and events';
+
+  @override
+  String get helpItemsBody =>
+      'Tasks are due by a date (with an optional time); events run from a start to an end. Click an item to edit it in the panel on the right; changes save as you go. Date and time are set together in one dialog. Deleting shows an Undo for 10 seconds.';
+
+  @override
+  String get helpNestingTitle => 'Subtasks';
+
+  @override
+  String get helpNestingBody =>
+      'Break things down as far as you like: use \"+ Add subtask\" in the details, or the + on a list row. A few situations ask first: pushing a parent\'s date when a subtask goes past it, closing open subtasks when a parent is done, and marking a parent done when its last subtask is. Tick \"don\'t ask again\" to remember your answer; change it anytime in Settings › Prompts.';
+
+  @override
+  String get helpRecurringTitle => 'Repeating items';
+
+  @override
+  String get helpRecurringBody =>
+      'Use Repeat in the details: daily, weekdays, weekly, every 2 weeks, monthly or yearly. Completing a repeating task creates the next one, with fresh copies of its subtasks. Repeating events roll forward on their own once they end.';
+
+  @override
+  String get helpTagsTitle => 'Tags and overdue';
+
+  @override
+  String get helpTagsBody =>
+      'Add tags from an item\'s details. Click a tag in the sidebar to see everything with it. Change a tag\'s color from its dot in the sidebar, by right-clicking it, or from a tag chip\'s menu. Overdue items get the automatic \"overdue\" tag, and a banner offers to review them or snooze it until tomorrow.';
+
+  @override
+  String get helpAiTitle => 'Using Wayfinch with your AI';
+
+  @override
+  String get helpAiBody =>
+      'Export for AI copies your list with the format rules below and your own instructions. Paste it into any AI with a request (\"plan my final project\"), then paste the reply into Import. You\'ll see what\'s new, changed and removed before anything happens. Add only adds new items; Replace makes your list match the AI\'s version (done items are never removed). Your list is backed up first, and you can undo.';
+
+  @override
+  String get helpThemesTitle => 'Themes';
+
+  @override
+  String get helpThemesBody =>
+      'Settings › Appearance has light, dark or system, five accent colors, and a custom theme builder that warns you when text may be hard to read.';
+
+  @override
+  String get helpPasswordTitle => 'Password and recovery code';
+
+  @override
+  String get helpPasswordBody =>
+      'A password encrypts your list on this computer. When you set one, you get a recovery code: it can unlock your list if you forget the password. If you lose both, your list can\'t be recovered. Manage both in Settings › Profile.';
+
+  @override
+  String get helpBackupsTitle => 'Backups and undo';
+
+  @override
+  String get helpBackupsBody =>
+      'Your list is backed up before every import. Undo the last import from the Import dialog, or restore any of the last 10 backups from Settings › Import history. Restoring backs up your current list first, so you can change your mind.';
 }

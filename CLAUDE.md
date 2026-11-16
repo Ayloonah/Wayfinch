@@ -44,6 +44,7 @@ Prefer well-maintained, widely used packages. Ask before adding any new dependen
 - Widget tests for the main flows when practical.
 - Run `flutter analyze` and `flutter test` before opening or updating a PR.
 - To check the UI without touching real data, run the demo entry point (in-memory database with sample items): `flutter run -d windows -t dev/demo_main.dart`. Options, as environment variables or `--dart-define`s: `DEMO_MODE=light|dark`, `DEMO_ACCENT=sky|honey|meadow|lilac|mono`, `DEMO_VIEW=settings|export|import`. Use a release build to launch it outside `flutter run` (a debug build started on its own exits right away, likely because its folder has no `native_assets.json`). A running app locks `build/`, so launch a **copy** of `build/windows/x64/runner/Release` from a scratch folder; one build then covers every view via environment variables.
+- To try first-run setup and the password flows on real code without touching real data, run `dev/fresh_main.dart` (the real app on a new temp data folder each launch).
 - Widget tests open the database inside the test's fake-async zone. Run database work with the `pumpUntilDone` helper in `test/widget/app_test.dart`, not `tester.runAsync`, or the test hangs.
 
 ## Style

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../detail/detail_panel.dart';
 import '../list/list_pane.dart';
 import '../prompts/prompts.dart';
+import '../help/help_pane.dart';
 import '../settings/settings_pane.dart';
 import '../sidebar/sidebar.dart';
 import 'home_controller.dart';
@@ -40,6 +42,17 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     widget.controller.asker = (kind, count) =>
         showRulePrompt(context, kind, count);
+    widget.controller.onTutorialFinished = () {
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.tutorialFinished),
+          behavior: SnackBarBehavior.floating,
+          width: 520,
+        ),
+      );
+    };
   }
 
   @override
@@ -60,7 +73,9 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 const Sidebar(),
                 Expanded(
-                  child: view == null
+                  child: controller.destination == Destination.help
+                      ? const HelpPane()
+                      : view == null
                       ? const SettingsPane()
                       : ListPane(view: view),
                 ),

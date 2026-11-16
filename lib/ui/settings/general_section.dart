@@ -17,7 +17,7 @@ class GeneralSection extends StatelessWidget {
       Destination.upcoming => l10n.navUpcoming,
       Destination.all => l10n.navAll,
       Destination.done => l10n.navDone,
-      Destination.tag || Destination.settings => '',
+      Destination.tag || Destination.help || Destination.settings => '',
     };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

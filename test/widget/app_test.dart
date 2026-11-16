@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +19,8 @@ import 'package:wayfinch/ui/home/home_controller.dart';
 import 'package:wayfinch/ui/theme/appearance_controller.dart';
 import 'package:wayfinch/ui/theme/tokens.dart';
 import 'package:wayfinch/ui/widgets/color_picker.dart';
+
+import 'helpers.dart';
 
 /// Sunday, Nov 15, 2026, 10:00.
 final _now = DateTime(2026, 11, 15, 10);
@@ -930,62 +930,4 @@ void main() {
     );
     await finish(tester, h);
   });
-}
-
-/// Lets database work (real async) and the UI catch up.
-Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 5; i++) {
-    await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 20)),
-    );
-    await tester.pump();
-  }
-  await tester.pumpAndSettle();
-}
-
-/// Runs [future] (database work started in the test zone) to completion by
-/// pumping, since the test zone's timers only move when pumped.
-Future<T> pumpUntilDone<T>(WidgetTester tester, Future<T> future) async {
-  var done = false;
-  late T result;
-  unawaited(
-    future.then((value) {
-      result = value;
-      done = true;
-    }),
-  );
-  for (var i = 0; i < 200 && !done; i++) {
-    await tester.pump(const Duration(milliseconds: 10));
-    await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 2)),
-    );
-  }
-  if (!done) throw StateError('Timed out waiting for database work');
-  return result;
-}
-
-/// The first text field inside the open dialog.
-Finder dialogField() => find
-    .descendant(of: find.byType(Dialog), matching: find.byType(TextField))
-    .first;
-
-/// A SelectableText (the export preview) containing [text].
-Finder selectable(String text) => find.byWidgetPredicate(
-  (w) => w is SelectableText && (w.data ?? '').contains(text),
-);
-
-/// Moves a drag gesture to [to] in small steps, one frame each, the way a
-/// real mouse drag reaches a reorderable list.
-Future<void> dragTo(
-  WidgetTester tester,
-  TestGesture gesture, {
-  required Offset from,
-  required Offset to,
-}) async {
-  const steps = 12;
-  final step = (to - from) / steps.toDouble();
-  for (var i = 0; i < steps; i++) {
-    await gesture.moveBy(step);
-    await tester.pump(const Duration(milliseconds: 16));
-  }
 }
