@@ -86,61 +86,14 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\PushNotifications
 var
   DeleteData: Boolean;
 
-{ Asks (with a checkbox, off by default) whether to delete the list too. }
-procedure AskAboutData();
-var
-  Form: TSetupForm;
-  Check: TNewCheckBox;
-  Note: TNewStaticText;
-  OkButton: TNewButton;
-begin
-  Form := CreateCustomForm(ScaleX(460), ScaleY(150), False, False);
-  try
-    Form.Caption := CustomMessage('DeleteDataTitle');
-
-    Check := TNewCheckBox.Create(Form);
-    Check.Parent := Form;
-    Check.Left := ScaleX(16);
-    Check.Top := ScaleY(16);
-    Check.Width := Form.ClientWidth - ScaleX(32);
-    Check.Height := ScaleY(20);
-    Check.Caption := CustomMessage('DeleteDataCheck');
-    Check.Checked := False;
-
-    Note := TNewStaticText.Create(Form);
-    Note.Parent := Form;
-    Note.Left := ScaleX(16);
-    Note.Top := Check.Top + Check.Height + ScaleY(8);
-    Note.Width := Form.ClientWidth - ScaleX(32);
-    Note.AutoSize := False;
-    Note.WordWrap := True;
-    Note.Height := ScaleY(56);
-    Note.Caption := CustomMessage('DeleteDataNote');
-
-    OkButton := TNewButton.Create(Form);
-    OkButton.Parent := Form;
-    OkButton.Width := ScaleX(90);
-    OkButton.Height := ScaleY(26);
-    OkButton.Left := Form.ClientWidth - OkButton.Width - ScaleX(16);
-    OkButton.Top := Form.ClientHeight - OkButton.Height - ScaleY(12);
-    OkButton.Caption := SetupMessage(msgButtonOK);
-    OkButton.ModalResult := mrOk;
-    OkButton.Default := True;
-
-    Form.ActiveControl := OkButton;
-    Form.ShowModal();
-    DeleteData := Check.Checked;
-  finally
-    Form.Free();
-  end;
-end;
+#include "delete_data_dialog.iss"
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
   { Asked after the "remove Wayfinch?" confirmation; silent uninstalls keep
     the data. }
   if (CurUninstallStep = usUninstall) and not UninstallSilent then
-    AskAboutData();
+    DeleteData := AskDeleteData();
   if (CurUninstallStep = usPostUninstall) and DeleteData then
     DelTree(ExpandConstant('{userappdata}\app.wayfinch'), True, True, True);
 end;
