@@ -1,0 +1,41 @@
+name: wayfinch
+description: "Offline-first to-do app that works with your AI."
+publish_to: 'none'
+
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  cryptography: ^2.9.0
+  drift: ^2.35.4
+  intl: ^0.20.3
+  path: ^1.9.1
+  path_provider: ^2.1.6
+  sqlite3: ^3.9.1
+  uuid: ^4.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  build_runner: ^2.17.1
+  drift_dev: ^2.35.3
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+# Use the SQLCipher build bundled with package:sqlite3 so the database file
+# can be encrypted (see the "hooks" docs of package:sqlite3).
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlcipher
