@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import '../../data/daily_backups.dart';
 import '../../data/database.dart' show newId;
 import '../../data/import_repository.dart';
 import '../../data/items_repository.dart';
@@ -12,6 +13,9 @@ import '../../domain/dates.dart';
 import '../../domain/exchange/exchange_export.dart';
 import '../../domain/exchange/exchange_model.dart';
 import '../../domain/exchange/import_plan.dart';
+import '../../domain/ics/ics_export.dart';
+import '../../domain/ics/ics_import.dart';
+import '../../domain/ics/ics_parser.dart';
 import '../../domain/item.dart';
 import '../../domain/item_enums.dart';
 import '../../domain/item_rules.dart';
@@ -67,6 +71,7 @@ class HomeController extends ChangeNotifier {
     required this.tags,
     required this.settings,
     required this.imports,
+    this.dailyBackups,
     DateTime Function()? clock,
   }) : _clock = clock ?? DateTime.now {
     _now = _clock();
@@ -119,6 +124,10 @@ class HomeController extends ChangeNotifier {
 
   /// AI import storage (apply, backups, undo).
   final ImportRepository imports;
+
+  /// Daily backup files (null where there are none, e.g. the demo and most
+  /// tests). Owned by the session, which disposes it.
+  final DailyBackupService? dailyBackups;
 
   List<ImportBackupInfo> _backups = const [];
 
@@ -177,6 +186,29 @@ class HomeController extends ChangeNotifier {
   /// Backs up the list and applies [plan]. Returns the number of changes.
   Future<int> applyImport(ImportPlan plan, {Set<String> keep = const {}}) =>
       imports.apply(plan, keep: keep, colorFor: tagColorFor);
+
+  /// Plans a calendar import of [events] (see [planIcsImport]).
+  IcsImportPlan planCalendarImport(
+    List<IcsEvent> events, {
+    required bool includePast,
+    required String untitled,
+  }) => planIcsImport(
+    tree: _tree,
+    events: events,
+    now: _clock(),
+    includePast: includePast,
+    untitled: untitled,
+    newId: newId,
+  );
+
+  /// Backs up the list and applies a calendar import. Returns the number of
+  /// items added or updated.
+  Future<int> applyCalendarImport(IcsImportPlan plan) =>
+      imports.applyCalendar(plan.build());
+
+  /// The list as an .ics file (events, plus open tasks if [includeTasks]).
+  String exportCalendar({required bool includeTasks}) =>
+      exportIcs(items: _tree.all, includeTasks: includeTasks, now: _clock());
 
   /// Restores the list from before the latest import.
   Future<bool> undoImport() async {

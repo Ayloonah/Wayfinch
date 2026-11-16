@@ -2513,8 +2513,242 @@ abstract class AppLocalizations {
   /// No description provided for @helpBackupsBody.
   ///
   /// In en, this message translates to:
-  /// **'Your list is backed up before every import. Undo the last import from the Import dialog, or restore any of the last 10 backups from Settings › Import history. Restoring backs up your current list first, so you can change your mind.'**
+  /// **'Wayfinch backs up your whole list once a day and keeps the last 7, in a folder you can change in Settings › Backups (pick OneDrive or a USB drive to keep a copy off this computer). With a password, backups are encrypted too. Your list is also backed up before every import: undo the last one from the Import dialog, or restore any of the last 10 from Settings › Import history. Restoring backs up your current list first, so you can change your mind.'**
   String get helpBackupsBody;
+
+  /// No description provided for @calendarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendarTitle;
+
+  /// No description provided for @calendarSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring events in from Google, Outlook or Apple Calendar, or send yours out, with .ics files.'**
+  String get calendarSubtitle;
+
+  /// No description provided for @calendarImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a calendar'**
+  String get calendarImportTitle;
+
+  /// No description provided for @calendarImportBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open an .ics file. You\'ll see what\'s new and what changed before anything happens.'**
+  String get calendarImportBody;
+
+  /// No description provided for @calendarOpenFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Open .ics file'**
+  String get calendarOpenFile;
+
+  /// No description provided for @calendarExportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export to a calendar'**
+  String get calendarExportTitle;
+
+  /// No description provided for @calendarExportBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your events as an .ics file, then import it in your calendar app.'**
+  String get calendarExportBody;
+
+  /// No description provided for @calendarSaveFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Save .ics file'**
+  String get calendarSaveFile;
+
+  /// No description provided for @calendarExportTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Also export tasks'**
+  String get calendarExportTasks;
+
+  /// No description provided for @calendarExportTasksBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open tasks become short events at their due time (calendars like Google ignore to-dos).'**
+  String get calendarExportTasksBody;
+
+  /// No description provided for @calendarExported.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar file saved.'**
+  String get calendarExported;
+
+  /// No description provided for @calendarNotIcs.
+  ///
+  /// In en, this message translates to:
+  /// **'That doesn\'t look like a calendar (.ics) file.'**
+  String get calendarNotIcs;
+
+  /// No description provided for @calendarNoEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no events in that file.'**
+  String get calendarNoEvents;
+
+  /// No description provided for @calendarUntitled.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled event'**
+  String get calendarUntitled;
+
+  /// No description provided for @calendarReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the calendar import'**
+  String get calendarReviewTitle;
+
+  /// No description provided for @calendarReviewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 event in the file} other{{count} events in the file}}'**
+  String calendarReviewSubtitle(int count);
+
+  /// No description provided for @calendarUpdatedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} updated'**
+  String calendarUpdatedCount(int count);
+
+  /// No description provided for @calendarUnchanged.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 already up to date} other{{count} already up to date}}'**
+  String calendarUnchanged(int count);
+
+  /// No description provided for @calendarIncludePast.
+  ///
+  /// In en, this message translates to:
+  /// **'Include past events'**
+  String get calendarIncludePast;
+
+  /// No description provided for @calendarPastLeftOut.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 event that already ended is left out.} other{{count} events that already ended are left out.}}'**
+  String calendarPastLeftOut(int count);
+
+  /// No description provided for @calendarSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 cancelled or one-off changed event was skipped.} other{{count} cancelled or one-off changed events were skipped.}}'**
+  String calendarSkipped(int count);
+
+  /// No description provided for @calendarNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything in this file is already in your list.'**
+  String get calendarNothing;
+
+  /// No description provided for @calendarImported.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Imported 1 event} other{Imported {count} events}}'**
+  String calendarImported(int count);
+
+  /// No description provided for @backupBeforeCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Before a calendar import (1 change)} other{Before a calendar import ({count} changes)}}'**
+  String backupBeforeCalendar(int count);
+
+  /// No description provided for @settingsBackups.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups'**
+  String get settingsBackups;
+
+  /// No description provided for @settingsBackupsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Wayfinch backs up your whole list once a day and keeps the last {count}. With a password, backups are encrypted too.'**
+  String settingsBackupsHelp(int count);
+
+  /// No description provided for @backupsFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup folder'**
+  String get backupsFolder;
+
+  /// No description provided for @backupsChangeFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get backupsChangeFolder;
+
+  /// No description provided for @backupsUseDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Use default'**
+  String get backupsUseDefault;
+
+  /// No description provided for @backupsNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up now'**
+  String get backupsNow;
+
+  /// No description provided for @backupsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Backed up.'**
+  String get backupsDone;
+
+  /// No description provided for @backupsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t back up to that folder. Try another one.'**
+  String get backupsFailed;
+
+  /// No description provided for @backupsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No daily backups yet. The first one happens today.'**
+  String get backupsEmpty;
+
+  /// No description provided for @backupsSize.
+  ///
+  /// In en, this message translates to:
+  /// **'{kb} KB'**
+  String backupsSize(int kb);
+
+  /// No description provided for @backupsUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'That backup couldn\'t be opened.'**
+  String get backupsUnreadable;
+
+  /// No description provided for @backupsOldPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Password for this backup'**
+  String get backupsOldPasswordTitle;
+
+  /// No description provided for @backupsOldPasswordBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup was made with a different password. Enter the password (or recovery code) you had back then.'**
+  String get backupsOldPasswordBody;
+
+  /// No description provided for @helpCalendarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendars (.ics)'**
+  String get helpCalendarTitle;
+
+  /// No description provided for @helpCalendarBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Calendar in the sidebar. Import opens an .ics file exported from Google, Outlook or Apple Calendar: events that already ended are left out unless you include them, and importing the same calendar again updates events instead of adding them twice. Nothing is ever removed, and you can undo. All-day events come in as events from midnight to midnight. Export saves your events as an .ics file; turn on \"Also export tasks\" to include open tasks as short events at their due time.'**
+  String get helpCalendarBody;
 }
 
 class _AppLocalizationsDelegate

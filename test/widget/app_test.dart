@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +17,7 @@ import 'package:wayfinch/domain/item_enums.dart';
 import 'package:wayfinch/domain/views.dart' show overdueTagId;
 import 'package:wayfinch/domain/item_rules.dart';
 import 'package:wayfinch/ui/app.dart';
+import 'package:wayfinch/ui/exchange/calendar_dialog.dart';
 import 'package:wayfinch/ui/home/home_controller.dart';
 import 'package:wayfinch/ui/theme/appearance_controller.dart';
 import 'package:wayfinch/ui/theme/tokens.dart';
@@ -988,6 +991,69 @@ void main() {
       await pumpUntilDone(tester, h.settings.getValue('notif.quietStart')),
       '22:00',
     );
+    await finish(tester, h);
+  });
+
+  testWidgets('Calendar opens from the sidebar with import and export', (
+    tester,
+  ) async {
+    final h = await pumpApp(tester);
+    await tester.tap(find.text('Calendar'));
+    await settle(tester);
+    expect(find.text('Import a calendar'), findsOneWidget);
+    expect(find.text('Export to a calendar'), findsOneWidget);
+    expect(find.text('Also export tasks'), findsOneWidget);
+    await tester.tap(find.byTooltip('Close'));
+    await settle(tester);
+    await finish(tester, h);
+  });
+
+  testWidgets('a calendar import previews, applies and can be undone', (
+    tester,
+  ) async {
+    final h = await pumpApp(tester);
+    const ics =
+        'BEGIN:VCALENDAR\r\nVERSION:2.0\r\n'
+        'BEGIN:VEVENT\r\nUID:g1\r\nSUMMARY:Dentist\r\n'
+        'DTSTART:20261120T140000\r\nDTEND:20261120T150000\r\nEND:VEVENT\r\n'
+        'BEGIN:VEVENT\r\nUID:g2\r\nSUMMARY:Old party\r\n'
+        'DTSTART:20261101T200000\r\nDTEND:20261101T230000\r\nEND:VEVENT\r\n'
+        'END:VCALENDAR\r\n';
+    unawaited(
+      showDialog<int>(
+        context: tester.element(find.byType(Scaffold).first),
+        builder: (_) => HomeScope(
+          controller: h.controller,
+          child: const CalendarDialog(initialText: ics),
+        ),
+      ),
+    );
+    await settle(tester);
+    expect(find.text('Review the calendar import'), findsOneWidget);
+    expect(find.text('+ 1 new'), findsOneWidget);
+    expect(find.text('Dentist'), findsOneWidget);
+    expect(find.text('Old party'), findsNothing);
+    expect(
+      find.text('1 event that already ended is left out.'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Include past events'));
+    await settle(tester);
+    expect(find.text('+ 2 new'), findsOneWidget);
+    await tester.tap(find.text('Include past events'));
+    await settle(tester);
+
+    await tester.tap(find.text('Import 1 change'));
+    await settle(tester);
+    final added = h.controller.tree.all.single;
+    expect(added.title, 'Dentist');
+    expect(added.icsUid, 'g1');
+    expect(h.controller.backups.first.reason, BackupReason.calendar);
+
+    await pumpUntilDone(tester, h.controller.undoImport());
+    await settle(tester);
+    expect(h.controller.tree.all, isEmpty);
     await finish(tester, h);
   });
 

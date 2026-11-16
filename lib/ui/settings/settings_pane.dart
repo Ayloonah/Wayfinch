@@ -5,6 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../home/home_controller.dart';
 import '../theme/tokens.dart';
 import 'appearance_section.dart';
+import 'backups_section.dart';
 import 'general_section.dart';
 import 'import_history_section.dart';
 import 'notifications_section.dart';
@@ -59,6 +60,10 @@ class SettingsPane extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 20),
+        if (HomeScope.of(context).dailyBackups case final backups?) ...[
+          _SettingsCard(children: [BackupsSection(service: backups)]),
+          const SizedBox(height: 20),
+        ],
         const _SettingsCard(children: [ImportHistorySection()]),
       ],
     );

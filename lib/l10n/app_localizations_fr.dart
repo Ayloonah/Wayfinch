@@ -1572,5 +1572,193 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get helpBackupsBody =>
-      'Ta liste est sauvegardée avant chaque import. Annule le dernier import depuis la fenêtre Importer, ou restaure l’une des 10 dernières sauvegardes depuis Paramètres › Historique des imports. Restaurer sauvegarde d’abord ta liste actuelle, donc tu peux changer d’avis.';
+      'Wayfinch sauvegarde toute ta liste une fois par jour et garde les 7 dernières sauvegardes, dans un dossier que tu peux changer dans Paramètres › Sauvegardes (choisis OneDrive ou une clé USB pour garder une copie hors de cet ordinateur). Avec un mot de passe, les sauvegardes sont chiffrées aussi. Ta liste est aussi sauvegardée avant chaque import : annule le dernier depuis la fenêtre Importer, ou restaure l’un des 10 derniers depuis Paramètres › Historique des imports. Restaurer sauvegarde d’abord ta liste actuelle, donc tu peux changer d’avis.';
+
+  @override
+  String get calendarTitle => 'Calendrier';
+
+  @override
+  String get calendarSubtitle =>
+      'Importe des événements de Google, Outlook ou Apple Calendar, ou exporte les tiens, avec des fichiers .ics.';
+
+  @override
+  String get calendarImportTitle => 'Importer un calendrier';
+
+  @override
+  String get calendarImportBody =>
+      'Ouvre un fichier .ics. Tu verras ce qui est nouveau et ce qui a changé avant que quoi que ce soit se passe.';
+
+  @override
+  String get calendarOpenFile => 'Ouvrir un fichier .ics';
+
+  @override
+  String get calendarExportTitle => 'Exporter vers un calendrier';
+
+  @override
+  String get calendarExportBody =>
+      'Enregistre tes événements dans un fichier .ics, puis importe-le dans ton app de calendrier.';
+
+  @override
+  String get calendarSaveFile => 'Enregistrer le .ics';
+
+  @override
+  String get calendarExportTasks => 'Exporter aussi les tâches';
+
+  @override
+  String get calendarExportTasksBody =>
+      'Les tâches ouvertes deviennent de courts événements à leur échéance (des calendriers comme Google ignorent les tâches).';
+
+  @override
+  String get calendarExported => 'Fichier de calendrier enregistré.';
+
+  @override
+  String get calendarNotIcs =>
+      'Ça ne ressemble pas à un fichier de calendrier (.ics).';
+
+  @override
+  String get calendarNoEvents => 'Il n’y a aucun événement dans ce fichier.';
+
+  @override
+  String get calendarUntitled => 'Événement sans titre';
+
+  @override
+  String get calendarReviewTitle => 'Vérifie l’import du calendrier';
+
+  @override
+  String calendarReviewSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count événements dans le fichier',
+      one: '1 événement dans le fichier',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String calendarUpdatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mis à jour',
+      one: '1 mis à jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String calendarUnchanged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count déjà à jour',
+      one: '1 déjà à jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get calendarIncludePast => 'Inclure les événements passés';
+
+  @override
+  String calendarPastLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count événements déjà terminés sont laissés de côté.',
+      one: '1 événement déjà terminé est laissé de côté.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String calendarSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count événements annulés ou modifiés ponctuellement ont été ignorés.',
+      one: '1 événement annulé ou modifié ponctuellement a été ignoré.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get calendarNothing =>
+      'Tout ce qui est dans ce fichier est déjà dans ta liste.';
+
+  @override
+  String calendarImported(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count événements importés',
+      one: '1 événement importé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupBeforeCalendar(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Avant un import de calendrier ($count changements)',
+      one: 'Avant un import de calendrier (1 changement)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsBackups => 'Sauvegardes';
+
+  @override
+  String settingsBackupsHelp(int count) {
+    return 'Wayfinch sauvegarde toute ta liste une fois par jour et garde les $count dernières sauvegardes. Avec un mot de passe, elles sont chiffrées aussi.';
+  }
+
+  @override
+  String get backupsFolder => 'Dossier des sauvegardes';
+
+  @override
+  String get backupsChangeFolder => 'Changer';
+
+  @override
+  String get backupsUseDefault => 'Par défaut';
+
+  @override
+  String get backupsNow => 'Sauvegarder maintenant';
+
+  @override
+  String get backupsDone => 'Sauvegardé.';
+
+  @override
+  String get backupsFailed =>
+      'Impossible de sauvegarder dans ce dossier. Essaie-en un autre.';
+
+  @override
+  String get backupsEmpty =>
+      'Pas encore de sauvegarde quotidienne. La première se fait aujourd’hui.';
+
+  @override
+  String backupsSize(int kb) {
+    return '$kb Ko';
+  }
+
+  @override
+  String get backupsUnreadable => 'Impossible d’ouvrir cette sauvegarde.';
+
+  @override
+  String get backupsOldPasswordTitle => 'Mot de passe de cette sauvegarde';
+
+  @override
+  String get backupsOldPasswordBody =>
+      'Cette sauvegarde a été faite avec un autre mot de passe. Entre le mot de passe (ou le code de récupération) que tu avais à ce moment-là.';
+
+  @override
+  String get helpCalendarTitle => 'Calendriers (.ics)';
+
+  @override
+  String get helpCalendarBody =>
+      'Utilise Calendrier dans la barre latérale. Importer ouvre un fichier .ics exporté de Google, Outlook ou Apple Calendar : les événements déjà terminés sont laissés de côté sauf si tu les inclus, et réimporter le même calendrier met les événements à jour au lieu de les ajouter deux fois. Rien n’est jamais retiré, et tu peux annuler. Les événements d’une journée entière arrivent comme des événements de minuit à minuit. Exporter enregistre tes événements dans un fichier .ics ; active « Exporter aussi les tâches » pour inclure les tâches ouvertes comme de courts événements à leur échéance.';
 }

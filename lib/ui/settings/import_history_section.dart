@@ -70,6 +70,8 @@ class _BackupRow extends StatelessWidget {
     final String what;
     if (backup.reason == BackupReason.restore) {
       what = l10n.backupBeforeRestore;
+    } else if (backup.reason == BackupReason.calendar) {
+      what = l10n.backupBeforeCalendar(backup.changes ?? 0);
     } else {
       final mode = switch (backup.mode) {
         ImportMode.add => l10n.importAdd,
@@ -84,11 +86,11 @@ class _BackupRow extends StatelessWidget {
     }
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-      leading: Icon(
-        backup.reason == BackupReason.restore
-            ? Icons.restore
-            : Icons.download_outlined,
-      ),
+      leading: Icon(switch (backup.reason) {
+        BackupReason.restore => Icons.restore,
+        BackupReason.calendar => Icons.event_outlined,
+        BackupReason.import => Icons.download_outlined,
+      }),
       title: Text(when),
       subtitle: Text('$what · ${l10n.backupItemCount(backup.itemCount)}'),
       trailing: OutlinedButton(

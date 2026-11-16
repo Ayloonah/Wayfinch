@@ -10,7 +10,6 @@ import '../../domain/exchange/import_plan.dart';
 import '../../l10n/app_localizations.dart';
 import '../format.dart';
 import '../home/home_controller.dart';
-import '../list/item_row.dart' show indentFor;
 import '../theme/tokens.dart';
 import 'dialog_parts.dart';
 import 'import_messages.dart';
@@ -294,18 +293,18 @@ class _ImportDialogState extends State<ImportDialog> {
           runSpacing: 8,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            _CountChip(
+            CountChip(
               text: l10n.importNewCount(plan.added.length),
-              kind: _Kind.added,
+              kind: ChangeKind.added,
             ),
             if (_mode == ImportMode.replace) ...[
-              _CountChip(
+              CountChip(
                 text: l10n.importChangedCount(plan.changed.length),
-                kind: _Kind.changed,
+                kind: ChangeKind.changed,
               ),
-              _CountChip(
+              CountChip(
                 text: l10n.importRemovedCount(removed.length),
-                kind: _Kind.removed,
+                kind: ChangeKind.removed,
               ),
             ],
             if (_mode == ImportMode.replace && plan.doneUntouched > 0)
@@ -344,7 +343,7 @@ class _ImportDialogState extends State<ImportDialog> {
                     padding: const EdgeInsets.all(6),
                     children: [
                       for (final change in plan.changes)
-                        _ChangeRow(
+                        ChangeRow(
                           change: change,
                           detail: messages.detail(change),
                           kept:
@@ -459,122 +458,6 @@ class _ModeCard extends StatelessWidget {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-enum _Kind { added, changed, removed }
-
-(Color, Color) _kindColors(_Kind kind, WayfinchColors c) => switch (kind) {
-  _Kind.added => (
-    c.isDarkMode ? const Color(0xFF1E3A26) : const Color(0xFFEBF7EE),
-    c.isDarkMode ? const Color(0xFF8CE99A) : const Color(0xFF22662F),
-  ),
-  _Kind.changed => (c.accentSoft, c.accentText),
-  _Kind.removed => (c.warningBackground, c.warningText),
-};
-
-class _CountChip extends StatelessWidget {
-  const _CountChip({required this.text, required this.kind});
-
-  final String text;
-  final _Kind kind;
-
-  @override
-  Widget build(BuildContext context) {
-    final (bg, fg) = _kindColors(kind, WayfinchColors.of(context));
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(fontWeight: FontWeight.w800, color: fg),
-      ),
-    );
-  }
-}
-
-class _ChangeRow extends StatelessWidget {
-  const _ChangeRow({
-    required this.change,
-    required this.detail,
-    required this.kept,
-    this.onToggleKeep,
-  });
-
-  final PlannedChange change;
-  final String detail;
-  final bool kept;
-  final VoidCallback? onToggleKeep;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = WayfinchColors.of(context);
-    final l10n = AppLocalizations.of(context);
-    final (kind, label) = switch (change) {
-      AddedItem() => (_Kind.added, l10n.importBadgeNew),
-      ChangedItem() => (_Kind.changed, l10n.importBadgeChanged),
-      RemovedItem() => (_Kind.removed, l10n.importBadgeRemoved),
-    };
-    final (bg, fg) = _kindColors(kind, colors);
-    return Opacity(
-      opacity: kept ? 0.55 : 1,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(indentFor(change.depth) - 4, 6, 12, 6),
-        child: Row(
-          children: [
-            Container(
-              width: 80,
-              padding: const EdgeInsets.symmetric(vertical: 3),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: bg,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                kept ? l10n.importBadgeKept : label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: fg,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                change.title,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            if (detail.isNotEmpty)
-              Flexible(
-                child: Text(
-                  detail,
-                  textAlign: TextAlign.end,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: colors.muted,
-                  ),
-                ),
-              ),
-            if (onToggleKeep != null) ...[
-              const SizedBox(width: 10),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 34)),
-                onPressed: onToggleKeep,
-                child: Text(kept ? l10n.importRemoveAnyway : l10n.importKeep),
-              ),
-            ],
-          ],
         ),
       ),
     );
