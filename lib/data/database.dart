@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../domain/item_enums.dart';
+import 'database.steps.dart';
 import 'tables.dart';
 
 export 'tables.dart' show newId;
@@ -15,17 +16,22 @@ part 'database.g.dart';
 /// Every schema change must bump [schemaVersion], add a step in [migration],
 /// export the schema (`dart run drift_dev make-migrations`) and come with a
 /// migration test.
-@DriftDatabase(tables: [Items, Tags, ItemTags, Reminders])
+@DriftDatabase(tables: [Items, Tags, ItemTags, Reminders, Settings])
 class WayfinchDatabase extends _$WayfinchDatabase {
   /// Creates the database on top of an already opened [executor].
   WayfinchDatabase(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
+    onUpgrade: stepByStep(
+      from1To2: (m, schema) async {
+        await m.createTable(schema.settings);
+      },
+    ),
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
     },

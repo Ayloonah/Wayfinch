@@ -1,12 +1,17 @@
 import 'package:drift/drift.dart';
 
+import '../domain/item.dart';
+import '../domain/item_enums.dart';
+import '../domain/item_rules.dart';
+import '../domain/item_tree.dart';
 import 'database.dart';
 
-/// Reads and writes items, keeping ids and timestamps consistent.
+/// Reads and writes items (with their tags), keeping ids and timestamps
+/// consistent:
 ///
-/// - New items get a fresh UUID (unless one is given, e.g. from an import
-///   that already carries it) and `createdAt == updatedAt`.
-/// - Updates never touch `id` or `createdAt` and always bump `updatedAt`.
+/// - new items get a fresh UUID (unless one is given, e.g. by an import) and
+///   `createdAt == updatedAt`;
+/// - saves never change `id` or `createdAt` and always bump `updatedAt`.
 class ItemsRepository {
   /// Creates a repository over [db]. [clock] is injectable for tests.
   ItemsRepository(this._db, {DateTime Function()? clock})
@@ -15,57 +20,215 @@ class ItemsRepository {
   final WayfinchDatabase _db;
   final DateTime Function() _clock;
 
-  /// Inserts [item] and returns the stored row.
-  Future<ItemRow> create(ItemsCompanion item) {
+  /// Creates an item and returns it.
+  Future<Item> create({
+    required ItemType type,
+    required String title,
+    String? id,
+    String? notes,
+    DateTime? due,
+    bool dueHasTime = false,
+    DateTime? start,
+    DateTime? end,
+    Priority priority = Priority.none,
+    String? recurrence,
+    String? parentId,
+    int? sortOrder,
+    ItemSource source = ItemSource.manual,
+    List<String> tagIds = const [],
+  }) async {
     final now = _clock();
-    return _db
-        .into(_db.items)
-        .insertReturning(
-          item.copyWith(
-            id: item.id.present ? item.id : Value(newId()),
-            createdAt: Value(now),
-            updatedAt: Value(now),
-          ),
-        );
+    final item = Item(
+      id: id ?? newId(),
+      type: type,
+      title: title,
+      notes: notes,
+      due: due,
+      dueHasTime: due != null && dueHasTime,
+      start: start,
+      end: end,
+      priority: priority,
+      recurrence: recurrence,
+      parentId: parentId,
+      sortOrder: sortOrder ?? await _nextSortOrder(parentId),
+      source: source,
+      createdAt: now,
+      updatedAt: now,
+      tagIds: tagIds,
+    );
+    await _db.transaction(() => _insert(item));
+    return item;
   }
 
-  /// Applies [changes] to the item with [id] and returns the updated row.
-  ///
-  /// Throws a [StateError] if there is no such item.
-  Future<ItemRow> update(String id, ItemsCompanion changes) async {
-    final rows = await (_db.update(_db.items)..where((t) => t.id.equals(id)))
-        .writeReturning(
-          changes.copyWith(
-            id: const Value.absent(),
-            createdAt: const Value.absent(),
-            updatedAt: Value(_clock()),
-          ),
-        );
-    if (rows.isEmpty) throw StateError('No item with id $id');
-    return rows.single;
+  /// Saves [item]'s current fields (not its id or creation time).
+  Future<void> save(Item item) =>
+      _db.transaction(() => _update(item.copyWith(updatedAt: _clock())));
+
+  /// Applies a rule's [changes] in one transaction.
+  Future<void> apply(ItemChanges changes) async {
+    if (changes.isEmpty) return;
+    final now = _clock();
+    await _db.transaction(() async {
+      for (final item in changes.updated) {
+        await _update(item.copyWith(updatedAt: now));
+      }
+      for (final item in changes.created) {
+        await _insert(item.copyWith(createdAt: now, updatedAt: now));
+      }
+    });
+  }
+
+  /// Deletes [id] and all its subtasks.
+  Future<void> deleteWithSubtasks(String id) async {
+    await _db.transaction(() async {
+      final tree = ItemTree(await loadAll());
+      final ids = [id, ...tree.descendantsOf(id).map((d) => d.id)];
+      // Children first, so the parent foreign key is never violated.
+      for (final itemId in ids.reversed) {
+        await (_db.delete(_db.items)..where((t) => t.id.equals(itemId))).go();
+      }
+    });
+  }
+
+  /// Puts back items removed by [deleteWithSubtasks] exactly as they were
+  /// (same ids, timestamps and tags), parents before children.
+  Future<void> restore(List<Item> items) async {
+    final ids = {for (final i in items) i.id};
+    final placed = <String>{};
+    final pending = [...items];
+    await _db.transaction(() async {
+      while (pending.isNotEmpty) {
+        final ready = pending
+            .where(
+              (i) =>
+                  i.parentId == null ||
+                  !ids.contains(i.parentId) ||
+                  placed.contains(i.parentId),
+            )
+            .toList();
+        if (ready.isEmpty) throw StateError('Cycle in restored items');
+        for (final item in ready) {
+          await _insert(item);
+          placed.add(item.id);
+          pending.remove(item);
+        }
+      }
+    });
   }
 
   /// The item with [id], or null.
-  Future<ItemRow?> getById(String id) =>
-      (_db.select(_db.items)..where((t) => t.id.equals(id))).getSingleOrNull();
+  Future<Item?> getById(String id) async {
+    final all = await loadAll();
+    return all.where((i) => i.id == id).firstOrNull;
+  }
 
-  /// Direct children of [parentId] (or top-level items when null), in manual
-  /// order.
-  Future<List<ItemRow>> children(String? parentId) {
-    final query = _db.select(_db.items)
+  /// All items with their tags.
+  Future<List<Item>> loadAll() => _allQuery().get().then(_group);
+
+  /// All items with their tags, updated live.
+  Stream<List<Item>> watchAll() => _allQuery().watch().map(_group);
+
+  JoinedSelectStatement<HasResultSet, dynamic> _allQuery() =>
+      _db.select(_db.items).join([
+        leftOuterJoin(
+          _db.itemTags,
+          _db.itemTags.itemId.equalsExp(_db.items.id),
+        ),
+      ]);
+
+  List<Item> _group(List<TypedResult> rows) {
+    final items = <String, ItemRow>{};
+    final tags = <String, List<String>>{};
+    for (final row in rows) {
+      final item = row.readTable(_db.items);
+      items[item.id] = item;
+      final link = row.readTableOrNull(_db.itemTags);
+      final list = tags[item.id] ??= [];
+      if (link != null) list.add(link.tagId);
+    }
+    return [
+      for (final row in items.values) _toItem(row, tags[row.id] ?? const []),
+    ];
+  }
+
+  Future<int> _nextSortOrder(String? parentId) async {
+    final max = _db.items.sortOrder.max();
+    final query = _db.selectOnly(_db.items)
+      ..addColumns([max])
       ..where(
-        (t) => parentId == null
-            ? t.parentId.isNull()
-            : t.parentId.equals(parentId),
-      )
-      ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]);
-    return query.get();
+        parentId == null
+            ? _db.items.parentId.isNull()
+            : _db.items.parentId.equals(parentId),
+      );
+    final value = await query.map((r) => r.read(max)).getSingle();
+    return (value ?? -1) + 1;
   }
 
-  /// Live count of all items.
-  Stream<int> watchCount() {
-    final count = _db.items.id.count();
-    final query = _db.selectOnly(_db.items)..addColumns([count]);
-    return query.map((row) => row.read(count) ?? 0).watchSingle();
+  Future<void> _insert(Item item) async {
+    await _db.into(_db.items).insert(_toCompanion(item, withId: true));
+    await _writeTags(item);
   }
+
+  Future<void> _update(Item item) async {
+    final count =
+        await (_db.update(_db.items)..where((t) => t.id.equals(item.id))).write(
+          _toCompanion(item, withId: false),
+        );
+    if (count == 0) throw StateError('No item with id ${item.id}');
+    await _writeTags(item);
+  }
+
+  Future<void> _writeTags(Item item) async {
+    await (_db.delete(
+      _db.itemTags,
+    )..where((t) => t.itemId.equals(item.id))).go();
+    for (final tagId in item.tagIds.toSet()) {
+      await _db
+          .into(_db.itemTags)
+          .insert(ItemTagsCompanion.insert(itemId: item.id, tagId: tagId));
+    }
+  }
+
+  ItemsCompanion _toCompanion(Item item, {required bool withId}) {
+    return ItemsCompanion(
+      id: withId ? Value(item.id) : const Value.absent(),
+      type: Value(item.type),
+      title: Value(item.title),
+      notes: Value(item.notes),
+      due: Value(item.due),
+      dueHasTime: Value(item.due != null && item.dueHasTime),
+      start: Value(item.start),
+      end: Value(item.end),
+      priority: Value(item.priority),
+      recurrence: Value(item.recurrence),
+      parentId: Value(item.parentId),
+      sortOrder: Value(item.sortOrder),
+      doneAt: Value(item.doneAt),
+      source: Value(item.source),
+      icsUid: Value(item.icsUid),
+      createdAt: withId ? Value(item.createdAt) : const Value.absent(),
+      updatedAt: Value(item.updatedAt),
+    );
+  }
+
+  Item _toItem(ItemRow row, List<String> tagIds) => Item(
+    id: row.id,
+    type: row.type,
+    title: row.title,
+    notes: row.notes,
+    due: row.due,
+    dueHasTime: row.dueHasTime,
+    start: row.start,
+    end: row.end,
+    priority: row.priority,
+    recurrence: row.recurrence,
+    parentId: row.parentId,
+    sortOrder: row.sortOrder,
+    doneAt: row.doneAt,
+    source: row.source,
+    icsUid: row.icsUid,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    tagIds: tagIds,
+  );
 }

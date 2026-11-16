@@ -1,151 +1,235 @@
-import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wayfinch/data/database.dart';
 import 'package:wayfinch/data/items_repository.dart';
+import 'package:wayfinch/data/settings_repository.dart';
+import 'package:wayfinch/data/tags_repository.dart';
 import 'package:wayfinch/domain/item_enums.dart';
+import 'package:wayfinch/domain/item_rules.dart';
 
 void main() {
   late WayfinchDatabase db;
   late ItemsRepository repo;
+  late TagsRepository tags;
   late DateTime now;
 
   setUp(() {
     db = WayfinchDatabase(NativeDatabase.memory());
     now = DateTime(2026, 11, 15, 9);
     repo = ItemsRepository(db, clock: () => now);
+    tags = TagsRepository(db, clock: () => now);
   });
 
   tearDown(() => db.close());
 
-  ItemsCompanion task(String title, {String? parentId, int order = 0}) =>
-      ItemsCompanion.insert(
-        type: ItemType.task,
-        title: title,
-        parentId: Value(parentId),
-        sortOrder: Value(order),
-      );
-
-  test('create assigns a UUID, timestamps and defaults', () async {
-    final item = await repo.create(task('Buy milk'));
+  test('create assigns a UUID, timestamps, defaults and sort order', () async {
+    final a = await repo.create(type: ItemType.task, title: 'Buy milk');
+    final b = await repo.create(type: ItemType.task, title: 'Bread');
 
     expect(
-      item.id,
+      a.id,
       matches(
         RegExp(
           r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
         ),
       ),
     );
-    expect(item.createdAt, now);
-    expect(item.updatedAt, now);
-    expect(item.priority, Priority.none);
-    expect(item.source, ItemSource.manual);
-    expect(item.doneAt, isNull);
+    expect(a.id, isNot(b.id));
+    expect(a.createdAt, now);
+    expect(a.updatedAt, now);
+    expect(a.priority, Priority.none);
+    expect(a.source, ItemSource.manual);
+    expect(a.sortOrder, 0);
+    expect(b.sortOrder, 1);
   });
 
   test('create keeps an id that is given (e.g. from an import)', () async {
     final item = await repo.create(
-      task('Kept').copyWith(id: const Value('a1b2')),
+      type: ItemType.task,
+      title: 'Kept',
+      id: 'a1b2',
     );
-
     expect(item.id, 'a1b2');
+    expect((await repo.getById('a1b2'))!.title, 'Kept');
   });
 
-  test('each item gets a different id', () async {
-    final a = await repo.create(task('A'));
-    final b = await repo.create(task('B'));
-
-    expect(a.id, isNot(b.id));
-  });
-
-  test('update bumps updatedAt but never id or createdAt', () async {
-    final item = await repo.create(task('Draft'));
+  test('save bumps updatedAt but never id or createdAt', () async {
+    final item = await repo.create(type: ItemType.task, title: 'Draft');
     now = now.add(const Duration(hours: 1));
 
-    final updated = await repo.update(
-      item.id,
-      ItemsCompanion(
-        title: const Value('Final'),
-        id: const Value('hijacked'),
-        createdAt: Value(DateTime(2000)),
-      ),
-    );
+    await repo.save(item.copyWith(title: 'Final', createdAt: DateTime(2000)));
+    final saved = await repo.getById(item.id);
 
-    expect(updated.id, item.id);
-    expect(updated.title, 'Final');
-    expect(updated.createdAt, item.createdAt);
-    expect(updated.updatedAt, now);
+    expect(saved!.title, 'Final');
+    expect(saved.createdAt, item.createdAt);
+    expect(saved.updatedAt, now);
   });
 
-  test('update of a missing item throws', () async {
-    expect(
-      repo.update('nope', const ItemsCompanion(title: Value('x'))),
-      throwsStateError,
+  test('saving a missing item throws', () async {
+    final item = await repo.create(type: ItemType.task, title: 'x');
+    await repo.deleteWithSubtasks(item.id);
+    expect(repo.save(item), throwsStateError);
+  });
+
+  test('tags round-trip and are found case-insensitively', () async {
+    final school = await tags.findOrCreate('school', colorFor: (_) => 1);
+    final again = await tags.findOrCreate('School', colorFor: (_) => 2);
+    final work = await tags.findOrCreate('work', colorFor: (n) => 100 + n);
+    expect(again.id, school.id);
+    expect(work.color, 101);
+
+    final item = await repo.create(
+      type: ItemType.task,
+      title: 'Tagged',
+      tagIds: [school.id, work.id],
     );
+    expect(
+      (await repo.getById(item.id))!.tagIds,
+      unorderedEquals([school.id, work.id]),
+    );
+
+    await repo.save(item.copyWith(tagIds: [work.id]));
+    expect((await repo.getById(item.id))!.tagIds, [work.id]);
   });
 
   test('items nest deeper than the UI shows', () async {
     String? parent;
     for (var depth = 0; depth < 8; depth++) {
-      parent = (await repo.create(task('Level $depth', parentId: parent))).id;
+      parent = (await repo.create(
+        type: ItemType.task,
+        title: 'Level $depth',
+        parentId: parent,
+      )).id;
     }
-    final deepest = await repo.getById(parent!);
-
-    expect(deepest!.title, 'Level 7');
+    expect((await repo.getById(parent!))!.title, 'Level 7');
   });
 
-  test('children come back in manual order', () async {
-    final parent = await repo.create(task('Parent'));
-    await repo.create(task('Second', parentId: parent.id, order: 2));
-    await repo.create(task('First', parentId: parent.id, order: 1));
-    await repo.create(task('Top level'));
+  test('deleteWithSubtasks removes the branch and its links', () async {
+    final tag = await tags.findOrCreate('t', colorFor: (_) => 0);
+    final p = await repo.create(
+      type: ItemType.task,
+      title: 'p',
+      tagIds: [tag.id],
+    );
+    final c = await repo.create(
+      type: ItemType.task,
+      title: 'c',
+      parentId: p.id,
+    );
+    await repo.create(type: ItemType.task, title: 'g', parentId: c.id);
+    final other = await repo.create(type: ItemType.task, title: 'other');
 
-    final kids = await repo.children(parent.id);
-    final top = await repo.children(null);
+    await repo.deleteWithSubtasks(p.id);
 
-    expect(kids.map((i) => i.title), ['First', 'Second']);
-    expect(top.map((i) => i.title), containsAll(['Parent', 'Top level']));
-    expect(top, hasLength(2));
-  });
-
-  test('watchCount follows inserts', () async {
-    final counts = repo.watchCount();
-    expect(await counts.first, 0);
-
-    await repo.create(task('One'));
-    expect(await counts.first, 1);
-  });
-
-  test('deleting an item cascades to its tags and reminders', () async {
-    final item = await repo.create(task('Tagged'));
-    final tag = await db
-        .into(db.tags)
-        .insertReturning(
-          TagsCompanion.insert(name: 'school', color: 0xFF60A3EB),
-        );
-    await db
-        .into(db.itemTags)
-        .insert(ItemTagsCompanion.insert(itemId: item.id, tagId: tag.id));
-    await db
-        .into(db.reminders)
-        .insert(RemindersCompanion.insert(itemId: item.id, offsetMinutes: 60));
-
-    await (db.delete(db.items)..where((t) => t.id.equals(item.id))).go();
-
+    final left = await repo.loadAll();
+    expect(left.map((i) => i.id), [other.id]);
     expect(await db.select(db.itemTags).get(), isEmpty);
-    expect(await db.select(db.reminders).get(), isEmpty);
-    expect(await db.select(db.tags).get(), hasLength(1));
+    expect(await tags.loadAll(), hasLength(1));
+  });
+
+  test('apply saves updates and inserts in one go', () async {
+    final a = await repo.create(type: ItemType.task, title: 'a');
+    now = now.add(const Duration(minutes: 5));
+    await repo.apply(
+      ItemChanges(
+        updated: [a.copyWith(doneAt: now)],
+        created: [a.copyWith(id: 'copy', doneAt: null, title: 'a again')],
+      ),
+    );
+    final all = {for (final i in await repo.loadAll()) i.id: i};
+    expect(all[a.id]!.doneAt, now);
+    expect(all['copy']!.title, 'a again');
+    expect(all['copy']!.createdAt, now);
+  });
+
+  test('watchAll follows changes', () async {
+    final stream = repo.watchAll();
+    expect(await stream.first, isEmpty);
+    await repo.create(type: ItemType.task, title: 'One');
+    expect((await stream.first).single.title, 'One');
   });
 
   test('date-times round-trip', () async {
     final due = DateTime(2026, 12, 5, 23, 59);
     final item = await repo.create(
-      task('Report').copyWith(due: Value(due), dueHasTime: const Value(true)),
+      type: ItemType.task,
+      title: 'Report',
+      due: due,
+      dueHasTime: true,
     );
-
     final loaded = await repo.getById(item.id);
     expect(loaded!.due, due);
     expect(loaded.dueHasTime, isTrue);
+  });
+
+  test('restore puts a deleted branch back exactly', () async {
+    final tag = await tags.findOrCreate('t', colorFor: (_) => 0);
+    final p = await repo.create(
+      type: ItemType.task,
+      title: 'p',
+      tagIds: [tag.id],
+    );
+    final c = await repo.create(
+      type: ItemType.task,
+      title: 'c',
+      parentId: p.id,
+    );
+    final g = await repo.create(
+      type: ItemType.task,
+      title: 'g',
+      parentId: c.id,
+    );
+    final before = {for (final i in await repo.loadAll()) i.id: i};
+
+    await repo.deleteWithSubtasks(p.id);
+    now = now.add(const Duration(hours: 2));
+    // Children listed first on purpose: restore must sort parents first.
+    await repo.restore([before[g.id]!, before[c.id]!, before[p.id]!]);
+
+    final after = {for (final i in await repo.loadAll()) i.id: i};
+    expect(after.keys, unorderedEquals([p.id, c.id, g.id]));
+    expect(after[c.id]!.parentId, p.id);
+    expect(after[p.id]!.tagIds, [tag.id]);
+    expect(after[p.id]!.createdAt, before[p.id]!.createdAt);
+    expect(after[p.id]!.updatedAt, before[p.id]!.updatedAt);
+  });
+
+  group('settings', () {
+    test('remembered answers persist and can be cleared', () async {
+      final settings = SettingsRepository(db);
+      expect(await settings.remembered(PromptKind.closeSubtasks), isNull);
+
+      await settings.remember(PromptKind.closeSubtasks, PromptAnswer.confirm);
+      await settings.remember(PromptKind.completeParent, PromptAnswer.cancel);
+      expect(
+        await settings.remembered(PromptKind.closeSubtasks),
+        PromptAnswer.confirm,
+      );
+      expect(
+        await settings.remembered(PromptKind.completeParent),
+        PromptAnswer.cancel,
+      );
+      final live = await settings.watchRemembered().first;
+      expect(live[PromptKind.pushParentDue], isNull);
+      expect(live[PromptKind.completeParent], PromptAnswer.cancel);
+
+      await settings.remember(PromptKind.closeSubtasks, null);
+      expect(await settings.remembered(PromptKind.closeSubtasks), isNull);
+    });
+
+    test('the old "always" value still reads as Confirm', () async {
+      await db
+          .into(db.settings)
+          .insert(
+            SettingsCompanion.insert(
+              key: 'prompt.always.pushParentDue',
+              value: 'true',
+            ),
+          );
+      expect(
+        await SettingsRepository(db).remembered(PromptKind.pushParentDue),
+        PromptAnswer.confirm,
+      );
+    });
   });
 }
