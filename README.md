@@ -74,6 +74,12 @@ flutter run -d windows
 flutter run -d windows -t dev/demo_main.dart
 ```
 
+**Try first-run setup** (the real app on a new throwaway data folder each launch, so setup, the password and the tutorial start fresh without touching your list):
+
+```bash
+flutter run -d windows -t dev/fresh_main.dart
+```
+
 **Checks**
 
 ```bash
