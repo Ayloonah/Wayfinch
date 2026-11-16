@@ -82,6 +82,11 @@ class HomeController extends ChangeNotifier {
       settings.watchAll().listen((values) {
         _bannerSnoozedUntil = DateTime.tryParse(values[_snoozeKey] ?? '');
         _overdueTagColor = int.tryParse(values[_overdueColorKey] ?? '');
+        _viewOrder = _parseViewOrder(values[_viewOrderKey]);
+        _tagOrder = (values[_tagOrderKey] ?? '')
+            .split(',')
+            .where((s) => s.isNotEmpty)
+            .toList();
         _startView =
             startViews.asNameMap()[values[_startViewKey]] ?? Destination.today;
         // Open the chosen start view once, unless the user already moved.
@@ -313,6 +318,65 @@ class HomeController extends ChangeNotifier {
   Destination _startView = Destination.today;
   bool _startApplied = false;
   bool _navigated = false;
+
+  static const _viewOrderKey = 'sidebar.viewOrder';
+  static const _tagOrderKey = 'sidebar.tagOrder';
+  List<Destination> _viewOrder = startViews;
+  List<String> _tagOrder = const [];
+
+  /// Sidebar views in the user's order (drag to reorder).
+  List<Destination> get viewOrder => _viewOrder;
+
+  static List<Destination> _parseViewOrder(String? stored) {
+    final names = (stored ?? '').split(',');
+    final byName = startViews.asNameMap();
+    final saved = [for (final n in names) ?byName[n]];
+    // Any view missing from the saved order goes at the end.
+    return [...saved, ...startViews.where((d) => !saved.contains(d))];
+  }
+
+  /// Sidebar tag ids in the user's order, including [overdueTagId]. Tags
+  /// that were never reordered follow, by name; the overdue tag defaults
+  /// to the end.
+  List<String> get sidebarTagIds {
+    final known = {..._tags.keys, overdueTagId};
+    final ordered = [
+      for (final id in _tagOrder)
+        if (known.contains(id)) id,
+    ];
+    final rest = _tags.values.where((t) => !ordered.contains(t.id)).toList()
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return [
+      ...ordered,
+      for (final t in rest) t.id,
+      if (!ordered.contains(overdueTagId)) overdueTagId,
+    ];
+  }
+
+  /// Moves the sidebar view at [oldIndex] to [newIndex] (its final spot).
+  Future<void> moveView(int oldIndex, int newIndex) {
+    _viewOrder = _moved(_viewOrder, oldIndex, newIndex);
+    notifyListeners();
+    return settings.setValue(
+      _viewOrderKey,
+      _viewOrder.map((d) => d.name).join(','),
+    );
+  }
+
+  /// Moves the sidebar tag at [oldIndex] to [newIndex] (its final spot).
+  Future<void> moveTag(int oldIndex, int newIndex) {
+    _tagOrder = _moved(sidebarTagIds, oldIndex, newIndex);
+    notifyListeners();
+    return settings.setValue(_tagOrderKey, _tagOrder.join(','));
+  }
+
+  /// [list] with the element at [oldIndex] moved to end up at [newIndex].
+  static List<T> _moved<T>(List<T> list, int oldIndex, int newIndex) {
+    final copy = [...list];
+    final item = copy.removeAt(oldIndex);
+    copy.insert(newIndex.clamp(0, copy.length), item);
+    return copy;
+  }
 
   /// The view the app opens in (Settings › General).
   Destination get startView => _startView;

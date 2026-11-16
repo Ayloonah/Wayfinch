@@ -94,6 +94,9 @@ A three-pane desktop layout: **sidebar | list | detail panel**. The detail panel
 
 - **Sidebar:** logo + greeting with the user's first name, search, the views, tags with counts, then Export for AI, Import, Help and Settings at the bottom.
 - **Start view:** Settings › General › "Open Wayfinch in" picks the view the app opens in (Today, Upcoming, All or Done; Today by default).
+- **Sidebar order:** views and tags (including the overdue auto tag) can be reordered by dragging; a plain click still opens them.
+  - The order is saved.
+  - New tags appear at the end. Until tags are reordered they're sorted by name, with the overdue tag last.
 - **Overdue banner:** sits at the top of every view ("3 overdue items need a new plan"). "Review" jumps to Today's overdue section; "Snooze until tomorrow" hides it for the day.
 - **Quick add** field at the top of the list. It understands, in English and French:
   - **Dates:** today/tomorrow (aujourd'hui/demain), weekday names, and month + day like "Dec 5" or "5 déc".

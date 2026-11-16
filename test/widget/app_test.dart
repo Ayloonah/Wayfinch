@@ -14,6 +14,7 @@ import 'package:wayfinch/domain/exchange/exchange_export.dart';
 import 'package:wayfinch/domain/exchange/exchange_parser.dart';
 import 'package:wayfinch/domain/exchange/import_plan.dart';
 import 'package:wayfinch/domain/item_enums.dart';
+import 'package:wayfinch/domain/views.dart' show overdueTagId;
 import 'package:wayfinch/domain/item_rules.dart';
 import 'package:wayfinch/ui/app.dart';
 import 'package:wayfinch/ui/home/home_controller.dart';
@@ -850,6 +851,75 @@ void main() {
     await finish(tester, h);
   });
 
+  testWidgets('sidebar views and tags reorder by dragging; order is saved', (
+    tester,
+  ) async {
+    final h = await pumpApp(
+      tester,
+      seed: (h) async {
+        await h.tags.findOrCreate('alpha', colorFor: (_) => 0xFF7950F2);
+        await h.tags.findOrCreate('beta', colorFor: (_) => 0xFF0C8599);
+      },
+    );
+    expect(h.controller.viewOrder.first, Destination.today);
+
+    // Drag "All" (3rd) above "Today" (1st).
+    final all = tester.getCenter(find.text('All'));
+    final today = tester.getCenter(find.text('Today').first);
+    final drag = await tester.startGesture(all);
+    await tester.pump(const Duration(milliseconds: 50));
+    await drag.moveBy(const Offset(0, -20));
+    await tester.pump();
+    await dragTo(tester, drag, from: all, to: today - const Offset(0, 24));
+    await drag.up();
+    await settle(tester);
+    expect(h.controller.viewOrder.first, Destination.all);
+    expect(
+      await pumpUntilDone(tester, h.settings.getValue('sidebar.viewOrder')),
+      startsWith('all,'),
+    );
+
+    // Tags: drag "overdue" (last) above "alpha" (first).
+    expect(h.controller.sidebarTagIds.last, overdueTagId);
+    final overdue = tester.getCenter(find.text('overdue'));
+    final alpha = tester.getCenter(find.text('alpha'));
+    final drag2 = await tester.startGesture(overdue);
+    await tester.pump(const Duration(milliseconds: 50));
+    await drag2.moveBy(const Offset(0, -20));
+    await tester.pump();
+    await dragTo(tester, drag2, from: overdue, to: alpha - const Offset(0, 24));
+    await drag2.up();
+    await settle(tester);
+    expect(h.controller.sidebarTagIds.first, overdueTagId);
+
+    // A plain click still opens a view.
+    await tester.tap(find.text('Upcoming'));
+    await settle(tester);
+    expect(h.controller.destination, Destination.upcoming);
+    await finish(tester, h);
+  });
+
+  testWidgets('new tags join the end of a saved tag order', (tester) async {
+    final h = await pumpApp(
+      tester,
+      seed: (h) async {
+        final b = await h.tags.findOrCreate('beta', colorFor: (_) => 0);
+        await h.settings.setValue('sidebar.tagOrder', '$overdueTagId,${b.id}');
+      },
+    );
+    await pumpUntilDone(
+      tester,
+      h.tags.findOrCreate('alpha', colorFor: (_) => 0),
+    );
+    await settle(tester);
+    final names = [
+      for (final id in h.controller.sidebarTagIds)
+        id == overdueTagId ? 'overdue' : h.controller.tagsById[id]!.name,
+    ];
+    expect(names, ['overdue', 'beta', 'alpha']);
+    await finish(tester, h);
+  });
+
   testWidgets('French UI', (tester) async {
     final h = await pumpApp(tester, locale: const Locale('fr'));
     expect(find.text('Bonjour'), findsOneWidget);
@@ -903,3 +973,19 @@ Finder dialogField() => find
 Finder selectable(String text) => find.byWidgetPredicate(
   (w) => w is SelectableText && (w.data ?? '').contains(text),
 );
+
+/// Moves a drag gesture to [to] in small steps, one frame each, the way a
+/// real mouse drag reaches a reorderable list.
+Future<void> dragTo(
+  WidgetTester tester,
+  TestGesture gesture, {
+  required Offset from,
+  required Offset to,
+}) async {
+  const steps = 12;
+  final step = (to - from) / steps.toDouble();
+  for (var i = 0; i < steps; i++) {
+    await gesture.moveBy(step);
+    await tester.pump(const Duration(milliseconds: 16));
+  }
+}
