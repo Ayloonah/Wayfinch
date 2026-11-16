@@ -171,7 +171,7 @@ void main() {
         task('done', doneAt: now).copyWith(tagIds: ['school']),
       ]);
       final data = ViewBuilder(tree, now).tag('school');
-      expect(data.count, 2);
+      expect(data.count, 1); // a1 shows (and counts) under a
       expect(
         data.entries.whereType<ItemEntry>().map((e) => (e.item.id, e.depth)),
         [('a', 0), ('a1', 1)],
@@ -250,6 +250,54 @@ void main() {
           .toList();
       expect(ids, ['mon parent', 'wed child']);
       expect(ids.toSet(), hasLength(2));
+    });
+  });
+
+  group('counts', () {
+    test('a parent with subtasks counts once; subtasks show as progress', () {
+      final tree = ItemTree([
+        task('trip', due: DateTime(2026, 11, 15, 20)),
+        for (final s in ['pack', 'tickets', 'hotel', 'charger'])
+          task(s, parent: 'trip'),
+      ]);
+      final b = ViewBuilder(tree, now);
+      final today = b.today();
+      expect(today.count, 1);
+      expect(today.entries.whereType<SectionHeader>().single.count, 1);
+      final row = today.entries.whereType<ItemEntry>().first;
+      expect((row.subtasksDone, row.subtasksTotal), (0, 4));
+      expect(b.all().count, 1);
+    });
+
+    test('progress counts leaves at every depth, not inner parents', () {
+      final tree = ItemTree([
+        task('project'),
+        task('research', parent: 'project'),
+        task('read', parent: 'research', doneAt: now),
+        task('notes', parent: 'research'),
+        task('write', parent: 'project'),
+        event(
+          'meeting',
+          parent: 'project',
+          start: DateTime(2026, 11, 16, 9),
+          end: DateTime(2026, 11, 16, 10),
+        ),
+      ]);
+      // Leaves: read (done), notes, write. "research" is an inner parent;
+      // events aren't steps.
+      expect(subtaskProgress(tree, 'project'), (done: 1, total: 3));
+      expect(subtaskProgress(tree, 'research'), (done: 1, total: 2));
+      expect(subtaskProgress(tree, 'write'), (done: 0, total: 0));
+    });
+
+    test('a subtask shown on its own (parent elsewhere) counts as a row', () {
+      final tree = ItemTree([
+        task('project', due: DateTime(2026, 12, 1)),
+        task('step', parent: 'project', due: DateTime(2026, 11, 15, 15)),
+        task('other', due: DateTime(2026, 11, 15, 16)),
+        task('other sub', parent: 'other', due: DateTime(2026, 11, 15, 14)),
+      ]);
+      expect(ViewBuilder(tree, now).today().count, 2); // step, other
     });
   });
 

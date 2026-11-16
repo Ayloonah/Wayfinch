@@ -130,11 +130,15 @@ class _Header extends StatelessWidget {
   }
 
   String _todaySubtitle(Formats f, HomeController controller) {
+    // Top-level rows only, like every other count (subtasks show as
+    // progress on their parent).
     final today = controller.view(AppView.today);
-    final items = today.entries.whereType<ItemEntry>().map((e) => e.item);
-    final unique = {for (final i in items) i.id: i}.values;
-    final tasks = unique.where((i) => i.isTask).length;
-    final events = unique.length - tasks;
+    final top = today.entries
+        .whereType<ItemEntry>()
+        .where((e) => e.depth == 0)
+        .map((e) => e.item);
+    final tasks = top.where((i) => i.isTask).length;
+    final events = top.length - tasks;
     return f.l10n.todaySubtitle(
       f.longDate(controller.now),
       f.l10n.taskCount(tasks),
