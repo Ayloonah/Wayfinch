@@ -460,7 +460,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get emptyOverdue => 'Rien en retard. Bien joué !';
 
   @override
-  String get changeTagColor => 'Couleur de l’étiquette';
+  String get changeTagColor => 'Changer la couleur';
+
+  @override
+  String get changeTagColorMenu => 'Changer la couleur...';
+
+  @override
+  String tagColorTitle(String name) {
+    return 'Couleur de « $name »';
+  }
 
   @override
   String get customColor => 'Couleur personnalisée...';
@@ -543,12 +551,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get contrastWarningTitle =>
-      'Certains textes pourraient être difficiles à lire :';
-
-  @override
-  String contrastIssue(String what, String ratio) {
-    return '$what : $ratio:1 (vise 4,5:1)';
-  }
+      'Le texte pourrait être difficile à lire ici :';
 
   @override
   String get contrastTextOnBackground => 'Texte sur l’arrière-plan';

@@ -9,6 +9,7 @@ import '../list/item_row.dart' show TagChip;
 import '../theme/tokens.dart';
 import 'date_time_picker.dart';
 import 'tag_picker.dart';
+import '../widgets/tag_color_dialog.dart';
 
 /// Task / Event switch.
 class TypeToggle extends StatelessWidget {
@@ -278,6 +279,8 @@ class _PriorityLabel extends StatelessWidget {
   }
 }
 
+enum _ChipAction { color, remove }
+
 class _TagsField extends StatefulWidget {
   const _TagsField({required this.item});
 
@@ -303,14 +306,34 @@ class _TagsFieldState extends State<_TagsField> {
       runSpacing: 6,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
+        // Clicking a chip offers "Change color..." and "Remove tag".
         for (final tag in tags)
-          InkWell(
-            borderRadius: BorderRadius.circular(999),
-            onTap: () => controller.removeTag(widget.item, tag.id),
-            child: Tooltip(
-              message: l10n.removeTag(tag.name),
-              child: TagChip(name: tag.name, color: colors.tagColor(tag.color)),
-            ),
+          PopupMenuButton<_ChipAction>(
+            tooltip: tag.name,
+            position: PopupMenuPosition.under,
+            onSelected: (action) => switch (action) {
+              _ChipAction.color => changeTagColor(context, tag),
+              _ChipAction.remove => controller.removeTag(widget.item, tag.id),
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: _ChipAction.color,
+                child: ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.palette_outlined),
+                  title: Text(l10n.changeTagColorMenu),
+                ),
+              ),
+              PopupMenuItem(
+                value: _ChipAction.remove,
+                child: ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.close),
+                  title: Text(l10n.removeTag(tag.name)),
+                ),
+              ),
+            ],
+            child: TagChip(name: tag.name, color: colors.tagColor(tag.color)),
           ),
         if (_adding)
           TagPicker(

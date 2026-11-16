@@ -327,11 +327,16 @@ class _ContrastReport extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 4),
-            for (final entry in issues.entries)
-              Text(
-                l10n.contrastIssue(
-                  name(entry.key),
-                  entry.value.toStringAsFixed(1),
+            // Just the areas: ratios mean little to most people.
+            for (final issue in issues.keys)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Row(
+                  children: [
+                    Icon(Icons.circle, size: 6, color: colors.warningText),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(name(issue))),
+                  ],
                 ),
               ),
           ],

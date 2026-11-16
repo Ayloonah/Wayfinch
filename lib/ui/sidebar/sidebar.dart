@@ -5,6 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../home/home_controller.dart';
 import '../theme/tokens.dart';
 import '../widgets/finch_logo.dart';
+import '../widgets/tag_color_dialog.dart';
 
 /// The left sidebar: logo, greeting, views and settings.
 class Sidebar extends StatelessWidget {
@@ -103,6 +104,7 @@ class _TagList extends StatelessWidget {
             count: controller.tagCount(tag.id),
             selected: selectedTag == tag.id,
             onTap: () => controller.openTag(tag.id),
+            onChangeColor: () => changeTagColor(context, tag),
           ),
         _TagRow(
           label: l10n.overdueTag,
@@ -124,6 +126,7 @@ class _TagRow extends StatelessWidget {
     required this.count,
     required this.selected,
     required this.onTap,
+    this.onChangeColor,
     this.auto = false,
   });
 
@@ -134,10 +137,42 @@ class _TagRow extends StatelessWidget {
   final bool auto;
   final VoidCallback onTap;
 
+  /// Opens the color dialog; null for the overdue auto tag.
+  final VoidCallback? onChangeColor;
+
+  Future<void> _showMenu(BuildContext context, Offset position) async {
+    final l10n = AppLocalizations.of(context);
+    final overlay =
+        Overlay.of(context).context.findRenderObject()! as RenderBox;
+    final choice = await showMenu<bool>(
+      context: context,
+      position: RelativeRect.fromRect(
+        position & const Size(1, 1),
+        Offset.zero & overlay.size,
+      ),
+      items: [
+        PopupMenuItem(
+          value: true,
+          child: ListTile(
+            dense: true,
+            leading: const Icon(Icons.palette_outlined),
+            title: Text(l10n.changeTagColorMenu),
+          ),
+        ),
+      ],
+    );
+    if (choice == true) onChangeColor?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = WayfinchColors.of(context);
     final l10n = AppLocalizations.of(context);
+    final dotWidget = Container(
+      width: 10,
+      height: 10,
+      decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+    );
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: Material(
@@ -146,21 +181,32 @@ class _TagRow extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: onTap,
+          // Right-click: "Change color...".
+          onSecondaryTapUp: onChangeColor == null
+              ? null
+              : (details) => _showMenu(context, details.globalPosition),
           child: SizedBox(
             height: 40,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.only(right: 12),
               child: Row(
                 children: [
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: dot,
-                      shape: BoxShape.circle,
+                  // The dot is also a button for the color dialog.
+                  if (onChangeColor == null)
+                    SizedBox(width: 34, child: Center(child: dotWidget))
+                  else
+                    SizedBox(
+                      width: 34,
+                      height: 40,
+                      child: Tooltip(
+                        message: l10n.changeTagColor,
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: onChangeColor,
+                          child: Center(child: dotWidget),
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       label,

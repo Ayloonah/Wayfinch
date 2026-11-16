@@ -785,8 +785,20 @@ abstract class AppLocalizations {
   /// No description provided for @changeTagColor.
   ///
   /// In en, this message translates to:
-  /// **'Tag color'**
+  /// **'Change color'**
   String get changeTagColor;
+
+  /// No description provided for @changeTagColorMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Change color...'**
+  String get changeTagColorMenu;
+
+  /// Title of the tag color dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Color for \"{name}\"'**
+  String tagColorTitle(String name);
 
   /// No description provided for @customColor.
   ///
@@ -947,14 +959,8 @@ abstract class AppLocalizations {
   /// No description provided for @contrastWarningTitle.
   ///
   /// In en, this message translates to:
-  /// **'Some text may be hard to read:'**
+  /// **'Text may be hard to read here:'**
   String get contrastWarningTitle;
-
-  /// One contrast warning line.
-  ///
-  /// In en, this message translates to:
-  /// **'{what}: {ratio}:1 (aim for 4.5:1)'**
-  String contrastIssue(String what, String ratio);
 
   /// No description provided for @contrastTextOnBackground.
   ///

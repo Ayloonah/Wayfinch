@@ -456,7 +456,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emptyOverdue => 'Nothing overdue. Nicely done!';
 
   @override
-  String get changeTagColor => 'Tag color';
+  String get changeTagColor => 'Change color';
+
+  @override
+  String get changeTagColorMenu => 'Change color...';
+
+  @override
+  String tagColorTitle(String name) {
+    return 'Color for \"$name\"';
+  }
 
   @override
   String get customColor => 'Custom color...';
@@ -537,12 +545,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contrastAllGood => 'Everything should be easy to read.';
 
   @override
-  String get contrastWarningTitle => 'Some text may be hard to read:';
-
-  @override
-  String contrastIssue(String what, String ratio) {
-    return '$what: $ratio:1 (aim for 4.5:1)';
-  }
+  String get contrastWarningTitle => 'Text may be hard to read here:';
 
   @override
   String get contrastTextOnBackground => 'Text on the background';

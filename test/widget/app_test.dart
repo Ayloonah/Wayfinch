@@ -14,6 +14,7 @@ import 'package:wayfinch/ui/app.dart';
 import 'package:wayfinch/ui/home/home_controller.dart';
 import 'package:wayfinch/ui/theme/appearance_controller.dart';
 import 'package:wayfinch/ui/theme/tokens.dart';
+import 'package:wayfinch/ui/widgets/color_picker.dart';
 
 /// Sunday, Nov 15, 2026, 10:00.
 final _now = DateTime(2026, 11, 15, 10);
@@ -469,8 +470,10 @@ void main() {
       ),
     );
     await settle(tester);
-    expect(find.text('Some text may be hard to read:'), findsOneWidget);
-    expect(find.textContaining('Text on panels:'), findsOneWidget);
+    expect(find.text('Text may be hard to read here:'), findsOneWidget);
+    expect(find.text('Text on panels'), findsOneWidget);
+    // Areas only, no numbers.
+    expect(find.textContaining(':1'), findsNothing);
     await finish(tester, h);
   });
 
@@ -538,6 +541,56 @@ void main() {
     ];
     expect(widths.toSet(), hasLength(1));
     expect(rights.toSet(), hasLength(1));
+    await finish(tester, h);
+  });
+
+  testWidgets('tag colors change from a chip menu and the sidebar dot', (
+    tester,
+  ) async {
+    final h = await pumpApp(
+      tester,
+      seed: (h) async {
+        final school = await h.tags.findOrCreate(
+          'school',
+          colorFor: (_) => tagPalette[0].light,
+        );
+        await h.items.create(
+          type: ItemType.task,
+          title: 'Essay',
+          due: DateTime(2026, 11, 15),
+          tagIds: [school.id],
+        );
+      },
+    );
+    int tagColor() => h.controller.tagsById.values.single.color;
+
+    // Detail panel: chip -> "Change color..." -> pick the teal swatch.
+    await tester.tap(find.text('Essay'));
+    await settle(tester);
+    await tester.tap(find.text('school').last);
+    await settle(tester);
+    expect(find.text('Change color...'), findsOneWidget);
+    expect(find.text('Remove school'), findsOneWidget);
+    await tester.tap(find.text('Change color...'));
+    await settle(tester);
+    expect(find.text('Color for "school"'), findsOneWidget);
+    await tester.tap(find.byType(Swatch).at(1));
+    await settle(tester);
+    expect(tagColor(), tagPalette[1].light);
+
+    // Sidebar: the dot opens the same dialog.
+    await tester.tap(find.byTooltip('Change color').first);
+    await settle(tester);
+    await tester.tap(find.byType(Swatch).at(2));
+    await settle(tester);
+    expect(tagColor(), tagPalette[2].light);
+
+    // The chip menu can still remove the tag.
+    await tester.tap(find.text('school').last);
+    await settle(tester);
+    await tester.tap(find.text('Remove school'));
+    await settle(tester);
+    expect(h.controller.tree.all.single.tagIds, isEmpty);
     await finish(tester, h);
   });
 

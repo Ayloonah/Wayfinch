@@ -53,7 +53,7 @@ Everything is an **item**, and every item is either a task or an event. Items ne
 
 - **Overdue** is computed, never stored: `due < now && doneAt == null`. Changing the due date clears it instantly. It shows as a special "overdue" auto tag that users can't assign or delete.
 - **Nesting:** unlimited depth in the data. Every level indents further in the UI so subtasks always read as subtasks: a full step for the first 4 levels, then a smaller step per extra level.
-- **Tags** are user-created with a color picked from a curated palette, or any color via a picker. New tags take the next palette color. A tag's color is changed from its Tags view (the dot next to its name). Curated colors have a lighter partner for dark mode; any other color is adjusted so it stays visible on the panel.
+- **Tags** are user-created with a color picked from a curated palette, or any color via a picker. New tags take the next palette color. A tag's color can be changed from three places, all opening the same color dialog: the tag's dot in the sidebar (or right-click → "Change color..."), a tag chip in the detail panel (its menu also has "Remove tag"), and the dot next to the name in the tag's own view. Curated colors have a lighter partner for dark mode; any other color is adjusted so it stays visible on the panel.
 
 ## Core behaviors
 
@@ -226,7 +226,7 @@ Neutral backgrounds, with color used only where it means something: priority, ta
   - The user picks five colors: accent, background, panels, sidebar and text. They can start from a light or a dark base.
   - Everything else is derived: borders, secondary text, text on the accent, and accent-colored text darkened or lightened until readable.
   - The custom theme decides light or dark by itself (from the panel color), so the mode setting doesn't apply while it's active.
-  - An automatic contrast check (WCAG AA, 4.5:1) lists anything that may be hard to read, but never blocks.
+  - An automatic contrast check (WCAG AA, 4.5:1) names the areas where text may be hard to read (e.g. "Text on panels"), without showing numbers. It never blocks.
   - Color pickers are built in (hue, saturation/brightness, hex), with no extra dependency.
 - **Delight:**
   - A small confetti burst when a task is completed (skipped when the system asks for reduced motion).
