@@ -497,8 +497,14 @@ abstract class AppLocalizations {
   /// No description provided for @tagHint.
   ///
   /// In en, this message translates to:
-  /// **'Tag name'**
+  /// **'Find or create a tag'**
   String get tagHint;
+
+  /// Tag picker option that creates a new tag.
+  ///
+  /// In en, this message translates to:
+  /// **'Create \"{name}\"'**
+  String createTag(String name);
 
   /// No description provided for @removeTag.
   ///

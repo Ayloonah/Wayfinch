@@ -352,6 +352,12 @@ class HomeController extends ChangeNotifier {
     await items.save(item.copyWith(tagIds: [...item.tagIds, tag.id]));
   }
 
+  /// Adds the existing tag [tagId] to [item].
+  Future<void> addTagId(Item item, String tagId) async {
+    if (item.tagIds.contains(tagId)) return;
+    await items.save(item.copyWith(tagIds: [...item.tagIds, tagId]));
+  }
+
   /// Removes tag [tagId] from [item].
   Future<void> removeTag(Item item, String tagId) => items.save(
     item.copyWith(tagIds: item.tagIds.where((t) => t != tagId).toList()),

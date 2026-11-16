@@ -474,6 +474,73 @@ void main() {
     await finish(tester, h);
   });
 
+  testWidgets('tag picker: pick an existing tag or create a new one', (
+    tester,
+  ) async {
+    final h = await pumpApp(
+      tester,
+      seed: (h) async {
+        await h.tags.findOrCreate('school', colorFor: (_) => 0xFF7950F2);
+        await h.items.create(
+          type: ItemType.task,
+          title: 'Essay',
+          due: DateTime(2026, 11, 15),
+        );
+      },
+    );
+    await tester.tap(find.text('Essay'));
+    await settle(tester);
+
+    // Existing tags show as soon as the field opens.
+    await tester.tap(find.text('+ Tag'));
+    await settle(tester);
+    final tagField = find.widgetWithText(TextField, 'Find or create a tag');
+    await tester.enterText(tagField, 'sch');
+    await settle(tester);
+    expect(find.text('Create "sch"'), findsOneWidget);
+    await tester.tap(find.text('school').last);
+    await settle(tester);
+    final schoolId = h.controller.tagsById.values.single.id;
+    expect(h.controller.tree.all.single.tagIds, [schoolId]);
+
+    // A new name: Enter on "Create" makes the tag.
+    await tester.tap(find.text('+ Tag'));
+    await settle(tester);
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Find or create a tag'),
+      'reading',
+    );
+    await settle(tester);
+    expect(find.text('Create "reading"'), findsOneWidget);
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await settle(tester);
+    expect(
+      h.controller.tagsById.values.map((t) => t.name),
+      contains('reading'),
+    );
+    expect(h.controller.tree.all.single.tagIds, hasLength(2));
+    await finish(tester, h);
+  });
+
+  testWidgets('Settings prompt dropdowns all have the same width', (
+    tester,
+  ) async {
+    final h = await pumpApp(tester);
+    await tester.tap(find.text('Settings'));
+    await settle(tester);
+    final dropdowns = find.byType(DropdownButton<PromptAnswer?>);
+    expect(dropdowns, findsNWidgets(3));
+    final rights = [
+      for (var i = 0; i < 3; i++) tester.getRect(dropdowns.at(i)).right,
+    ];
+    final widths = [
+      for (var i = 0; i < 3; i++) tester.getSize(dropdowns.at(i)).width,
+    ];
+    expect(widths.toSet(), hasLength(1));
+    expect(rights.toSet(), hasLength(1));
+    await finish(tester, h);
+  });
+
   testWidgets('French UI', (tester) async {
     final h = await pumpApp(tester, locale: const Locale('fr'));
     expect(find.text('Bonjour'), findsOneWidget);

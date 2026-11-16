@@ -267,7 +267,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addTag => '+ Tag';
 
   @override
-  String get tagHint => 'Tag name';
+  String get tagHint => 'Find or create a tag';
+
+  @override
+  String createTag(String name) {
+    return 'Create \"$name\"';
+  }
 
   @override
   String removeTag(String name) {

@@ -270,7 +270,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addTag => '+ Étiquette';
 
   @override
-  String get tagHint => 'Nom de l’étiquette';
+  String get tagHint => 'Trouver ou créer une étiquette';
+
+  @override
+  String createTag(String name) {
+    return 'Créer « $name »';
+  }
 
   @override
   String removeTag(String name) {

@@ -8,6 +8,7 @@ import '../home/home_controller.dart';
 import '../list/item_row.dart' show TagChip;
 import '../theme/tokens.dart';
 import 'date_time_picker.dart';
+import 'tag_picker.dart';
 
 /// Task / Event switch.
 class TypeToggle extends StatelessWidget {
@@ -288,13 +289,6 @@ class _TagsField extends StatefulWidget {
 
 class _TagsFieldState extends State<_TagsField> {
   bool _adding = false;
-  final _text = TextEditingController();
-
-  @override
-  void dispose() {
-    _text.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -319,23 +313,11 @@ class _TagsFieldState extends State<_TagsField> {
             ),
           ),
         if (_adding)
-          SizedBox(
-            width: 140,
-            child: TextField(
-              controller: _text,
-              autofocus: true,
-              style: const TextStyle(fontSize: 14),
-              decoration: InputDecoration(
-                isDense: true,
-                hintText: l10n.tagHint,
-              ),
-              onSubmitted: (name) async {
-                setState(() => _adding = false);
-                _text.clear();
-                await controller.addTag(widget.item, name);
-              },
-              onTapOutside: (_) => setState(() => _adding = false),
-            ),
+          TagPicker(
+            item: widget.item,
+            onDone: () {
+              if (mounted) setState(() => _adding = false);
+            },
           )
         else
           OutlinedButton(

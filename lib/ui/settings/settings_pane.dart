@@ -86,6 +86,9 @@ class _SettingsCard extends StatelessWidget {
   }
 }
 
+/// Width of every prompt choice dropdown in Settings.
+const promptChoiceWidth = 250.0;
+
 /// One prompt's setting: "Ask me" or a remembered answer.
 class PromptSettingRow extends StatelessWidget {
   /// Creates the row for [kind].
@@ -118,16 +121,30 @@ class PromptSettingRow extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 20),
       title: Text(situation),
-      trailing: DropdownButton<PromptAnswer?>(
-        value: controller.remembered[kind],
-        underline: const SizedBox.shrink(),
-        onChanged: (answer) => controller.setRemembered(kind, answer),
-        items: [
-          DropdownMenuItem(value: null, child: Text(l10n.choiceAsk)),
-          DropdownMenuItem(value: PromptAnswer.confirm, child: Text(always)),
-          if (never != null)
-            DropdownMenuItem(value: PromptAnswer.cancel, child: Text(never)),
-        ],
+      // A fixed width keeps all three dropdowns lined up, whatever their
+      // longest option.
+      trailing: SizedBox(
+        width: promptChoiceWidth,
+        child: DropdownButton<PromptAnswer?>(
+          isExpanded: true,
+          value: controller.remembered[kind],
+          underline: const SizedBox.shrink(),
+          borderRadius: BorderRadius.circular(12),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          onChanged: (answer) => controller.setRemembered(kind, answer),
+          items: [
+            DropdownMenuItem(value: null, child: Text(l10n.choiceAsk)),
+            DropdownMenuItem(
+              value: PromptAnswer.confirm,
+              child: Text(always, overflow: TextOverflow.ellipsis),
+            ),
+            if (never != null)
+              DropdownMenuItem(
+                value: PromptAnswer.cancel,
+                child: Text(never, overflow: TextOverflow.ellipsis),
+              ),
+          ],
+        ),
       ),
     );
   }
