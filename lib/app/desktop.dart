@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:path/path.dart' as p;
 import 'package:tray_manager/legacy.dart';
 import 'package:window_manager/legacy.dart';
 import 'package:windows_single_instance/windows_single_instance.dart';
@@ -132,7 +133,12 @@ class Desktop with TrayListener, WindowListener {
   // ---- Tray ---------------------------------------------------------------
 
   Future<void> _setUpTray() async {
-    await trayManager.setIcon('assets/tray_icon.ico');
+    // White ink on a dark taskbar, navy ink on a light one.
+    await trayManager.setIcon(
+      await _taskbarIsLight()
+          ? 'assets/tray/tray_dark.ico'
+          : 'assets/tray/tray_light.ico',
+    );
     await trayManager.setToolTip(_l10n.appTitle);
     await trayManager.setContextMenu(
       Menu(
@@ -143,6 +149,21 @@ class Desktop with TrayListener, WindowListener {
         ],
       ),
     );
+  }
+
+  /// Whether the Windows taskbar uses the light theme (it's dark by default).
+  static Future<bool> _taskbarIsLight() async {
+    try {
+      final result = await Process.run('reg', [
+        'query',
+        r'HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize',
+        '/v',
+        'SystemUsesLightTheme',
+      ]);
+      return RegExp(r'0x0*1\b').hasMatch('${result.stdout}');
+    } on ProcessException {
+      return false;
+    }
   }
 
   @override
@@ -189,6 +210,7 @@ class Desktop with TrayListener, WindowListener {
           appName: _l10n.appTitle,
           appUserModelId: 'Wayfinch.Wayfinch.Desktop',
           guid: '6f7c1b3e-2a4d-4c8e-9b1f-5d3a7e9c2b41',
+          iconPath: _notificationIconPath(),
         ),
       ),
       onDidReceiveNotificationResponse: (response) {
@@ -196,6 +218,20 @@ class Desktop with TrayListener, WindowListener {
         if (args != null) _service?.handle(args);
       },
     );
+  }
+
+  /// The bundled logo for toasts (next to the exe, in Flutter's assets), or
+  /// null if it isn't there.
+  static String? _notificationIconPath() {
+    final path = p.join(
+      File(Platform.resolvedExecutable).parent.path,
+      'data',
+      'flutter_assets',
+      'assets',
+      'brand',
+      'notification_icon.png',
+    );
+    return File(path).existsSync() ? path : null;
   }
 
   // ---- Start with Windows (HKCU Run key, via the built-in reg tool) --------
