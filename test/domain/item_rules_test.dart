@@ -6,13 +6,19 @@ import 'package:wayfinch/domain/item_tree.dart';
 import 'test_items.dart';
 
 class _Prefs implements PromptPreferences {
-  final Set<PromptKind> always = {};
+  final Map<PromptKind, PromptAnswer> saved = {};
 
   @override
-  Future<bool> isAlways(PromptKind kind) async => always.contains(kind);
+  Future<PromptAnswer?> remembered(PromptKind kind) async => saved[kind];
 
   @override
-  Future<void> setAlways(PromptKind kind) async => always.add(kind);
+  Future<void> remember(PromptKind kind, PromptAnswer? answer) async {
+    if (answer == null) {
+      saved.remove(kind);
+    } else {
+      saved[kind] = answer;
+    }
+  }
 }
 
 void main() {
@@ -20,6 +26,7 @@ void main() {
   late _Prefs prefs;
   late List<PromptKind> asked;
   late PromptAnswer answer;
+  late bool remember;
   late ItemRules rules;
   var ids = 0;
 
@@ -27,12 +34,13 @@ void main() {
     prefs = _Prefs();
     asked = [];
     answer = PromptAnswer.confirm;
+    remember = false;
     ids = 0;
     rules = ItemRules(
       preferences: prefs,
       ask: (kind, count) async {
         asked.add(kind);
-        return answer;
+        return PromptResult(answer, remember: remember);
       },
       newId: () => 'new${ids++}',
       clock: () => now,
@@ -110,10 +118,11 @@ void main() {
       expect(updated.keys, containsAll(['c', 'p', 'gp']));
     });
 
-    test('Always is remembered and skips the prompt next time', () async {
-      answer = PromptAnswer.always;
+    test('a remembered Confirm skips the prompt next time', () async {
+      remember = true;
       await rules.complete(ItemTree([task('p'), task('c', parent: 'p')]), 'c');
-      expect(prefs.always, {PromptKind.completeParent});
+      expect(prefs.saved, {PromptKind.completeParent: PromptAnswer.confirm});
+      remember = false;
 
       asked.clear();
       final changes = await rules.complete(
@@ -122,6 +131,51 @@ void main() {
       );
       expect(asked, isEmpty);
       expect(byId(changes!)['q']!.doneAt, now);
+    });
+
+    test('a remembered Cancel leaves parents open without asking', () async {
+      answer = PromptAnswer.cancel;
+      remember = true;
+      await rules.complete(ItemTree([task('p'), task('c', parent: 'p')]), 'c');
+      expect(prefs.saved, {PromptKind.completeParent: PromptAnswer.cancel});
+
+      asked.clear();
+      answer = PromptAnswer.confirm;
+      final updated = byId(
+        (await rules.complete(
+          ItemTree([task('q'), task('d', parent: 'q')]),
+          'd',
+        ))!,
+      );
+      expect(asked, isEmpty);
+      expect(updated.containsKey('q'), isFalse);
+      expect(updated['d']!.doneAt, now);
+    });
+
+    test('Cancel is never remembered for close-subtasks', () async {
+      answer = PromptAnswer.cancel;
+      remember = true;
+      final tree = ItemTree([task('p'), task('c', parent: 'p')]);
+      expect(await rules.complete(tree, 'p'), isNull);
+      expect(prefs.saved, isEmpty);
+
+      // Next time it asks again.
+      asked.clear();
+      await rules.complete(tree, 'p');
+      expect(asked, [PromptKind.closeSubtasks]);
+    });
+
+    test('a remembered close-subtasks Confirm closes without asking', () async {
+      prefs.saved[PromptKind.closeSubtasks] = PromptAnswer.confirm;
+      final tree = ItemTree([task('p'), task('c', parent: 'p')]);
+      final updated = byId((await rules.complete(tree, 'p'))!);
+      expect(asked, isEmpty);
+      expect(updated.keys, containsAll(['p', 'c']));
+    });
+
+    test('unchecked remember stores nothing', () async {
+      await rules.complete(ItemTree([task('p'), task('c', parent: 'p')]), 'c');
+      expect(prefs.saved, isEmpty);
     });
 
     test('events and done tasks are ignored', () async {
@@ -262,6 +316,17 @@ void main() {
       final tree = ItemTree([task('p'), task('c', parent: 'p')]);
       await rules.setDue(tree, 'c', due: DateTime(2027), hasTime: false);
       expect(asked, isEmpty);
+    });
+
+    test('Cancel with remember checked is not remembered', () async {
+      answer = PromptAnswer.cancel;
+      remember = true;
+      final tree = ItemTree([
+        task('p', due: DateTime(2026, 12, 5)),
+        task('c', parent: 'p'),
+      ]);
+      await rules.setDue(tree, 'c', due: DateTime(2026, 12, 9), hasTime: false);
+      expect(prefs.saved, isEmpty);
     });
 
     test('Cancel changes nothing at all', () async {

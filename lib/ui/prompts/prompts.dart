@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import '../../domain/item_rules.dart';
 import '../../l10n/app_localizations.dart';
 
-/// Shows the shared Confirm / Cancel / Always do this prompt for [kind].
+/// Shows the shared Confirm / Cancel prompt for [kind], with a
+/// "don't ask again" checkbox.
 ///
-/// Dismissing the dialog counts as Cancel.
-Future<PromptAnswer> showRulePrompt(
+/// For [PromptKind.completeParent] the checkbox remembers either answer. For
+/// the other prompts it reads "Always do this without asking" and only
+/// applies with Confirm (Cancel there stops the whole action, so it is never
+/// remembered). Dismissing the dialog counts as Cancel.
+Future<PromptResult> showRulePrompt(
   BuildContext context,
   PromptKind kind,
   int count,
@@ -26,29 +30,52 @@ Future<PromptAnswer> showRulePrompt(
       l10n.promptCompleteParentBody,
     ),
   };
-  final answer = await showDialog<PromptAnswer>(
+  final rememberLabel = kind.canRememberCancel
+      ? l10n.promptRememberAnswer
+      : l10n.promptAlwaysDoThis;
+  var remember = false;
+  final result = await showDialog<PromptResult>(
     context: context,
-    builder: (context) => AlertDialog(
-      title: Text(title),
-      content: Text(body),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, PromptAnswer.always),
-          child: Text(l10n.promptAlways),
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) => AlertDialog(
+        title: Text(title),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(body),
+            const SizedBox(height: 12),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              dense: true,
+              value: remember,
+              onChanged: (v) => setState(() => remember = v ?? false),
+              title: Text(rememberLabel),
+            ),
+          ],
         ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, PromptAnswer.cancel),
-          child: Text(l10n.promptCancel),
-        ),
-        FilledButton(
-          autofocus: true,
-          onPressed: () => Navigator.pop(context, PromptAnswer.confirm),
-          child: Text(l10n.promptConfirm),
-        ),
-      ],
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(
+              context,
+              PromptResult(PromptAnswer.cancel, remember: remember),
+            ),
+            child: Text(l10n.promptCancel),
+          ),
+          FilledButton(
+            autofocus: true,
+            onPressed: () => Navigator.pop(
+              context,
+              PromptResult(PromptAnswer.confirm, remember: remember),
+            ),
+            child: Text(l10n.promptConfirm),
+          ),
+        ],
+      ),
     ),
   );
-  return answer ?? PromptAnswer.cancel;
+  return result ?? PromptResult.dismissed;
 }
 
 /// Asks before deleting an item that has [subtaskCount] subtasks.

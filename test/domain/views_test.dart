@@ -162,6 +162,68 @@ void main() {
     expect(data.doneThisWeek, 1);
   });
 
+  group('each item shows once', () {
+    test('Today: an overdue subtask only shows in Overdue', () {
+      final tree = ItemTree([
+        task('report', due: DateTime(2026, 11, 15, 23)),
+        task('late step', parent: 'report', due: DateTime(2026, 11, 14, 9)),
+        task('no date', parent: 'report'),
+      ]);
+      final entries = ViewBuilder(tree, now).today().entries;
+      final rows = <(String, String)>[];
+      var section = '';
+      for (final e in entries) {
+        if (e is SectionHeader) section = e.kind.name;
+        if (e is ItemEntry) rows.add((section, e.item.id));
+      }
+      expect(rows, [
+        ('overdue', 'late step'),
+        ('today', 'report'),
+        ('today', 'no date'),
+      ]);
+    });
+
+    test('Today: a subtask due today of an overdue parent shows in Today', () {
+      final tree = ItemTree([
+        task('late', due: DateTime(2026, 11, 14, 9)),
+        task('today step', parent: 'late', due: DateTime(2026, 11, 15, 18)),
+        task('grandchild', parent: 'today step'),
+      ]);
+      final entries = ViewBuilder(tree, now).today().entries;
+      final ids = entries.whereType<ItemEntry>().map((e) => e.item.id).toList();
+      expect(ids, ['late', 'today step', 'grandchild']);
+      expect(ids.toSet(), hasLength(ids.length));
+    });
+
+    test('Today: overdue child between two today items stays out', () {
+      final tree = ItemTree([
+        task('gp', due: DateTime(2026, 11, 15, 22)),
+        task('p', parent: 'gp', due: DateTime(2026, 11, 14, 9)),
+        task('c', parent: 'p', due: DateTime(2026, 11, 15, 20)),
+      ]);
+      final ids = ViewBuilder(
+        tree,
+        now,
+      ).today().entries.whereType<ItemEntry>().map((e) => e.item.id).toList();
+      expect(ids, ['p', 'c', 'gp']);
+    });
+
+    test('Upcoming: a subtask shows under its own day only', () {
+      final tree = ItemTree([
+        task('mon parent', due: DateTime(2026, 11, 16, 9)),
+        task('wed child', parent: 'mon parent', due: DateTime(2026, 11, 18, 9)),
+      ]);
+      final ids = ViewBuilder(tree, now)
+          .upcoming()
+          .entries
+          .whereType<ItemEntry>()
+          .map((e) => e.item.id)
+          .toList();
+      expect(ids, ['mon parent', 'wed child']);
+      expect(ids.toSet(), hasLength(2));
+    });
+  });
+
   group('sorting', () {
     test('by due date, items without one last', () {
       final items = [

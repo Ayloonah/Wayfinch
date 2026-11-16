@@ -162,21 +162,74 @@ void main() {
     expect(loaded.dueHasTime, isTrue);
   });
 
+  test('restore puts a deleted branch back exactly', () async {
+    final tag = await tags.findOrCreate('t', colorFor: (_) => 0);
+    final p = await repo.create(
+      type: ItemType.task,
+      title: 'p',
+      tagIds: [tag.id],
+    );
+    final c = await repo.create(
+      type: ItemType.task,
+      title: 'c',
+      parentId: p.id,
+    );
+    final g = await repo.create(
+      type: ItemType.task,
+      title: 'g',
+      parentId: c.id,
+    );
+    final before = {for (final i in await repo.loadAll()) i.id: i};
+
+    await repo.deleteWithSubtasks(p.id);
+    now = now.add(const Duration(hours: 2));
+    // Children listed first on purpose: restore must sort parents first.
+    await repo.restore([before[g.id]!, before[c.id]!, before[p.id]!]);
+
+    final after = {for (final i in await repo.loadAll()) i.id: i};
+    expect(after.keys, unorderedEquals([p.id, c.id, g.id]));
+    expect(after[c.id]!.parentId, p.id);
+    expect(after[p.id]!.tagIds, [tag.id]);
+    expect(after[p.id]!.createdAt, before[p.id]!.createdAt);
+    expect(after[p.id]!.updatedAt, before[p.id]!.updatedAt);
+  });
+
   group('settings', () {
-    test('"Always" choices persist and can be turned back on', () async {
+    test('remembered answers persist and can be cleared', () async {
       final settings = SettingsRepository(db);
-      expect(await settings.isAlways(PromptKind.closeSubtasks), isFalse);
+      expect(await settings.remembered(PromptKind.closeSubtasks), isNull);
 
-      await settings.setAlways(PromptKind.closeSubtasks);
-      expect(await settings.isAlways(PromptKind.closeSubtasks), isTrue);
-      expect(await settings.isAlways(PromptKind.completeParent), isFalse);
+      await settings.remember(PromptKind.closeSubtasks, PromptAnswer.confirm);
+      await settings.remember(PromptKind.completeParent, PromptAnswer.cancel);
       expect(
-        (await settings.watchAskPrompts().first)[PromptKind.closeSubtasks],
-        isFalse,
+        await settings.remembered(PromptKind.closeSubtasks),
+        PromptAnswer.confirm,
       );
+      expect(
+        await settings.remembered(PromptKind.completeParent),
+        PromptAnswer.cancel,
+      );
+      final live = await settings.watchRemembered().first;
+      expect(live[PromptKind.pushParentDue], isNull);
+      expect(live[PromptKind.completeParent], PromptAnswer.cancel);
 
-      await settings.setAsk(PromptKind.closeSubtasks, ask: true);
-      expect(await settings.isAlways(PromptKind.closeSubtasks), isFalse);
+      await settings.remember(PromptKind.closeSubtasks, null);
+      expect(await settings.remembered(PromptKind.closeSubtasks), isNull);
+    });
+
+    test('the old "always" value still reads as Confirm', () async {
+      await db
+          .into(db.settings)
+          .insert(
+            SettingsCompanion.insert(
+              key: 'prompt.always.pushParentDue',
+              value: 'true',
+            ),
+          );
+      expect(
+        await SettingsRepository(db).remembered(PromptKind.pushParentDue),
+        PromptAnswer.confirm,
+      );
     });
   });
 }

@@ -286,9 +286,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addSubtask => '+ Add subtask';
 
   @override
-  String get subtaskHint => 'Subtask, then Enter';
-
-  @override
   String get notes => 'Notes';
 
   @override
@@ -361,21 +358,63 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptCancel => 'Cancel';
 
   @override
-  String get promptAlways => 'Always do this';
+  String get promptRememberAnswer => 'Remember my answer';
+
+  @override
+  String get promptAlwaysDoThis => 'Always do this without asking';
 
   @override
   String get settingsPrompts => 'Prompts';
 
   @override
   String get settingsPromptsHelp =>
-      'Turn a prompt off to always do it without asking.';
+      'Choose whether Wayfinch asks you first, or just does what you picked last time.';
 
   @override
-  String get settingAskPushParent => 'Ask before pushing a parent\'s due date';
+  String get settingPushParent =>
+      'A subtask\'s due date moves past its parent\'s';
 
   @override
-  String get settingAskCloseSubtasks => 'Ask before closing open subtasks';
+  String get settingCloseSubtasks =>
+      'A parent is marked done with open subtasks';
 
   @override
-  String get settingAskCompleteParent => 'Ask before marking a parent done';
+  String get settingCompleteParent => 'The last open subtask is marked done';
+
+  @override
+  String get choiceAsk => 'Ask me';
+
+  @override
+  String get choiceAlwaysPushParent => 'Push the parent\'s date';
+
+  @override
+  String get choiceAlwaysCloseSubtasks => 'Close the subtasks';
+
+  @override
+  String get choiceAlwaysCompleteParent => 'Mark the parent done';
+
+  @override
+  String get choiceNeverCompleteParent => 'Leave the parent open';
+
+  @override
+  String deletedItem(String title) {
+    return 'Deleted \"$title\"';
+  }
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get addSubtaskTooltip => 'Add a subtask';
+
+  @override
+  String subtaskOf(String title) {
+    return 'Subtask of $title';
+  }
+
+  @override
+  String get removeTime => 'Remove time';
+
+  @override
+  String get save => 'Save';
 }

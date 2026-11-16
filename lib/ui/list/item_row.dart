@@ -9,15 +9,19 @@ import '../format.dart';
 import '../home/home_controller.dart';
 import '../theme/tokens.dart';
 
-/// Visual indentation stops after this many levels; deeper items line up
-/// with the last level.
-const maxIndentLevels = 4;
+/// Full-width indentation steps for the first levels; deeper levels keep
+/// indenting with a smaller step so the page doesn't run out of room.
+const fullIndentLevels = 4;
 
-/// Left padding for a row at [depth].
-double indentFor(int depth) => 16.0 + math.min(depth, maxIndentLevels) * 34;
+/// Left padding for a row at [depth]: 34 px per level for the first
+/// [fullIndentLevels], then 16 px per extra level.
+double indentFor(int depth) =>
+    16.0 +
+    math.min(depth, fullIndentLevels) * 34 +
+    math.max(0, depth - fullIndentLevels) * 16;
 
 /// One task or event in a list.
-class ItemRow extends StatelessWidget {
+class ItemRow extends StatefulWidget {
   /// Creates a row for [entry].
   const ItemRow({super.key, required this.entry});
 
@@ -25,51 +29,81 @@ class ItemRow extends StatelessWidget {
   final ItemEntry entry;
 
   @override
+  State<ItemRow> createState() => _ItemRowState();
+}
+
+class _ItemRowState extends State<ItemRow> {
+  bool _hovered = false;
+
+  @override
   Widget build(BuildContext context) {
     final controller = HomeScope.of(context);
     final colors = WayfinchColors.of(context);
+    final l10n = Formats.of(context).l10n;
+    final entry = widget.entry;
     final item = entry.item;
     final selected = controller.selected?.id == item.id;
     final finished = item.isDone || item.isEnded(controller.now);
-    return Material(
-      color: selected ? colors.accentSoft : Colors.transparent,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
+    final showAdd = !finished && (_hovered || selected);
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: Material(
+        color: selected ? colors.accentSoft : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
-        onTap: () => controller.select(item.id),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 52),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(indentFor(entry.depth), 8, 16, 8),
-            child: Row(
-              children: [
-                item.isTask
-                    ? _Checkbox(entry: entry)
-                    : _EventBadge(colors: colors),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.title,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: entry.depth == 0
-                              ? FontWeight.w800
-                              : FontWeight.w600,
-                          color: finished ? colors.muted : colors.text,
-                          decoration: item.isDone
-                              ? TextDecoration.lineThrough
-                              : null,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => controller.select(item.id),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 52),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(indentFor(entry.depth), 8, 8, 8),
+              child: Row(
+                children: [
+                  item.isTask
+                      ? _Checkbox(entry: entry)
+                      : _EventBadge(colors: colors),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.title,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: entry.depth == 0
+                                ? FontWeight.w800
+                                : FontWeight.w600,
+                            color: finished ? colors.muted : colors.text,
+                            decoration: item.isDone
+                                ? TextDecoration.lineThrough
+                                : null,
+                          ),
                         ),
-                      ),
-                      _Meta(entry: entry),
-                    ],
+                        _Meta(entry: entry),
+                      ],
+                    ),
                   ),
-                ),
-                if (item.priority != Priority.none) _Flag(entry: entry),
-              ],
+                  if (item.priority != Priority.none) _Flag(entry: entry),
+                  // Keeps its space so rows don't shift on hover.
+                  SizedBox(
+                    width: 40,
+                    child: showAdd
+                        ? IconButton(
+                            tooltip: l10n.addSubtaskTooltip,
+                            iconSize: 20,
+                            color: colors.accentText,
+                            onPressed: () => controller.addSubtask(
+                              item.id,
+                              l10n.newItemTitle,
+                            ),
+                            icon: const Icon(Icons.add),
+                          )
+                        : null,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

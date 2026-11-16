@@ -62,8 +62,8 @@ class HomeController extends ChangeNotifier {
         _tags = {for (final t in list) t.id: t};
         notifyListeners();
       }),
-      settings.watchAskPrompts().listen((map) {
-        _askPrompts = map;
+      settings.watchRemembered().listen((map) {
+        _remembered = map;
         notifyListeners();
       }),
     ];
@@ -84,13 +84,11 @@ class HomeController extends ChangeNotifier {
   late final Timer _ticker;
 
   /// Shows a Confirm / Cancel / Always prompt. Set by the screen.
-  PromptAsker asker = (kind, count) async => PromptAnswer.cancel;
+  PromptAsker asker = (kind, count) async => PromptResult.dismissed;
 
   ItemTree _tree = ItemTree(const []);
   Map<String, Tag> _tags = {};
-  Map<PromptKind, bool> _askPrompts = {
-    for (final k in PromptKind.values) k: true,
-  };
+  Map<PromptKind, PromptAnswer?> _remembered = const {};
   bool _loaded = false;
   late DateTime _now;
   Destination _destination = Destination.today;
@@ -109,8 +107,8 @@ class HomeController extends ChangeNotifier {
   /// Tags by id.
   Map<String, Tag> get tagsById => _tags;
 
-  /// Which prompts are still asked.
-  Map<PromptKind, bool> get askPrompts => _askPrompts;
+  /// Remembered prompt answers (missing or null = ask).
+  Map<PromptKind, PromptAnswer?> get remembered => _remembered;
 
   /// The selected sidebar destination.
   Destination get destination => _destination;
@@ -203,14 +201,17 @@ class HomeController extends ChangeNotifier {
     return true;
   }
 
-  /// Adds a subtask under [parentId].
-  Future<void> addSubtask(String parentId, String title) async {
-    if (title.trim().isEmpty) return;
-    await items.create(
+  /// Adds a subtask called [title] under [parentId] and opens it in the
+  /// detail panel with its title selected, ready to edit.
+  Future<Item> addSubtask(String parentId, String title) async {
+    final item = await items.create(
       type: ItemType.task,
-      title: title.trim(),
+      title: title,
       parentId: parentId,
     );
+    _focusTitleFor = item.id;
+    select(item.id);
+    return item;
   }
 
   /// Marks a task done (with prompts and recurrence).
@@ -282,15 +283,34 @@ class HomeController extends ChangeNotifier {
   /// Number of subtasks (at any depth) under [id].
   int subtaskCount(String id) => _tree.descendantsOf(id).length;
 
-  /// Deletes an item and its subtasks.
-  Future<void> delete(String id) async {
-    if (_selectedId == id) _selectedId = null;
+  /// Deletes an item and its subtasks. Returns what was deleted, for
+  /// [undoDelete].
+  Future<List<Item>> delete(String id) async {
+    final item = _tree[id];
+    if (item == null) return const [];
+    final removed = [item, ..._tree.descendantsOf(id)];
+    if (removed.any((i) => i.id == _selectedId)) _selectedId = null;
     await items.deleteWithSubtasks(id);
+    return removed;
   }
 
-  /// Turns a prompt back on (or off).
-  Future<void> setAskPrompt(PromptKind kind, {required bool ask}) =>
-      settings.setAsk(kind, ask: ask);
+  /// Puts back items returned by [delete], exactly as they were, and
+  /// reselects the top one.
+  Future<void> undoDelete(List<Item> removed) async {
+    if (removed.isEmpty) return;
+    final top = removed.first;
+    // If its parent was deleted meanwhile, bring it back at the top level.
+    final parentGone = top.parentId != null && _tree[top.parentId] == null;
+    await items.restore([
+      if (parentGone) top.copyWith(parentId: null) else top,
+      ...removed.skip(1),
+    ]);
+    select(removed.first.id);
+  }
+
+  /// Remembers [answer] for a prompt, or asks again when null.
+  Future<void> setRemembered(PromptKind kind, PromptAnswer? answer) =>
+      settings.remember(kind, answer);
 
   @override
   void dispose() {

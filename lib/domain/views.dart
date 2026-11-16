@@ -154,14 +154,19 @@ class ViewBuilder {
         todays.add(item);
       }
     }
+    // Each item shows once: an overdue subtask of a parent due today only
+    // shows in Overdue, and a subtask due today of an overdue parent only
+    // in Today.
+    final overdueIds = {for (final i in overdue) i.id};
+    final todayIds = {for (final i in todays) i.id};
     final entries = <ListEntry>[];
     if (overdue.isNotEmpty) {
       entries.add(SectionHeader(SectionKind.overdue, overdue.length));
-      entries.addAll(_forest(overdue));
+      entries.addAll(_forest(overdue, shownElsewhere: todayIds));
     }
     if (todays.isNotEmpty) {
       entries.add(SectionHeader(SectionKind.today, todays.length));
-      entries.addAll(_forest(todays));
+      entries.addAll(_forest(todays, shownElsewhere: overdueIds));
     }
     return ViewData(entries, count: overdue.length + todays.length);
   }
@@ -171,16 +176,27 @@ class ViewBuilder {
     final entries = <ListEntry>[];
     var count = 0;
     final todayStart = startOfDay(now);
+    final days = <(DateTime, List<Item>)>[];
     for (var offset = 1; offset <= 7; offset++) {
       final day = addDays(todayStart, offset);
       final next = addDays(todayStart, offset + 1);
       final matched = tree.all
           .where((i) => i.isVisible(now) && _startsOrDueBetween(i, day, next))
           .toList();
-      if (matched.isEmpty) continue;
+      if (matched.isNotEmpty) days.add((day, matched));
+    }
+    // Each item shows once, under its own day.
+    final allMatched = {
+      for (final (_, items) in days)
+        for (final i in items) i.id,
+    };
+    for (final (day, matched) in days) {
       count += matched.length;
+      final own = {for (final i in matched) i.id};
       entries.add(SectionHeader(SectionKind.day, matched.length, day: day));
-      entries.addAll(_forest(matched));
+      entries.addAll(
+        _forest(matched, shownElsewhere: allMatched.difference(own)),
+      );
     }
     return ViewData(entries, count: count);
   }
@@ -208,34 +224,53 @@ class ViewBuilder {
 
   /// Renders [matched] items as trees: each matched item shows with its
   /// visible subtasks, unless it already shows under a matched ancestor.
-  List<ListEntry> _forest(List<Item> matched) {
+  /// Subtasks in [shownElsewhere] are left out (another section shows them).
+  List<ListEntry> _forest(
+    List<Item> matched, {
+    Set<String> shownElsewhere = const {},
+  }) {
     final matchedIds = {for (final m in matched) m.id};
-    final roots = matched.where((m) => !_coveredBy(m, matchedIds)).toList()
-      ..sort(compareItems);
+    final roots =
+        matched
+            .where((m) => !_coveredBy(m, matchedIds, shownElsewhere))
+            .toList()
+          ..sort(compareItems);
     final entries = <ListEntry>[];
     for (final root in roots) {
-      _subtree(root, 0, entries);
+      _subtree(root, 0, entries, shownElsewhere);
     }
     return entries;
   }
 
   /// Whether [item] already appears inside a matched ancestor's subtree
-  /// (every item between them is visible).
-  bool _coveredBy(Item item, Set<String> matchedIds) {
+  /// (every item between them is visible and not shown elsewhere).
+  bool _coveredBy(
+    Item item,
+    Set<String> matchedIds,
+    Set<String> shownElsewhere,
+  ) {
     var parent = tree[item.parentId];
     while (parent != null) {
       if (!parent.isVisible(now)) return false;
+      if (shownElsewhere.contains(parent.id)) return false;
       if (matchedIds.contains(parent.id)) return true;
       parent = tree[parent.parentId];
     }
     return false;
   }
 
-  void _subtree(Item item, int depth, List<ListEntry> out) {
+  void _subtree(
+    Item item,
+    int depth,
+    List<ListEntry> out,
+    Set<String> shownElsewhere,
+  ) {
     out.add(_entry(item, depth));
     final children = tree.childrenOf(item.id);
     for (final child in children) {
-      if (child.isVisible(now)) _subtree(child, depth + 1, out);
+      if (child.isVisible(now) && !shownElsewhere.contains(child.id)) {
+        _subtree(child, depth + 1, out, shownElsewhere);
+      }
     }
     final doneChildren = children.where((c) => !c.isVisible(now)).toList();
     if (doneChildren.isEmpty) return;

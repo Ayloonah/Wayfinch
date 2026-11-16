@@ -3,7 +3,8 @@ import 'item_tree.dart';
 import 'overdue.dart';
 import 'recurrence.dart';
 
-/// The three situations that ask before acting (Confirm / Cancel / Always).
+/// The three situations that ask before acting (Confirm / Cancel, with a
+/// "don't ask again" checkbox).
 enum PromptKind {
   /// A subtask's due date moves past its parent's: push the parent's too.
   pushParentDue,
@@ -12,32 +13,51 @@ enum PromptKind {
   closeSubtasks,
 
   /// The last open subtask is marked done: mark the parent done too?
-  completeParent,
+  completeParent;
+
+  /// Whether a remembered "Cancel" makes sense for this prompt.
+  ///
+  /// For [pushParentDue] and [closeSubtasks], Cancel stops the whole action,
+  /// so remembering it would silently block date changes or completing
+  /// parents. Only Confirm can be remembered there.
+  bool get canRememberCancel => this == completeParent;
 }
 
 /// The user's answer to a prompt.
 enum PromptAnswer {
-  /// Do it this time.
+  /// Do it.
   confirm,
 
   /// Don't.
   cancel,
+}
 
-  /// Do it, and stop asking (can be undone in Settings).
-  always,
+/// What the user picked in a prompt, and whether to stop asking.
+class PromptResult {
+  /// Creates a result.
+  const PromptResult(this.answer, {this.remember = false});
+
+  /// Dismissing a prompt: cancel, remember nothing.
+  static const dismissed = PromptResult(PromptAnswer.cancel);
+
+  /// The button pressed.
+  final PromptAnswer answer;
+
+  /// Whether "Don't ask again" was checked.
+  final bool remember;
 }
 
 /// Asks the user a [PromptKind] question. [count] is the number of items
 /// affected (e.g. open subtasks), for the message.
-typedef PromptAsker = Future<PromptAnswer> Function(PromptKind kind, int count);
+typedef PromptAsker = Future<PromptResult> Function(PromptKind kind, int count);
 
-/// Remembers which prompts the user answered with "Always do this".
+/// Remembers answers the user chose not to be asked about again.
 abstract interface class PromptPreferences {
-  /// Whether [kind] should be done without asking.
-  Future<bool> isAlways(PromptKind kind);
+  /// The remembered answer for [kind], or null to ask.
+  Future<PromptAnswer?> remembered(PromptKind kind);
 
-  /// Stops asking about [kind].
-  Future<void> setAlways(PromptKind kind);
+  /// Remembers [answer] for [kind], or forgets it (ask again) when null.
+  Future<void> remember(PromptKind kind, PromptAnswer? answer);
 }
 
 /// The result of a rule: items to update and items to create. Apply both in
@@ -71,7 +91,7 @@ class ItemRules {
     DateTime Function()? clock,
   }) : _clock = clock ?? DateTime.now;
 
-  /// Where "Always do this" choices are kept.
+  /// Where remembered prompt answers are kept.
   final PromptPreferences preferences;
 
   /// Shows a prompt.
@@ -269,10 +289,15 @@ class ItemRules {
   }
 
   Future<bool> _confirm(PromptKind kind, int count) async {
-    if (await preferences.isAlways(kind)) return true;
-    final answer = await ask(kind, count);
-    if (answer == PromptAnswer.always) await preferences.setAlways(kind);
-    return answer != PromptAnswer.cancel;
+    final saved = await preferences.remembered(kind);
+    if (saved != null) return saved == PromptAnswer.confirm;
+    final result = await ask(kind, count);
+    final rememberable =
+        result.answer == PromptAnswer.confirm || kind.canRememberCancel;
+    if (result.remember && rememberable) {
+      await preferences.remember(kind, result.answer);
+    }
+    return result.answer == PromptAnswer.confirm;
   }
 }
 

@@ -524,12 +524,6 @@ abstract class AppLocalizations {
   /// **'+ Add subtask'**
   String get addSubtask;
 
-  /// No description provided for @subtaskHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Subtask, then Enter'**
-  String get subtaskHint;
-
   /// No description provided for @notes.
   ///
   /// In en, this message translates to:
@@ -626,11 +620,17 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get promptCancel;
 
-  /// No description provided for @promptAlways.
+  /// Checkbox in the 'Mark the parent done too?' prompt: remembers Confirm or Cancel.
   ///
   /// In en, this message translates to:
-  /// **'Always do this'**
-  String get promptAlways;
+  /// **'Remember my answer'**
+  String get promptRememberAnswer;
+
+  /// Checkbox in the push-parent and close-subtasks prompts: only takes effect with Confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Always do this without asking'**
+  String get promptAlwaysDoThis;
 
   /// No description provided for @settingsPrompts.
   ///
@@ -641,26 +641,92 @@ abstract class AppLocalizations {
   /// No description provided for @settingsPromptsHelp.
   ///
   /// In en, this message translates to:
-  /// **'Turn a prompt off to always do it without asking.'**
+  /// **'Choose whether Wayfinch asks you first, or just does what you picked last time.'**
   String get settingsPromptsHelp;
 
-  /// No description provided for @settingAskPushParent.
+  /// No description provided for @settingPushParent.
   ///
   /// In en, this message translates to:
-  /// **'Ask before pushing a parent\'s due date'**
-  String get settingAskPushParent;
+  /// **'A subtask\'s due date moves past its parent\'s'**
+  String get settingPushParent;
 
-  /// No description provided for @settingAskCloseSubtasks.
+  /// No description provided for @settingCloseSubtasks.
   ///
   /// In en, this message translates to:
-  /// **'Ask before closing open subtasks'**
-  String get settingAskCloseSubtasks;
+  /// **'A parent is marked done with open subtasks'**
+  String get settingCloseSubtasks;
 
-  /// No description provided for @settingAskCompleteParent.
+  /// No description provided for @settingCompleteParent.
   ///
   /// In en, this message translates to:
-  /// **'Ask before marking a parent done'**
-  String get settingAskCompleteParent;
+  /// **'The last open subtask is marked done'**
+  String get settingCompleteParent;
+
+  /// No description provided for @choiceAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask me'**
+  String get choiceAsk;
+
+  /// No description provided for @choiceAlwaysPushParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Push the parent\'s date'**
+  String get choiceAlwaysPushParent;
+
+  /// No description provided for @choiceAlwaysCloseSubtasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Close the subtasks'**
+  String get choiceAlwaysCloseSubtasks;
+
+  /// No description provided for @choiceAlwaysCompleteParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark the parent done'**
+  String get choiceAlwaysCompleteParent;
+
+  /// No description provided for @choiceNeverCompleteParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave the parent open'**
+  String get choiceNeverCompleteParent;
+
+  /// Message shown after deleting, with an Undo button.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted \"{title}\"'**
+  String deletedItem(String title);
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @addSubtaskTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a subtask'**
+  String get addSubtaskTooltip;
+
+  /// Link at the top of a subtask's details that opens its parent.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtask of {title}'**
+  String subtaskOf(String title);
+
+  /// No description provided for @removeTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove time'**
+  String get removeTime;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
 }
 
 class _AppLocalizationsDelegate

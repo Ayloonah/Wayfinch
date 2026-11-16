@@ -5,22 +5,16 @@ import '../../l10n/app_localizations.dart';
 import '../home/home_controller.dart';
 import '../theme/tokens.dart';
 
-/// Settings. For now: turning the three prompts back on after
-/// "Always do this".
+/// Settings. For now: what each of the three prompts does (ask, or a
+/// remembered answer).
 class SettingsPane extends StatelessWidget {
   /// Creates the pane.
   const SettingsPane({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = HomeScope.of(context);
     final colors = WayfinchColors.of(context);
     final l10n = AppLocalizations.of(context);
-    final labels = {
-      PromptKind.pushParentDue: l10n.settingAskPushParent,
-      PromptKind.closeSubtasks: l10n.settingAskCloseSubtasks,
-      PromptKind.completeParent: l10n.settingAskCompleteParent,
-    };
     return ListView(
       padding: const EdgeInsets.fromLTRB(32, 24, 32, 24),
       children: [
@@ -32,7 +26,7 @@ class SettingsPane extends StatelessWidget {
         Align(
           alignment: Alignment.centerLeft,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 640),
+            constraints: const BoxConstraints(maxWidth: 720),
             child: Material(
               color: colors.panel,
               shape: RoundedRectangleBorder(
@@ -63,12 +57,7 @@ class SettingsPane extends StatelessWidget {
                       ),
                     ),
                     for (final kind in PromptKind.values)
-                      SwitchListTile(
-                        title: Text(labels[kind]!),
-                        value: controller.askPrompts[kind] ?? true,
-                        onChanged: (ask) =>
-                            controller.setAskPrompt(kind, ask: ask),
-                      ),
+                      PromptSettingRow(kind: kind),
                   ],
                 ),
               ),
@@ -76,6 +65,53 @@ class SettingsPane extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// One prompt's setting: "Ask me" or a remembered answer.
+class PromptSettingRow extends StatelessWidget {
+  /// Creates the row for [kind].
+  const PromptSettingRow({super.key, required this.kind});
+
+  /// Which prompt.
+  final PromptKind kind;
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = HomeScope.of(context);
+    final l10n = AppLocalizations.of(context);
+    final (situation, always, never) = switch (kind) {
+      PromptKind.pushParentDue => (
+        l10n.settingPushParent,
+        l10n.choiceAlwaysPushParent,
+        null,
+      ),
+      PromptKind.closeSubtasks => (
+        l10n.settingCloseSubtasks,
+        l10n.choiceAlwaysCloseSubtasks,
+        null,
+      ),
+      PromptKind.completeParent => (
+        l10n.settingCompleteParent,
+        l10n.choiceAlwaysCompleteParent,
+        l10n.choiceNeverCompleteParent,
+      ),
+    };
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+      title: Text(situation),
+      trailing: DropdownButton<PromptAnswer?>(
+        value: controller.remembered[kind],
+        underline: const SizedBox.shrink(),
+        onChanged: (answer) => controller.setRemembered(kind, answer),
+        items: [
+          DropdownMenuItem(value: null, child: Text(l10n.choiceAsk)),
+          DropdownMenuItem(value: PromptAnswer.confirm, child: Text(always)),
+          if (never != null)
+            DropdownMenuItem(value: PromptAnswer.cancel, child: Text(never)),
+        ],
+      ),
     );
   }
 }

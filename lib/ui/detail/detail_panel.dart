@@ -10,6 +10,9 @@ import '../prompts/prompts.dart';
 import '../theme/tokens.dart';
 import 'detail_fields.dart';
 
+/// How long the "Deleted · Undo" message stays up.
+const undoDuration = Duration(seconds: 10);
+
 /// The right-hand panel for editing the selected item. Every change saves
 /// right away; there's no Save button.
 class DetailPanel extends StatelessWidget {
@@ -48,14 +51,14 @@ class DetailPanel extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
+                ParentLink(item: item),
+                const SizedBox(height: 4),
                 _TitleField(key: ValueKey('title-${item.id}'), item: item),
                 const SizedBox(height: 20),
                 FieldGrid(item: item),
-                if (item.isTask) ...[
-                  const SizedBox(height: 22),
-                  SubtasksSection(item: item),
-                ],
+                const SizedBox(height: 22),
+                SubtasksSection(item: item),
                 const SizedBox(height: 22),
                 _NotesField(key: ValueKey('notes-${item.id}'), item: item),
               ],
@@ -295,6 +298,24 @@ class _Actions extends StatelessWidget {
   Future<void> _delete(BuildContext context, HomeController controller) async {
     final count = controller.subtaskCount(item.id);
     if (count > 0 && !await confirmDelete(context, count)) return;
-    await controller.delete(item.id);
+    if (!context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = Formats.of(context).l10n;
+    final removed = await controller.delete(item.id);
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(l10n.deletedItem(item.title)),
+          duration: undoDuration,
+          persist: false,
+          behavior: SnackBarBehavior.floating,
+          width: 420,
+          action: SnackBarAction(
+            label: l10n.undo,
+            onPressed: () => controller.undoDelete(removed),
+          ),
+        ),
+      );
   }
 }

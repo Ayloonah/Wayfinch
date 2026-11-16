@@ -81,7 +81,6 @@
   "subtasks": "Sous-tâches",
   "subtasksProgress": "{done} sur {total} faites",
   "addSubtask": "+ Ajouter une sous-tâche",
-  "subtaskHint": "Sous-tâche, puis Entrée",
   "notes": "Notes",
   "notesHint": "Tout ce qui vaut la peine d’être noté",
   "markAsDone": "Marquer comme fait",
@@ -100,11 +99,24 @@
   "promptCompleteParentBody": "Marquer le parent comme fait aussi ?",
   "promptConfirm": "Confirmer",
   "promptCancel": "Annuler",
-  "promptAlways": "Toujours faire ça",
+  "promptRememberAnswer": "Retenir ma réponse",
+  "promptAlwaysDoThis": "Toujours faire ça sans demander",
 
   "settingsPrompts": "Confirmations",
-  "settingsPromptsHelp": "Désactive une confirmation pour toujours le faire sans demander.",
-  "settingAskPushParent": "Demander avant de repousser l’échéance d’un parent",
-  "settingAskCloseSubtasks": "Demander avant de fermer les sous-tâches ouvertes",
-  "settingAskCompleteParent": "Demander avant de marquer un parent comme fait"
+  "settingsPromptsHelp": "Choisis si Wayfinch te demande d’abord, ou fait simplement ce que tu as choisi la dernière fois.",
+  "settingPushParent": "L’échéance d’une sous-tâche dépasse celle de son parent",
+  "settingCloseSubtasks": "Un parent est marqué comme fait avec des sous-tâches ouvertes",
+  "settingCompleteParent": "La dernière sous-tâche ouverte est marquée comme faite",
+  "choiceAsk": "Me demander",
+  "choiceAlwaysPushParent": "Repousser la date du parent",
+  "choiceAlwaysCloseSubtasks": "Fermer les sous-tâches",
+  "choiceAlwaysCompleteParent": "Marquer le parent comme fait",
+  "choiceNeverCompleteParent": "Laisser le parent ouvert",
+
+  "deletedItem": "« {title} » supprimé",
+  "undo": "Annuler",
+  "addSubtaskTooltip": "Ajouter une sous-tâche",
+  "subtaskOf": "Sous-tâche de {title}",
+  "removeTime": "Retirer l’heure",
+  "save": "Enregistrer"
 }

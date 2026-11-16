@@ -144,7 +144,7 @@ void main() {
     await finish(tester, h);
   });
 
-  testWidgets('"Always do this" skips the prompt and shows in Settings', (
+  testWidgets('"Remember my answer" keeps the choice; Settings shows it', (
     tester,
   ) async {
     final h = await pumpApp(
@@ -162,36 +162,151 @@ void main() {
         );
       },
     );
-    // Complete the child: "Mark the parent done too?"
+    // Complete the child: "Mark the parent done too?" -> remember "Cancel".
     await tester.tap(find.byTooltip('Mark done').last);
     await settle(tester);
     expect(find.text('Mark the parent done too?'), findsOneWidget);
-    await tester.tap(find.text('Always do this'));
+    await tester.tap(find.text('Remember my answer'));
+    await tester.pump();
+    await tester.tap(find.text('Cancel'));
     await settle(tester);
-    expect(find.text('Parent'), findsNothing);
+    expect(find.text('Parent'), findsOneWidget);
+    expect(
+      h.controller.remembered[PromptKind.completeParent],
+      PromptAnswer.cancel,
+    );
 
     await tester.tap(find.text('Settings'));
     await settle(tester);
-    final tile = tester.widget<SwitchListTile>(
-      find.widgetWithText(SwitchListTile, 'Ask before marking a parent done'),
-    );
-    expect(tile.value, isFalse);
-    await pumpUntilDone(
-      tester,
-      h.settings.setAsk(PromptKind.completeParent, ask: true),
-    );
+    expect(find.text('Leave the parent open'), findsOneWidget);
+    expect(find.text('Ask me'), findsNWidgets(2));
+
+    // Switch it back to asking.
+    await tester.tap(find.text('Leave the parent open'));
     await settle(tester);
-    expect(
-      tester
-          .widget<SwitchListTile>(
-            find.widgetWithText(
-              SwitchListTile,
-              'Ask before marking a parent done',
-            ),
-          )
-          .value,
-      isTrue,
+    await tester.tap(find.text('Ask me').last);
+    await settle(tester);
+    expect(h.controller.remembered[PromptKind.completeParent], isNull);
+    await finish(tester, h);
+  });
+
+  testWidgets('push/close prompts say "Always do this without asking"', (
+    tester,
+  ) async {
+    final h = await pumpApp(
+      tester,
+      seed: (h) async {
+        final p = await h.items.create(
+          type: ItemType.task,
+          title: 'Report',
+          due: DateTime(2026, 11, 15, 23),
+          dueHasTime: true,
+        );
+        await h.items.create(
+          type: ItemType.task,
+          title: 'Write results',
+          parentId: p.id,
+        );
+      },
     );
+    await tester.tap(find.byTooltip('Mark done').first);
+    await settle(tester);
+    expect(find.text('Always do this without asking'), findsOneWidget);
+    await tester.tap(find.text('Always do this without asking'));
+    await tester.pump();
+    await tester.tap(find.text('Cancel'));
+    await settle(tester);
+    // Cancel is never remembered here.
+    expect(h.controller.remembered[PromptKind.closeSubtasks], isNull);
+    expect(find.text('Report'), findsOneWidget);
+    await finish(tester, h);
+  });
+
+  testWidgets('delete shows Undo for 10 seconds, and Undo restores', (
+    tester,
+  ) async {
+    final h = await pumpApp(
+      tester,
+      seed: (h) => h.items.create(
+        type: ItemType.task,
+        title: 'Oops',
+        due: DateTime(2026, 11, 15),
+      ),
+    );
+    final id = h.controller.tree.all.single.id;
+    await tester.tap(find.text('Oops'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Delete item'));
+    await settle(tester);
+    expect(find.text('Deleted "Oops"'), findsOneWidget);
+    expect(h.controller.tree.all, isEmpty);
+
+    await tester.tap(find.text('Undo'));
+    await settle(tester);
+    expect(h.controller.tree[id]!.title, 'Oops');
+    expect(find.text('Oops'), findsWidgets);
+
+    // Delete again and let the message time out.
+    await tester.tap(find.byTooltip('Delete item'));
+    await settle(tester);
+    expect(find.text('Deleted "Oops"'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 11));
+    await tester.pumpAndSettle();
+    expect(find.text('Deleted "Oops"'), findsNothing);
+    await finish(tester, h);
+  });
+
+  testWidgets('new subtasks open right away (button and row +)', (
+    tester,
+  ) async {
+    final h = await pumpApp(
+      tester,
+      seed: (h) => h.items.create(
+        type: ItemType.event,
+        title: 'Trip',
+        start: DateTime(2026, 11, 15, 14),
+        end: DateTime(2026, 11, 15, 18),
+      ),
+    );
+    await tester.tap(find.text('Trip'));
+    await settle(tester);
+    await tester.tap(find.text('+ Add subtask'));
+    await settle(tester);
+    expect(find.text('Subtask of Trip'), findsOneWidget);
+    final sub = h.controller.selected!;
+    expect(sub.parentId, isNotNull);
+    expect(sub.title, 'New task');
+
+    // The row "+" (shown on the selected row) adds a sub-subtask.
+    await tester.tap(find.byTooltip('Add a subtask').first);
+    await settle(tester);
+    expect(h.controller.selected!.parentId, isNotNull);
+    expect(h.controller.tree.all, hasLength(3));
+    await finish(tester, h);
+  });
+
+  testWidgets('one dialog sets the due date (and time) together', (
+    tester,
+  ) async {
+    final h = await pumpApp(
+      tester,
+      seed: (h) => h.items.create(type: ItemType.task, title: 'Plan trip'),
+    );
+    await tester.tap(find.text('All'));
+    await settle(tester);
+    await tester.tap(find.text('Plan trip'));
+    await settle(tester);
+    await tester.tap(find.text('No due date'));
+    await settle(tester);
+    expect(find.byType(CalendarDatePicker), findsOneWidget);
+    expect(find.text('Add time'), findsOneWidget);
+    await tester.tap(find.text('20'));
+    await tester.pump();
+    await tester.tap(find.text('Save'));
+    await settle(tester);
+    final item = h.controller.tree.all.single;
+    expect(item.due, DateTime(2026, 11, 20));
+    expect(item.dueHasTime, isFalse);
     await finish(tester, h);
   });
 

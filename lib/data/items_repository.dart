@@ -90,6 +90,32 @@ class ItemsRepository {
     });
   }
 
+  /// Puts back items removed by [deleteWithSubtasks] exactly as they were
+  /// (same ids, timestamps and tags), parents before children.
+  Future<void> restore(List<Item> items) async {
+    final ids = {for (final i in items) i.id};
+    final placed = <String>{};
+    final pending = [...items];
+    await _db.transaction(() async {
+      while (pending.isNotEmpty) {
+        final ready = pending
+            .where(
+              (i) =>
+                  i.parentId == null ||
+                  !ids.contains(i.parentId) ||
+                  placed.contains(i.parentId),
+            )
+            .toList();
+        if (ready.isEmpty) throw StateError('Cycle in restored items');
+        for (final item in ready) {
+          await _insert(item);
+          placed.add(item.id);
+          pending.remove(item);
+        }
+      }
+    });
+  }
+
   /// The item with [id], or null.
   Future<Item?> getById(String id) async {
     final all = await loadAll();

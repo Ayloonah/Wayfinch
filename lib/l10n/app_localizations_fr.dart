@@ -289,9 +289,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addSubtask => '+ Ajouter une sous-tâche';
 
   @override
-  String get subtaskHint => 'Sous-tâche, puis Entrée';
-
-  @override
   String get notes => 'Notes';
 
   @override
@@ -364,24 +361,64 @@ class AppLocalizationsFr extends AppLocalizations {
   String get promptCancel => 'Annuler';
 
   @override
-  String get promptAlways => 'Toujours faire ça';
+  String get promptRememberAnswer => 'Retenir ma réponse';
+
+  @override
+  String get promptAlwaysDoThis => 'Toujours faire ça sans demander';
 
   @override
   String get settingsPrompts => 'Confirmations';
 
   @override
   String get settingsPromptsHelp =>
-      'Désactive une confirmation pour toujours le faire sans demander.';
+      'Choisis si Wayfinch te demande d’abord, ou fait simplement ce que tu as choisi la dernière fois.';
 
   @override
-  String get settingAskPushParent =>
-      'Demander avant de repousser l’échéance d’un parent';
+  String get settingPushParent =>
+      'L’échéance d’une sous-tâche dépasse celle de son parent';
 
   @override
-  String get settingAskCloseSubtasks =>
-      'Demander avant de fermer les sous-tâches ouvertes';
+  String get settingCloseSubtasks =>
+      'Un parent est marqué comme fait avec des sous-tâches ouvertes';
 
   @override
-  String get settingAskCompleteParent =>
-      'Demander avant de marquer un parent comme fait';
+  String get settingCompleteParent =>
+      'La dernière sous-tâche ouverte est marquée comme faite';
+
+  @override
+  String get choiceAsk => 'Me demander';
+
+  @override
+  String get choiceAlwaysPushParent => 'Repousser la date du parent';
+
+  @override
+  String get choiceAlwaysCloseSubtasks => 'Fermer les sous-tâches';
+
+  @override
+  String get choiceAlwaysCompleteParent => 'Marquer le parent comme fait';
+
+  @override
+  String get choiceNeverCompleteParent => 'Laisser le parent ouvert';
+
+  @override
+  String deletedItem(String title) {
+    return '« $title » supprimé';
+  }
+
+  @override
+  String get undo => 'Annuler';
+
+  @override
+  String get addSubtaskTooltip => 'Ajouter une sous-tâche';
+
+  @override
+  String subtaskOf(String title) {
+    return 'Sous-tâche de $title';
+  }
+
+  @override
+  String get removeTime => 'Retirer l’heure';
+
+  @override
+  String get save => 'Enregistrer';
 }
