@@ -89,6 +89,14 @@ flutter analyze
 flutter test
 ```
 
+**Build the installer** (needs [Inno Setup 6](https://jrsoftware.org/isinfo.php), e.g. `winget install JRSoftware.InnoSetup`):
+
+```bash
+powershell -ExecutionPolicy Bypass -File installer/build.ps1
+```
+
+This builds the app and writes `build/installer/WayfinchSetup-<version>.exe` (the version comes from `pubspec.yaml`). The setup wizard is in English and French and installs for the current user by default (no admin), or for everyone on the PC. Uninstalling keeps your list unless you tick "Also delete my list, settings and daily backups". The installer isn't code-signed yet, so Windows SmartScreen warns the first time it runs.
+
 ## Docs
 
 - [`docs/SPEC.md`](docs/SPEC.md): the full product spec (features, data model, AI format, design)
