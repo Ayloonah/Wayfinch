@@ -42,14 +42,12 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     widget.controller.asker = (kind, count) =>
         showRulePrompt(context, kind, count);
-    widget.controller.onTutorialFinished = ({required closed}) {
+    widget.controller.onTutorialFinished = () {
       if (!mounted) return;
       final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            closed ? l10n.tutorialFinished : l10n.tutorialFinishedCheckParent,
-          ),
+          content: Text(l10n.tutorialFinished),
           behavior: SnackBarBehavior.floating,
           width: 520,
         ),

@@ -308,24 +308,28 @@ void main() {
     dir.deleteSync(recursive: true);
     dir.createSync();
 
-    // Your own subtask still open: the tutorial stays, with a gentle note.
+    // A practice subtask still open (the one "Add a subtask" made): the
+    // whole tutorial still closes, practice included (done, not deleted).
     s = await setup();
     home = s.home!;
     steps = home.tutorial!;
     await pumpUntilDone(tester, home.complete(steps.checkOff));
     await settle(tester);
-    await pumpUntilDone(tester, home.addSubtask(steps.addSubtask, 'Open one'));
+    final practice = await pumpUntilDone(
+      tester,
+      home.addSubtask(steps.addSubtask, 'New task'),
+    );
     await settle(tester);
     await pumpUntilDone(tester, home.addTag(home.tree[steps.tag]!, 't'));
     await settle(tester);
     await pumpUntilDone(tester, home.markExported());
     await settle(tester);
     expect(find.text('That was the last one!'), findsNothing);
-    expect(home.tree[steps.parent]!.isDone, isFalse);
+    expect(home.tree[steps.parent]!.isDone, isTrue);
+    expect(home.tree[practice.id]!.isDone, isTrue);
+    expect(home.tree[practice.id], isNotNull); // kept, in Done
     expect(
-      find.text(
-        'Tutorial done! Check off "Getting started" when you\'re ready.',
-      ),
+      find.text('You finished "Getting started". Nice work!'),
       findsOneWidget,
     );
     await finish(tester, s);

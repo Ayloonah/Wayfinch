@@ -1343,10 +1343,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tutorialFinished => 'Tu as terminé « Premiers pas ». Bravo !';
 
   @override
-  String get tutorialFinishedCheckParent =>
-      'Tutoriel terminé ! Coche « Premiers pas » quand tu veux.';
-
-  @override
   String get tutorialNotes =>
       'Ces étapes t’apprennent les bases en les faisant. Marque cette tâche comme faite quand tu veux pour passer le reste.';
 
