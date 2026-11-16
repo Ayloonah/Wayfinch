@@ -7,7 +7,7 @@ Nov 15, 2026 · @Judhy Germain
 Wayfinch is an offline-first to-do app for Windows that works hand in hand with whatever AI the user already uses. The user exports their list with a prompt attached, the AI edits it, and the user imports the reply back with a preview of every change.
 
 - **Who it's for:** anyone who plans with an AI chatbot and wants that plan to live in a real to-do app instead of a chat log.
-- **The AI loop:** Export for AI (locked format rules + the user's own instructions + their list as JSON) → user pastes into their AI with a request → user pastes the reply into Import → preview → Add or Replace.
+- **The AI loop:** Import › "Message for your AI" (locked format rules + the list as JSON) → user pastes it into their AI with their own request → user pastes the reply into Import → preview → Add or Replace.
 - **Platform:** Windows desktop first. Personal use and testing before any public release.
 - **Data:** fully local, no accounts, no network. Multi-platform and sync come later.
 - **Languages:** English and French from day one.
@@ -92,11 +92,11 @@ A three-pane desktop layout: **sidebar | list | detail panel**. The detail panel
 | All | The full item tree |
 | Tags | One filter per tag, plus the overdue auto tag |
 | Done | Completed items + progress stat |
-| Help | Short searchable sections |
+| AI instructions | How to use Wayfinch with your AI, with the format rules |
 
-- **Sidebar:** logo + greeting with the user's first name, search, the views, tags with counts, then Export for AI, Import, Help and Settings at the bottom.
+- **Sidebar:** logo + greeting with the user's first name (just "Good morning" without one), the views, tags with counts, then Export, Import, AI instructions and Settings at the bottom.
 - **Start view:** Settings › General › "Open Wayfinch in" picks the view the app opens in (Today, Upcoming, All or Done; Today by default).
-- **Sidebar order:** views and tags (including the overdue auto tag) can be reordered by dragging; a plain click still opens them.
+- **Sidebar order:** views are All, Today, Upcoming, Done by default. Views and tags (including the overdue auto tag) can be reordered by dragging; a plain click still opens them.
   - The order is saved.
   - New tags appear at the end. Until tags are reordered they're sorted by name, with the overdue tag last.
 - **Overdue banner:** sits at the top of every view ("3 overdue items need a new plan"). "Review" jumps to Today's overdue section; "Snooze until tomorrow" hides it for the day.
@@ -144,20 +144,27 @@ The exchange format is JSON, validated strictly against a schema. Only the forma
   - Unknown fields are errors (strict schema).
 - **Existing items:** a field missing from the reply means "leave it as it is". New items get defaults.
 
-### Export for AI
+### Message for your AI
 
-- One copyable block in three parts: **Format rules** (locked, app-controlled), **My instructions** (user-editable, saved, empty by default with example placeholders), **My list** (the JSON).
+- A button in the Import dialog, "Message for your AI", opens a window with what to send the AI, in two parts: **Format rules** (locked, app-controlled) and **My list** (the JSON). The user writes their own request to the AI; Wayfinch doesn't ask for instructions.
+- The window shows exactly what gets copied, with Copy to clipboard and Save as file (a `.txt`).
 - **Format rules:**
   - They tell the AI: reply with only valid JSON in the Wayfinch format, keep every existing id, omit id for new items, don't remove items unless asked, don't add other fields.
   - They describe every field, and include **today's date** so the AI can plan.
   - The rules text follows the app language; the JSON keys don't.
-- "What to include" checkboxes: open tasks, events, notes, done items. Done items are off by default. The choices are remembered.
-- When a parent is left out (e.g. a done parent with done items unchecked), its included subtasks move up a level in the export.
-- Output: Copy to clipboard or Save as file (a `.txt` with the whole block).
+- "What to include" checkboxes: open tasks, events, notes, done items. Done items are off by default. The choices are shared with Export and remembered.
+- When a parent is left out (e.g. a done parent with done items unchecked), its included subtasks move up a level in the list.
+
+### Export
+
+- The sidebar's **Export** opens one window with two formats:
+  - **Your list (JSON):** the "What to include" checkboxes (shared with the message for your AI) and a preview of the list as JSON, with Copy to clipboard and Save as file (`.json`). Only the data: no format rules or instructions.
+  - **Calendar (.ics):** see "Calendar import and export".
 
 ### Import
 
 1. **Paste or open:**
+   - "Message for your AI" (see above) is the first button, for getting what to send the AI.
    - Paste the AI's reply ("Paste from clipboard" or type into the box) or open a file.
    - The app strips any text and code fences around the JSON, then validates it.
    - Errors say exactly what's wrong and where ("Item 3 › subtask 1: "due" should look like 2026-12-05..."), with a tip to ask the AI to fix them.
@@ -180,7 +187,7 @@ The exchange format is JSON, validated strictly against a schema. Only the forma
 
 Calendars come in and go out as .ics files. Direct Google/Outlook sync waits for the online phase.
 
-- **Where:** importing goes through the regular Import dialog: an "Import a calendar (.ics)..." button, and any .ics file opened (or pasted) there goes to the calendar review. Exporting has its own sidebar action, "Export to a calendar", under Export for AI and Import (so nothing in the sidebar looks like it opens a calendar view).
+- **Where:** importing goes through the regular Import dialog: an "Import a calendar (.ics)..." button, and any .ics file opened (or pasted) there goes to the calendar review. Exporting is the Calendar (.ics) format in the Export window (so nothing in the sidebar looks like it opens a calendar view).
 - **Import:** .ics events become Wayfinch events, recurring ones included (RRULE). Only events from today forward by default, with an option to include past ones.
   - A repeating event counts as past only once its rule has run out.
   - All-day events come in as events from midnight to midnight (a 3-day trip runs from day 1 00:00 to day 4 00:00).
@@ -198,14 +205,14 @@ Calendars come in and go out as .ics files. Direct Google/Outlook sync waits for
 
 The password is optional, but when it's set the database is encrypted. A forgotten password with no recovery code means the data is gone for good, so the UI must say so plainly.
 
-- **Profile:** first name (required, used in greetings and the daily digest) and an optional password.
+- **Profile:** first name (optional, used in greetings and the daily digest) and an optional password.
   - Settings › Profile edits the name and can set, change or remove the password, or make a new recovery code. Each action except setting a password asks for the current one.
 - **Encryption:** SQLCipher.
   - A random database key is wrapped (AES-256-GCM) twice, once with a key derived from the password and once with one derived from the recovery code, using Argon2id. Either one unlocks.
   - The wrapped keys live in a small vault file next to the database; it holds no secrets in the clear.
   - Turning the password on or off re-encrypts or decrypts the database file in place (SQLCipher export, swapped in only once complete). Changing the password only re-wraps the key.
 - **Unlock screen** at start when a password is set: password, or "Use your recovery code". After a recovery-code unlock, the app asks for a new password (or "Keep my old password").
-- **Recovery code:** shown once after the password is set, with an "I saved it" checkbox before continuing (Copy and Save as file offered). It can also unlock the database.
+- **Recovery code:** shown once after the password is set, with an "I saved it" checkbox before continuing (Copy and Save as file offered). It can also unlock the database. The same screen explains that losing both the password and the code means the list can't be recovered, and that both are managed in Settings › Profile. The window is only as tall as its content.
 - **Daily auto-backups:** the last 7 are kept, in a folder the user picks. Backups are encrypted the same way as the database.
   - By default they go to a `backups` folder next to the database (in AppData). Settings › Backups shows the folder with "Change" (and "Use default"), "Back up now", and the stored backups with Restore.
   - One backup per day (`wayfinch-backup-YYYY-MM-DD.db`), checked at startup and every 30 minutes; "Back up now" replaces today's. Not during setup.
@@ -216,25 +223,21 @@ The password is optional, but when it's set the database is encrypted. A forgott
 
 ## Onboarding and help
 
-Setup takes five short screens, then the app teaches itself through a tutorial that is a real task list.
+Setup is short and skippable, then the app teaches itself through a tutorial that is a real task list.
 
-1. Welcome (the finch says hi)
-2. First name
-3. Password (optional) → recovery code screen
-4. Pick your vibe: light/dark + accent, with a live preview
-5. Notifications: quick defaults (task and event reminders, morning digest and its time), "Launch at startup". Windows needs no permission prompt; the screen explains that reminders arrive while Wayfinch runs in the tray.
+1. Welcome (the finch says hi), with **Let's start** and **Skip setup**.
+2. **About you:** first name (optional) and an optional password on one screen → recovery code screen when a password was entered.
+3. **Look and notifications:** light/dark + accent with a live preview, and the notification defaults (task and event reminders, morning digest and its time, "Launch at startup") on one screen. Windows needs no permission prompt; the screen explains that reminders arrive while Wayfinch runs in the tray.
+4. **How to use it with your AI:** the copy → paste → import loop as a small diagram.
 
-Then a short **"How to use it with your AI"** screen showing the copy → paste → import loop as a small diagram.
-
-- **Applying the choices:** the password (and the file encryption) is applied only when setup finishes; until then, Back changes nothing. The notification choices are saved right away.
+- **Skip setup** saves the defaults (no name, so the greeting is just "Good morning"; no password; system theme and the Sky accent; default reminders, digest and "Launch at startup") and adds the tutorial. Everything can be changed later in Settings.
+- **Applying the choices:** the password (and the file encryption) is applied only when setup finishes; until then, Back changes nothing.
 - **Existing data:** someone who already has items but never ran setup (e.g. from before this feature) sees setup once, but the tutorial isn't added.
-- **Tutorial as tasks:** a pre-loaded "Getting started" task (due today) whose subtasks teach by doing: check this off, add a subtask, give this a tag, export your list for AI.
-  - Every step but "Check this off" checks itself off when the user does it: adding a subtask or a tag anywhere in the tutorial (the task, its steps, or their subtasks), or copying or saving an export. Automatic checks never prompt. When that was the last step, the whole tutorial closes: "Getting started" and anything still open under it (practice subtasks added while learning) are marked done, not deleted, with a "You finished…" message.
+- **Tutorial as tasks:** a pre-loaded "Getting started" task (due today) whose subtasks teach by doing: check this off, add a subtask, give this a tag, get the message for your AI.
+  - Every step but "Check this off" checks itself off when the user does it: adding a subtask or a tag anywhere in the tutorial (the task, its steps, or their subtasks), or copying or saving the message for your AI (or an export). Automatic checks never prompt. When that was the last step, the whole tutorial closes: "Getting started" and anything still open under it (practice subtasks added while learning) are marked done, not deleted, with a "You finished…" message.
   - The tutorial is only created when the list is empty.
 - **Skippable:** marking the parent done closes the whole tutorial (through the usual parent-completion prompt). No nagging.
-- **Not replayable.** The Help page covers everything instead: basics, nesting, AI import/export (including the exact format rules the AI receives), calendar, themes, backups.
-  - Help is a sidebar destination with searchable, expandable sections; searching opens the matches.
-  - It has Calendar and Notifications sections.
+- **Not replayable.** The **AI instructions** page (a sidebar destination) explains the one thing that isn't obvious from the app: how to use Wayfinch with your AI, with the loop diagram (three equal cards) and the exact format rules the AI receives. Everything else is learned from the app and the tutorial; password and recovery-code advice lives on the recovery code screen.
 
 ## Notifications
 

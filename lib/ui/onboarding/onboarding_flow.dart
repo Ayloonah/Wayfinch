@@ -12,10 +12,11 @@ import '../widgets/finch_logo.dart';
 import '../security/password_widgets.dart';
 import 'tutorial.dart';
 
-enum _Step { welcome, name, password, recovery, vibe, notifications, aiLoop }
+enum _Step { welcome, about, recovery, look, aiLoop }
 
-/// First-run setup: welcome, first name, optional password (+ recovery
-/// code), pick your vibe, notifications, then how the AI loop works.
+/// First-run setup: welcome (with "Skip setup"), about you (first name and
+/// an optional password, + the recovery code), look and notifications,
+/// then how the AI loop works.
 ///
 /// Nothing irreversible happens until the last step: the password (and the
 /// file encryption) is applied when setup finishes.
@@ -58,27 +59,46 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
 
   List<_Step> get _steps => [
     _Step.welcome,
-    _Step.name,
-    _Step.password,
+    _Step.about,
     if (_setup != null) _Step.recovery,
-    _Step.vibe,
-    _Step.notifications,
+    _Step.look,
     _Step.aiLoop,
   ];
 
   bool get _canContinue => switch (_step) {
-    _Step.name => _name.text.trim().isNotEmpty,
     _Step.recovery => _codeSaved,
     _ => !_busy,
   };
 
   void _back() {
     final i = _steps.indexOf(_step);
-    if (i > 0) setState(() => _step = _steps[i - 1]);
+    if (i > 0) {
+      setState(() {
+        _step = _steps[i - 1];
+        // The password fields start empty again on that screen.
+        if (_step == _Step.about) {
+          _password = null;
+          _setup = null;
+        }
+      });
+    }
+  }
+
+  /// "Skip setup": keeps the defaults (no name, no password, system theme,
+  /// default reminders), adds the tutorial, and opens the app. Everything
+  /// can be changed later in Settings.
+  Future<void> _skip() async {
+    final session = SessionScope.maybeOf(context)!;
+    final controller = HomeScope.of(context);
+    final l10n = AppLocalizations.of(context);
+    setState(() => _busy = true);
+    await const NotificationPrefs().save(controller.settings);
+    await controller.createTutorial(TutorialTexts.of(l10n));
+    await session.completeOnboarding();
   }
 
   Future<void> _next() async {
-    if (_step == _Step.password) {
+    if (_step == _Step.about) {
       if (_password == null) {
         // Skipped (or cleared): no password.
         setState(() => _setup = null);
@@ -131,7 +151,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
               borderRadius: BorderRadius.circular(28),
             ),
             child: Container(
-              width: 640,
+              // The look step puts two columns side by side.
+              width: _step == _Step.look ? 920 : 640,
               padding: const EdgeInsets.fromLTRB(36, 28, 36, 24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -153,36 +174,35 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                         TextButton(
                           onPressed: _busy ? null : _back,
                           child: Text(l10n.onboardingBack),
-                        ),
-                      const Spacer(),
-                      if (_step == _Step.password && _password == null)
-                        TextButton(
-                          onPressed: _busy ? null : _next,
-                          child: Text(l10n.onboardingSkip),
                         )
                       else
-                        FilledButton(
-                          style: FilledButton.styleFrom(
-                            minimumSize: const Size(140, 48),
-                            backgroundColor: colors.accent,
-                            foregroundColor: colors.onAccent,
-                          ),
-                          onPressed: _canContinue && !_busy ? _next : null,
-                          child: _busy
-                              ? SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.5,
-                                    color: colors.onAccent,
-                                  ),
-                                )
-                              : Text(switch (_step) {
-                                  _Step.welcome => l10n.onboardingStart,
-                                  _Step.aiLoop => l10n.onboardingFinish,
-                                  _ => l10n.onboardingNext,
-                                }),
+                        TextButton(
+                          onPressed: _busy ? null : _skip,
+                          child: Text(l10n.onboardingSkipSetup),
                         ),
+                      const Spacer(),
+                      FilledButton(
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(140, 48),
+                          backgroundColor: colors.accent,
+                          foregroundColor: colors.onAccent,
+                        ),
+                        onPressed: _canContinue && !_busy ? _next : null,
+                        child: _busy
+                            ? SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: colors.onAccent,
+                                ),
+                              )
+                            : Text(switch (_step) {
+                                _Step.welcome => l10n.onboardingStart,
+                                _Step.aiLoop => l10n.onboardingFinish,
+                                _ => l10n.onboardingNext,
+                              }),
+                      ),
                     ],
                   ),
                 ],
@@ -202,33 +222,38 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         title: l10n.onboardingWelcomeTitle,
         body: l10n.onboardingWelcomeBody,
       ),
-      _Step.name => _Page(
-        title: l10n.onboardingNameTitle,
-        body: l10n.onboardingNameBody,
-        child: TextField(
-          controller: _name,
-          autofocus: true,
-          onChanged: (_) => setState(() {}),
-          onSubmitted: (_) {
-            if (_canContinue) _next();
-          },
-          decoration: InputDecoration(labelText: l10n.onboardingNameLabel),
-        ),
-      ),
-      _Step.password => _Page(
-        title: l10n.onboardingPasswordTitle,
-        body: l10n.onboardingPasswordBody,
+      _Step.about => _Page(
+        title: l10n.onboardingAboutTitle,
+        body: l10n.onboardingAboutBody,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            TextField(
+              controller: _name,
+              autofocus: true,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                labelText: l10n.onboardingNameOptional,
+              ),
+            ),
+            const SizedBox(height: 22),
+            _Subheading(l10n.onboardingPasswordOptional),
+            Text(
+              l10n.onboardingPasswordBody,
+              style: TextStyle(color: WayfinchColors.of(context).muted),
+            ),
+            const SizedBox(height: 8),
             PasswordFields(
+              autofocus: false,
               onChanged: (p) => setState(() {
                 if (p != _password) _setup = null;
                 _password = p;
               }),
             ),
-            const SizedBox(height: 14),
-            const PasswordWarning(),
+            if (_password != null) ...[
+              const SizedBox(height: 14),
+              const PasswordWarning(),
+            ],
           ],
         ),
       ),
@@ -240,17 +265,35 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           onSavedChanged: (v) => setState(() => _codeSaved = v),
         ),
       ),
-      _Step.vibe => _Page(
-        title: l10n.onboardingVibeTitle,
-        body: l10n.onboardingVibeBody,
-        child: const _VibePicker(),
-      ),
-      _Step.notifications => _Page(
-        title: l10n.onboardingNotifTitle,
-        body: l10n.onboardingNotifBody,
-        child: NotificationChoices(
-          prefs: _prefs,
-          onChanged: (p) => setState(() => _prefs = p),
+      _Step.look => _Page(
+        title: l10n.onboardingLookTitle,
+        body: l10n.onboardingLookBody,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _Subheading(l10n.onboardingVibeTitle),
+                  const _VibePicker(),
+                ],
+              ),
+            ),
+            const SizedBox(width: 32),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _Subheading(l10n.onboardingNotifTitle),
+                  NotificationChoices(
+                    prefs: _prefs,
+                    onChanged: (p) => setState(() => _prefs = p),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
       _Step.aiLoop => _Page(
@@ -260,6 +303,22 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       ),
     };
   }
+}
+
+/// A small bold heading inside a setup screen.
+class _Subheading extends StatelessWidget {
+  const _Subheading(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Text(
+      text,
+      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+    ),
+  );
 }
 
 class _Dots extends StatelessWidget {
@@ -427,12 +486,17 @@ class _MiniPreview extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: c.text,
+          // The preview can be narrow (half of the look step): shrink.
+          Flexible(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: c.text,
+              ),
             ),
           ),
         ],
@@ -677,7 +741,8 @@ class _TimeButton extends StatelessWidget {
   }
 }
 
-/// Copy → paste → import, as three cards with arrows (setup and Help).
+/// Copy → paste → import, as three equal cards with arrows (setup and AI
+/// instructions).
 class AiLoopDiagram extends StatelessWidget {
   /// Creates the diagram.
   const AiLoopDiagram({super.key});
@@ -686,6 +751,8 @@ class AiLoopDiagram extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = WayfinchColors.of(context);
     final l10n = AppLocalizations.of(context);
+    // Equal width (Expanded) and equal height (the row is as tall as the
+    // tallest card, and every card stretches to it).
     Widget card(IconData icon, String title, String body) => Expanded(
       child: Container(
         padding: const EdgeInsets.all(14),
@@ -715,25 +782,31 @@ class AiLoopDiagram extends StatelessWidget {
     );
     final arrow = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: Icon(Icons.arrow_forward, color: colors.muted),
+      child: Center(child: Icon(Icons.arrow_forward, color: colors.muted)),
     );
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        card(
-          Icons.auto_awesome_outlined,
-          l10n.aiLoopStep1Title,
-          l10n.aiLoopStep1Body,
-        ),
-        arrow,
-        card(Icons.forum_outlined, l10n.aiLoopStep2Title, l10n.aiLoopStep2Body),
-        arrow,
-        card(
-          Icons.download_outlined,
-          l10n.aiLoopStep3Title,
-          l10n.aiLoopStep3Body,
-        ),
-      ],
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          card(
+            Icons.auto_awesome_outlined,
+            l10n.aiLoopStep1Title,
+            l10n.aiLoopStep1Body,
+          ),
+          arrow,
+          card(
+            Icons.forum_outlined,
+            l10n.aiLoopStep2Title,
+            l10n.aiLoopStep2Body,
+          ),
+          arrow,
+          card(
+            Icons.download_outlined,
+            l10n.aiLoopStep3Title,
+            l10n.aiLoopStep3Body,
+          ),
+        ],
+      ),
     );
   }
 }

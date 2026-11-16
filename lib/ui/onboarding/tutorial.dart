@@ -13,7 +13,8 @@ enum TutorialStep {
   /// "Give this a tag": done when the tutorial gets a tag.
   tag,
 
-  /// "Export your list for AI": done when an export is copied or saved.
+  /// "Get the message for your AI": done when the message for your AI (or
+  /// an export) is copied or saved. Stored as "export" in older databases.
   export,
 }
 

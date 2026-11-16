@@ -572,11 +572,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get close => 'Close';
 
   @override
-  String get exportTitle => 'Export for AI';
+  String get exportTitle => 'Export';
 
   @override
   String get exportSubtitle =>
-      'Paste this into your AI with your request, then bring its reply back with Import.';
+      'Save or copy your list, or your events as a calendar file.';
 
   @override
   String get exportWhatToInclude => 'What to include';
@@ -594,16 +594,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportDoneItems => 'Done items';
 
   @override
-  String get exportInstructionsHeading => 'My instructions';
-
-  @override
-  String get exportInstructionsSaved => 'Saved for every export';
-
-  @override
-  String get exportInstructionsHint =>
-      'Anything your AI should always know. For example:\nBreak big tasks into steps under 2 hours.\nI\'m usually free after 4 PM on weekdays.\nTag school stuff with \"school\".';
-
-  @override
   String get exportPreview => 'What gets copied';
 
   @override
@@ -614,6 +604,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exportListHeading => 'My list';
+
+  @override
+  String get exportFormatList => 'Your list (JSON)';
+
+  @override
+  String get exportFormatCalendar => 'Calendar (.ics)';
+
+  @override
+  String get exportCalendarOptions => 'Options';
+
+  @override
+  String exportItemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String exportCalendarCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count calendar events',
+      one: '1 calendar event',
+    );
+    return '$_temp0';
+  }
 
   @override
   String exportRules(String today, String skeleton) {
@@ -646,6 +667,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exportSaved => 'Saved.';
+
+  @override
+  String get exportCopiedPlain => 'Copied.';
+
+  @override
+  String get aiMessageButton => 'Message for your AI';
+
+  @override
+  String get aiMessageTitle => 'Message for your AI';
+
+  @override
+  String get aiMessageSubtitle =>
+      'Copy this and paste it into your AI, then tell it what you\'d like (\"plan my final project\"). Bring its reply back here.';
 
   @override
   String get importTitle => 'Import';
@@ -1041,7 +1075,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get navHelp => 'Help';
+  String get navHelp => 'AI instructions';
 
   @override
   String get onboardingStart => 'Let\'s start';
@@ -1053,41 +1087,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingBack => 'Back';
 
   @override
-  String get onboardingSkip => 'Skip for now';
+  String get onboardingFinish => 'Let\'s go!';
 
   @override
-  String get onboardingFinish => 'Let\'s go!';
+  String get onboardingSkipSetup => 'Skip setup';
 
   @override
   String get onboardingWelcomeTitle => 'Hi, I\'m Wayfinch!';
 
   @override
   String get onboardingWelcomeBody =>
-      'A calm to-do list that works with your AI. Ask your AI to plan something, bring the plan here, and I\'ll help you keep track of it. Setup takes about a minute.';
+      'A calm to-do list that works with your AI. Ask your AI to plan something, bring the plan here, and I\'ll help you keep track of it. Setup takes about a minute, or skip it and dive right in.';
 
   @override
-  String get onboardingNameTitle => 'What should I call you?';
+  String get onboardingAboutTitle => 'A bit about you';
 
   @override
-  String get onboardingNameBody =>
-      'Just your first name. It\'s used for greetings and stays on this computer.';
+  String get onboardingAboutBody =>
+      'Both are optional, and you can change them later in Settings.';
+
+  @override
+  String get onboardingNameOptional => 'First name (optional)';
+
+  @override
+  String get onboardingPasswordOptional => 'Password (optional)';
 
   @override
   String get onboardingNameLabel => 'First name';
 
   @override
-  String get onboardingPasswordTitle => 'Want a password?';
-
-  @override
   String get onboardingPasswordBody =>
-      'It\'s optional. With a password, your list is encrypted on disk, so nobody can read the file without it. You can add or remove one later in Settings.';
+      'With a password, your list is encrypted on disk, so nobody can read the file without it.';
 
   @override
   String get onboardingVibeTitle => 'Pick your vibe';
 
   @override
-  String get onboardingVibeBody =>
-      'Light or dark, and a color you like. You can make your own theme later in Settings.';
+  String get onboardingLookTitle => 'Make it yours';
+
+  @override
+  String get onboardingLookBody =>
+      'Pick a look and how Wayfinch reminds you. You can change all of this later in Settings.';
 
   @override
   String get onboardingPreviewLabel => 'Preview of the app in these colors';
@@ -1105,10 +1145,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingNotifTitle => 'Reminders';
 
   @override
-  String get onboardingNotifBody =>
-      'Gentle nudges before things are due. You can change all of this later, and per item.';
-
-  @override
   String get onboardingAiTitle => 'How to use it with your AI';
 
   @override
@@ -1116,11 +1152,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Wayfinch doesn\'t talk to any AI by itself: you stay in control of what\'s shared.';
 
   @override
-  String get aiLoopStep1Title => '1. Export for AI';
+  String get aiLoopStep1Title => '1. Copy the message';
 
   @override
   String get aiLoopStep1Body =>
-      'Copy your list with the format rules and your instructions.';
+      'In Import, \"Message for your AI\" copies the format rules and your list.';
 
   @override
   String get aiLoopStep2Title => '2. Ask your AI';
@@ -1347,6 +1383,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'If you ever forget your password, this code unlocks your list instead. It\'s shown only once: save it somewhere safe (a password manager, or printed and put away).';
 
   @override
+  String get recoveryAdvice =>
+      'If you lose both your password and this code, your list can\'t be recovered. You can change your password or get a new code anytime in Settings › Profile.';
+
+  @override
   String get recoveryCopy => 'Copy';
 
   @override
@@ -1481,100 +1521,32 @@ class AppLocalizationsEn extends AppLocalizations {
       'Open this step (or \"Getting started\") and click \"+ Tag\" in its details. Pick a tag or type a new one.';
 
   @override
-  String get tutorialExport => 'Export your list for AI';
+  String get tutorialExport => 'Get the message for your AI';
 
   @override
   String get tutorialExportNotes =>
-      'Click \"Export for AI\" in the sidebar, then Copy. Paste it into your AI with a request, and bring the reply back with Import.';
-
-  @override
-  String get helpSearch => 'Search help';
-
-  @override
-  String get helpNoResults => 'Nothing found. Try another word.';
-
-  @override
-  String get helpBasicsTitle => 'Getting around';
-
-  @override
-  String get helpBasicsBody =>
-      'Today shows overdue items first, then what\'s due or happening today. Upcoming shows the next 7 days, All shows everything as a tree, and Done keeps what you finished, with your weekly count. Drag views and tags in the sidebar to reorder them, and pick the view Wayfinch opens in under Settings › General.\n\nQuick add understands dates, times, tags and priority, in English and French: try \"Lab report Friday 5pm #school !high\" or \"Rapport vendredi 17h #école !haute\".';
-
-  @override
-  String get helpItemsTitle => 'Tasks and events';
-
-  @override
-  String get helpItemsBody =>
-      'Tasks are due by a date (with an optional time); events run from a start to an end. Click an item to edit it in the panel on the right; changes save as you go. Date and time are set together in one dialog. Deleting shows an Undo for 10 seconds.';
-
-  @override
-  String get helpNestingTitle => 'Subtasks';
-
-  @override
-  String get helpNestingBody =>
-      'Break things down as far as you like: use \"+ Add subtask\" in the details, or the + on a list row. A few situations ask first: pushing a parent\'s date when a subtask goes past it, closing open subtasks when a parent is done, and marking a parent done when its last subtask is. Tick \"don\'t ask again\" to remember your answer; change it anytime in Settings › Prompts.';
-
-  @override
-  String get helpRecurringTitle => 'Repeating items';
-
-  @override
-  String get helpRecurringBody =>
-      'Use Repeat in the details: daily, weekdays, weekly, every 2 weeks, monthly or yearly. Completing a repeating task creates the next one, with fresh copies of its subtasks. Repeating events roll forward on their own once they end.';
-
-  @override
-  String get helpTagsTitle => 'Tags and overdue';
-
-  @override
-  String get helpTagsBody =>
-      'Add tags from an item\'s details. Click a tag in the sidebar to see everything with it. Change a tag\'s color from its dot in the sidebar, by right-clicking it, or from a tag chip\'s menu. Overdue items get the automatic \"overdue\" tag, and a banner offers to review them or snooze it until tomorrow.';
+      'Click Import in the sidebar, then \"Message for your AI\" and Copy. Paste it into your AI with a request, and bring the reply back with Import.';
 
   @override
   String get helpAiTitle => 'Using Wayfinch with your AI';
 
   @override
   String get helpAiBody =>
-      'Export for AI copies your list with the format rules below and your own instructions. Paste it into any AI with a request (\"plan my final project\"), then paste the reply into Import. You\'ll see what\'s new, changed and removed before anything happens. Add only adds new items; Replace makes your list match the AI\'s version (done items are never removed). Your list is backed up first, and you can undo.';
+      'Wayfinch doesn\'t talk to any AI by itself, so you stay in control of what\'s shared. In Import, click \"Message for your AI\": it copies the format rules below and your list. Paste it into any AI with your own request (\"plan my final project\"), then paste the AI\'s reply into Import. You\'ll see what\'s new, changed and removed before anything happens. Add only adds new items; Replace makes your list match the AI\'s version (done items are never removed). Your list is backed up first, and you can undo.';
 
   @override
-  String get helpNotificationsTitle => 'Reminders and notifications';
+  String get helpAiRulesTitle => 'The format rules';
 
   @override
-  String get helpNotificationsBody =>
-      'Tasks with a time remind you 1 hour before and events 15 minutes before; change the defaults in Settings › Notifications, or set an item\'s own reminders from its details. Date-only tasks show up in the morning digest instead. Snooze a reminder from its notification. During quiet hours, reminders wait until the end. Closing the window keeps Wayfinch in the system tray so reminders still arrive; right-click the tray icon to quit.';
-
-  @override
-  String get helpThemesTitle => 'Themes';
-
-  @override
-  String get helpThemesBody =>
-      'Settings › Appearance has light, dark or system, five accent colors, and a custom theme builder that warns you when text may be hard to read.';
-
-  @override
-  String get helpPasswordTitle => 'Password and recovery code';
-
-  @override
-  String get helpPasswordBody =>
-      'A password encrypts your list on this computer. When you set one, you get a recovery code: it can unlock your list if you forget the password. If you lose both, your list can\'t be recovered. Manage both in Settings › Profile.';
-
-  @override
-  String get helpBackupsTitle => 'Backups and undo';
-
-  @override
-  String get helpBackupsBody =>
-      'Wayfinch backs up your whole list once a day and keeps the last 7, in a folder you can change in Settings › Backups (pick OneDrive or a USB drive to keep a copy off this computer). With a password, backups are encrypted too. Your list is also backed up before every import: undo the last one from the Import dialog, or restore any of the last 10 from Settings › Import history. Restoring backs up your current list first, so you can change your mind.';
+  String get helpAiRulesBody =>
+      'This is what your AI is told about the format. Wayfinch adds it to the message for you.';
 
   @override
   String get importCalendar => 'Import a calendar (.ics)...';
 
   @override
-  String get calendarExportTitle => 'Export to a calendar';
-
-  @override
   String get calendarExportBody =>
       'Save your events as an .ics file, then import it in your calendar app.';
-
-  @override
-  String get calendarSaveFile => 'Save .ics file';
 
   @override
   String get calendarExportTasks => 'Also export tasks';
@@ -1582,9 +1554,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get calendarExportTasksBody =>
       'Open tasks become short events at their due time (calendars like Google ignore to-dos).';
-
-  @override
-  String get calendarExported => 'Calendar file saved.';
 
   @override
   String get calendarNotIcs =>
@@ -1722,11 +1691,4 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get backupsOldPasswordBody =>
       'This backup was made with a different password. Enter the password (or recovery code) you had back then.';
-
-  @override
-  String get helpCalendarTitle => 'Calendars (.ics)';
-
-  @override
-  String get helpCalendarBody =>
-      'To bring in events, use Import and pick \"Import a calendar (.ics)\" (or just open an .ics file exported from Google, Outlook or Apple Calendar): events that already ended are left out unless you include them, and importing the same calendar again updates events instead of adding them twice. Nothing is ever removed, and you can undo. All-day events come in as events from midnight to midnight. \"Export to calendar\" in the sidebar saves your events as an .ics file; turn on \"Also export tasks\" to include open tasks as short events at their due time.';
 }

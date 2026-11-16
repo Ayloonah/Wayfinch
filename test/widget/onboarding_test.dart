@@ -70,28 +70,37 @@ void main() {
     await settle(tester);
   }
 
-  testWidgets('setup without a password: name, vibe, reminders, tutorial', (
+  /// Setup with a name, no password and the default look.
+  Future<void> quickSetup(WidgetTester tester, String name) async {
+    await tapText(tester, "Let's start");
+    await tester.enterText(find.byType(TextField).first, name);
+    await tester.pump();
+    await tapText(tester, 'Next'); // about you
+    await tapText(tester, 'Next'); // look and notifications
+    await tapText(tester, "Let's go!"); // AI screen
+  }
+
+  testWidgets('setup without a password: about you, look, reminders, AI', (
     tester,
   ) async {
     final s = await pumpShell(tester);
     expect(find.text("Hi, I'm Wayfinch!"), findsOneWidget);
     await tapText(tester, "Let's start");
 
-    expect(find.text('What should I call you?'), findsOneWidget);
-    await tester.enterText(find.byType(TextField), 'Judhy');
+    // Name and password on one screen; both optional.
+    expect(find.text('A bit about you'), findsOneWidget);
+    expect(find.text('Password (optional)'), findsOneWidget);
+    await tester.enterText(find.byType(TextField).first, 'Judhy');
     await tester.pump();
     await tapText(tester, 'Next');
 
-    expect(find.text('Want a password?'), findsOneWidget);
-    await tapText(tester, 'Skip for now');
-
+    // Look and notifications side by side.
+    expect(find.text('Make it yours'), findsOneWidget);
     expect(find.text('Pick your vibe'), findsOneWidget);
+    expect(find.text('Reminders'), findsOneWidget);
     await tester.tap(find.byTooltip('Honey'));
     await settle(tester);
     expect(s.appearance!.value.accent.name, 'honey');
-    await tapText(tester, 'Next');
-
-    expect(find.text('Reminders'), findsOneWidget);
     await tester.tap(find.text('Morning digest'));
     await settle(tester);
     await tapText(tester, 'Next');
@@ -118,13 +127,10 @@ void main() {
   ) async {
     final s = await pumpShell(tester);
     await tapText(tester, "Let's start");
-    await tester.enterText(find.byType(TextField), 'Sam');
-    await tester.pump();
-    await tapText(tester, 'Next');
-
     final fields = find.byType(TextField);
-    await tester.enterText(fields.at(0), 'hunter2');
+    await tester.enterText(fields.at(0), 'Sam');
     await tester.enterText(fields.at(1), 'hunter2');
+    await tester.enterText(fields.at(2), 'hunter2');
     await tester.pump();
     await tapText(tester, 'Next');
 
@@ -135,8 +141,7 @@ void main() {
     expect(next.onPressed, isNull); // until "I saved it"
     await tester.tap(find.text('I saved my recovery code'));
     await settle(tester);
-    await tapText(tester, 'Next'); // vibe
-    await tapText(tester, 'Next'); // reminders
+    await tapText(tester, 'Next'); // look and notifications
     await tapText(tester, 'Next'); // AI loop
     await tapText(tester, "Let's go!");
     await settle(tester);
@@ -162,16 +167,32 @@ void main() {
 
     final s = await pumpShell(tester);
     expect(find.text("Hi, I'm Wayfinch!"), findsOneWidget);
-    await tapText(tester, "Let's start");
-    await tester.enterText(find.byType(TextField), 'Alex');
-    await tester.pump();
-    await tapText(tester, 'Next');
-    await tapText(tester, 'Skip for now');
-    await tapText(tester, 'Next');
-    await tapText(tester, 'Next');
-    await tapText(tester, "Let's go!");
+    await quickSetup(tester, 'Alex');
     final titles = s.home!.tree.all.map((i) => i.title).toList();
     expect(titles, ['Old stuff']);
+    await finish(tester, s);
+  });
+
+  testWidgets('Skip setup keeps the defaults and opens the app', (
+    tester,
+  ) async {
+    final s = await pumpShell(tester);
+    await tapText(tester, 'Skip setup');
+
+    // No name: just "Good morning". The tutorial is there; no password.
+    expect(find.text('Good morning'), findsOneWidget);
+    expect(find.text('Getting started with Wayfinch'), findsOneWidget);
+    expect(s.needsOnboarding, isFalse);
+    expect(s.hasPassword, isFalse);
+    expect(s.home!.firstName, isEmpty);
+    expect(s.appearance!.value.accent.name, 'sky');
+    final prefs = await pumpUntilDone(
+      tester,
+      NotificationPrefs.load(s.settings!),
+    );
+    expect(prefs.digestEnabled, isTrue);
+    expect(prefs.taskReminderMinutes, 60);
+    expect(prefs.launchAtStartup, isTrue);
     await finish(tester, s);
   });
 
@@ -224,14 +245,7 @@ void main() {
     tester,
   ) async {
     final s = await pumpShell(tester);
-    await tapText(tester, "Let's start");
-    await tester.enterText(find.byType(TextField), 'Judhy');
-    await tester.pump();
-    await tapText(tester, 'Next');
-    await tapText(tester, 'Skip for now');
-    await tapText(tester, 'Next');
-    await tapText(tester, 'Next');
-    await tapText(tester, "Let's go!");
+    await quickSetup(tester, 'Judhy');
 
     final home = s.home!;
     final steps = home.tutorial!;
@@ -269,14 +283,8 @@ void main() {
   ) async {
     Future<AppSession> setup() async {
       final s = await pumpShell(tester);
-      await tapText(tester, "Let's start");
-      await tester.enterText(find.byType(TextField), 'Judhy');
-      await tester.pump();
-      await tapText(tester, 'Next');
-      await tapText(tester, 'Skip for now');
-      await tapText(tester, 'Next');
-      await tapText(tester, 'Next');
-      await tapText(tester, "Let's go!");
+      await quickSetup(tester, 'Judhy');
+
       return s;
     }
 
@@ -384,18 +392,11 @@ void main() {
     await finish(tester, s);
   });
 
-  testWidgets('tutorial steps check themselves off; Help searches', (
+  testWidgets('tutorial steps check themselves off; AI instructions page', (
     tester,
   ) async {
     final s = await pumpShell(tester);
-    await tapText(tester, "Let's start");
-    await tester.enterText(find.byType(TextField), 'Judhy');
-    await tester.pump();
-    await tapText(tester, 'Next');
-    await tapText(tester, 'Skip for now');
-    await tapText(tester, 'Next');
-    await tapText(tester, 'Next');
-    await tapText(tester, "Let's go!");
+    await quickSetup(tester, 'Judhy');
 
     final home = s.home!;
     final steps = home.tutorial!;
@@ -415,23 +416,29 @@ void main() {
     expect(done(steps.export), isTrue);
     expect(done(steps.checkOff), isFalse); // that one is yours to check
 
-    // Help: search opens matching sections; the AI section shows the rules.
+    // AI instructions: just the AI guide, the diagram and the rules.
     home.go(Destination.help);
     await settle(tester);
-    expect(find.text('Getting around'), findsOneWidget);
-    await tester.enterText(find.byType(TextField).last, 'recovery code');
-    await settle(tester);
-    expect(find.text('Password and recovery code'), findsOneWidget);
-    expect(find.text('Getting around'), findsNothing);
-    await tester.enterText(find.byType(TextField).last, 'format rules');
-    await settle(tester);
+    expect(find.text('AI instructions'), findsWidgets);
     expect(find.text('Using Wayfinch with your AI'), findsOneWidget);
+    expect(find.text('1. Copy the message'), findsOneWidget);
+    expect(find.text('The format rules'), findsOneWidget);
+    expect(find.text('Getting around'), findsNothing);
     expect(
       find.byWidgetPredicate(
         (w) => w is SelectableText && (w.data ?? '').contains('"wayfinch"'),
       ),
       findsOneWidget,
     );
+    // The three diagram cards are the same size (the nearest container
+    // around each title is its card).
+    Size card(String title) => tester.getSize(
+      find
+          .ancestor(of: find.text(title), matching: find.byType(Container))
+          .first,
+    );
+    expect(card('2. Ask your AI'), card('1. Copy the message'));
+    expect(card('3. Import'), card('1. Copy the message'));
     await finish(tester, s);
   });
 }

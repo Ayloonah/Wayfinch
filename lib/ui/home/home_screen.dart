@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../detail/detail_panel.dart';
 import '../list/list_pane.dart';
-import '../prompts/prompts.dart';
 import '../help/help_pane.dart';
+import '../prompts/prompts.dart';
 import '../settings/settings_pane.dart';
 import '../sidebar/sidebar.dart';
 import 'home_controller.dart';
@@ -74,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const Sidebar(),
                 Expanded(
                   child: controller.destination == Destination.help
-                      ? const HelpPane()
+                      ? const AiInstructionsPane()
                       : view == null
                       ? const SettingsPane()
                       : ListPane(view: view),

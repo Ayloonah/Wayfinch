@@ -14,6 +14,7 @@ import '../home/home_controller.dart';
 import '../theme/tokens.dart';
 import 'calendar_dialog.dart';
 import 'dialog_parts.dart';
+import 'export_dialog.dart' show showAiMessageDialog;
 import 'import_messages.dart';
 
 /// How long the "Imported · Undo" message stays up.
@@ -232,6 +233,13 @@ class _ImportDialogState extends State<ImportDialog> {
                 spacing: 10,
                 runSpacing: 8,
                 children: [
+                  // What to send the AI (rules + list), before pasting its
+                  // reply here.
+                  FilledButton.tonalIcon(
+                    onPressed: () => showAiMessageDialog(context),
+                    icon: const Icon(Icons.auto_awesome_outlined),
+                    label: Text(l10n.aiMessageButton),
+                  ),
                   OutlinedButton.icon(
                     onPressed: _paste,
                     icon: const Icon(Icons.content_paste),

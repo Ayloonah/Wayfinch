@@ -148,23 +148,15 @@ class HomeController extends ChangeNotifier {
   }
 
   static const _exportOptionsKey = 'export.options';
-  static const _instructionsKey = 'export.instructions';
 
-  /// Saved "What to include" choices.
+  /// Saved "What to include" choices (shared by Export and the message for
+  /// your AI).
   Future<ExportOptions> loadExportOptions() async =>
       ExportOptions.decode(await settings.getValue(_exportOptionsKey));
 
   /// Saves "What to include".
   Future<void> saveExportOptions(ExportOptions options) =>
       settings.setValue(_exportOptionsKey, options.encode());
-
-  /// Saved "My instructions" (empty by default).
-  Future<String> loadInstructions() async =>
-      await settings.getValue(_instructionsKey) ?? '';
-
-  /// Saves "My instructions".
-  Future<void> saveInstructions(String text) =>
-      settings.setValue(_instructionsKey, text.isEmpty ? null : text);
 
   /// The "My list" JSON for [options].
   ExportResult exportList(ExportOptions options) =>
@@ -359,9 +351,17 @@ class HomeController extends ChangeNotifier {
   bool _startApplied = false;
   bool _navigated = false;
 
+  /// The sidebar's view order until the user drags them.
+  static const defaultViewOrder = [
+    Destination.all,
+    Destination.today,
+    Destination.upcoming,
+    Destination.done,
+  ];
+
   static const _viewOrderKey = 'sidebar.viewOrder';
   static const _tagOrderKey = 'sidebar.tagOrder';
-  List<Destination> _viewOrder = startViews;
+  List<Destination> _viewOrder = defaultViewOrder;
   List<String> _tagOrder = const [];
 
   /// Sidebar views in the user's order (drag to reorder).
@@ -369,10 +369,10 @@ class HomeController extends ChangeNotifier {
 
   static List<Destination> _parseViewOrder(String? stored) {
     final names = (stored ?? '').split(',');
-    final byName = startViews.asNameMap();
+    final byName = defaultViewOrder.asNameMap();
     final saved = [for (final n in names) ?byName[n]];
     // Any view missing from the saved order goes at the end.
-    return [...saved, ...startViews.where((d) => !saved.contains(d))];
+    return [...saved, ...defaultViewOrder.where((d) => !saved.contains(d))];
   }
 
   /// Sidebar tag ids in the user's order, including [overdueTagId]. Tags

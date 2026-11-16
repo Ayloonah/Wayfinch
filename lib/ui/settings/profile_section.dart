@@ -65,7 +65,8 @@ class _ProfileSectionState extends State<ProfileSection> {
             onChanged: (text) {
               _save?.cancel();
               _save = Timer(const Duration(milliseconds: 400), () {
-                if (text.trim().isNotEmpty) controller.setFirstName(text);
+                // Optional: an empty name just means "Good morning".
+                controller.setFirstName(text);
               });
             },
           ),
