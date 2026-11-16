@@ -262,5 +262,21 @@
   "importNowEvent": "Devient un événement",
   "importNowTask": "Devient une tâche",
   "importMovedTop": "Déplacé au premier niveau",
-  "importMovedUnder": "Déplacé sous « {parent} »"
+  "importMovedUnder": "Déplacé sous « {parent} »",
+
+  "settingsGeneral": "Général",
+  "settingStartView": "Ouvrir Wayfinch sur",
+
+  "settingsImportHistory": "Historique des imports",
+  "settingsImportHistoryHelp": "Ta liste est sauvegardée avant chaque import. Restaure l’une des {count} dernières sauvegardes ; ta liste actuelle est sauvegardée d’abord, donc tu peux changer d’avis.",
+  "importHistoryEmpty": "Pas encore de sauvegarde. Une est faite avant chaque import.",
+  "backupBeforeImport": "Avant un import",
+  "backupBeforeImportMode": "Avant un import ({mode})",
+  "backupBeforeImportDetail": "{count, plural, =1{Avant un import ({mode}, 1 changement)} other{Avant un import ({mode}, {count} changements)}}",
+  "backupBeforeRestore": "Avant une restauration",
+  "backupItemCount": "{count, plural, =1{1 élément} other{{count} éléments}}",
+  "backupRestore": "Restaurer",
+  "backupRestoreTitle": "Restaurer cette sauvegarde ?",
+  "backupRestoreBody": "Ta liste redevient exactement comme à ce moment-là. Ta liste actuelle est sauvegardée d’abord, donc tu peux annuler depuis l’historique des imports.",
+  "backupRestored": "Sauvegarde restaurée."
 }

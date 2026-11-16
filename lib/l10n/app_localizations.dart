@@ -1555,6 +1555,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Moved under \"{parent}\"'**
   String importMovedUnder(String parent);
+
+  /// No description provided for @settingsGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get settingsGeneral;
+
+  /// No description provided for @settingStartView.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Wayfinch in'**
+  String get settingStartView;
+
+  /// No description provided for @settingsImportHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Import history'**
+  String get settingsImportHistory;
+
+  /// No description provided for @settingsImportHistoryHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Your list is backed up before every import. Restore any of the last {count} backups; your current list is backed up first, so you can change your mind.'**
+  String settingsImportHistoryHelp(int count);
+
+  /// No description provided for @importHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No backups yet. One is made before each import.'**
+  String get importHistoryEmpty;
+
+  /// No description provided for @backupBeforeImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Before an import'**
+  String get backupBeforeImport;
+
+  /// No description provided for @backupBeforeImportMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Before an import ({mode})'**
+  String backupBeforeImportMode(String mode);
+
+  /// No description provided for @backupBeforeImportDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Before an import ({mode}, 1 change)} other{Before an import ({mode}, {count} changes)}}'**
+  String backupBeforeImportDetail(String mode, int count);
+
+  /// No description provided for @backupBeforeRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Before a restore'**
+  String get backupBeforeRestore;
+
+  /// No description provided for @backupItemCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}}'**
+  String backupItemCount(int count);
+
+  /// No description provided for @backupRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get backupRestore;
+
+  /// No description provided for @backupRestoreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore this backup?'**
+  String get backupRestoreTitle;
+
+  /// No description provided for @backupRestoreBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your list goes back to exactly how it was at that point. Your current list is backed up first, so you can undo this from Import history.'**
+  String get backupRestoreBody;
+
+  /// No description provided for @backupRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup restored.'**
+  String get backupRestored;
 }
 
 class _AppLocalizationsDelegate

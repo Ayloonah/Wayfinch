@@ -11,6 +11,8 @@ import 'package:wayfinch/data/items_repository.dart';
 import 'package:wayfinch/data/settings_repository.dart';
 import 'package:wayfinch/data/tags_repository.dart';
 import 'package:wayfinch/domain/exchange/exchange_export.dart';
+import 'package:wayfinch/domain/exchange/exchange_parser.dart';
+import 'package:wayfinch/domain/exchange/import_plan.dart';
 import 'package:wayfinch/domain/item_enums.dart';
 import 'package:wayfinch/domain/item_rules.dart';
 import 'package:wayfinch/ui/app.dart';
@@ -781,6 +783,70 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Review your import'), findsNothing);
+    await finish(tester, h);
+  });
+
+  testWidgets('start view: chosen in Settings, used at launch', (tester) async {
+    var h = await pumpApp(tester);
+    expect(h.controller.destination, Destination.today);
+    await tester.tap(find.text('Settings'));
+    await settle(tester);
+    await tester.tap(find.text('Today').last); // the "Open Wayfinch in" value
+    await settle(tester);
+    await tester.tap(find.text('All').last);
+    await settle(tester);
+    expect(h.controller.startView, Destination.all);
+    expect(
+      await pumpUntilDone(tester, h.settings.getValue('app.startView')),
+      'all',
+    );
+    await finish(tester, h);
+
+    // A fresh launch with that setting opens All.
+    h = await pumpApp(
+      tester,
+      seed: (h) => h.settings.setValue('app.startView', 'all'),
+    );
+    expect(h.controller.destination, Destination.all);
+    expect(find.text('Nothing open'), findsOneWidget);
+    await finish(tester, h);
+  });
+
+  testWidgets('Import history lists backups and restores one', (tester) async {
+    final h = await pumpApp(
+      tester,
+      seed: (h) => h.items.create(type: ItemType.task, title: 'Keep me'),
+    );
+    final doc = parseExchange(
+      '{"format":"wayfinch","version":1,"items":'
+      '[{"type":"task","title":"From AI"}]}',
+    ).document!;
+    await pumpUntilDone(
+      tester,
+      h.controller.applyImport(
+        h.controller.planImportOf(doc, ImportMode.replace),
+      ),
+    );
+    await settle(tester);
+    expect(h.controller.tree.all.single.title, 'From AI');
+
+    await tester.tap(find.text('Settings'));
+    await settle(tester);
+    expect(find.text('Import history'), findsOneWidget);
+    expect(
+      find.textContaining('Before an import (Replace my list, 2 changes)'),
+      findsOneWidget,
+    );
+    await tester.ensureVisible(find.text('Restore'));
+    await tester.pump();
+    await tester.tap(find.text('Restore'));
+    await settle(tester);
+    expect(find.text('Restore this backup?'), findsOneWidget);
+    await tester.tap(find.text('Restore').last);
+    await settle(tester);
+    expect(h.controller.tree.all.single.title, 'Keep me');
+    expect(find.text('Backup restored.'), findsOneWidget);
+    expect(find.textContaining('Before a restore'), findsOneWidget);
     await finish(tester, h);
   });
 

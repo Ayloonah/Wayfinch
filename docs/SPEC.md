@@ -93,6 +93,7 @@ A three-pane desktop layout: **sidebar | list | detail panel**. The detail panel
 | Help | Short searchable sections |
 
 - **Sidebar:** logo + greeting with the user's first name, search, the views, tags with counts, then Export for AI, Import, Help and Settings at the bottom.
+- **Start view:** Settings › General › "Open Wayfinch in" picks the view the app opens in (Today, Upcoming, All or Done; Today by default).
 - **Overdue banner:** sits at the top of every view ("3 overdue items need a new plan"). "Review" jumps to Today's overdue section; "Snooze until tomorrow" hides it for the day.
 - **Quick add** field at the top of the list. It understands, in English and French:
   - **Dates:** today/tomorrow (aujourd'hui/demain), weekday names, and month + day like "Dec 5" or "5 déc".
@@ -166,6 +167,9 @@ The exchange format is JSON, validated strictly against a schema. Only the forma
    - A snapshot of the whole list (items, tags, tag links, reminders) is stored in the database right before every import, Add or Replace. It's encrypted with the database; the last 10 are kept.
    - After importing, "Imported N changes · Undo" stays up for 15 seconds.
    - The Import dialog also offers "Undo last import" (with a confirmation, since it also drops anything changed since). Undo restores the snapshot exactly.
+   - **Settings › Import history** lists every stored backup (when, Add or Replace, how many changes, how many items) with a **Restore** button.
+     - Restoring first backs up the current list as a "Before a restore" entry, so a restore can be undone the same way.
+     - This is separate from the daily auto-backups, which come with milestone 7.
 
 ## Calendar import and export
 

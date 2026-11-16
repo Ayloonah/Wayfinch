@@ -66,8 +66,8 @@ class HomeController extends ChangeNotifier {
   }) : _clock = clock ?? DateTime.now {
     _now = _clock();
     _subscriptions = [
-      imports.watchLatest().listen((backup) {
-        _lastImport = backup;
+      imports.watchAll().listen((backups) {
+        _backups = backups;
         notifyListeners();
       }),
       items.watchAll().listen(_onItems),
@@ -82,6 +82,13 @@ class HomeController extends ChangeNotifier {
       settings.watchAll().listen((values) {
         _bannerSnoozedUntil = DateTime.tryParse(values[_snoozeKey] ?? '');
         _overdueTagColor = int.tryParse(values[_overdueColorKey] ?? '');
+        _startView =
+            startViews.asNameMap()[values[_startViewKey]] ?? Destination.today;
+        // Open the chosen start view once, unless the user already moved.
+        if (!_startApplied) {
+          _startApplied = true;
+          if (!_navigated) _destination = _startView;
+        }
         notifyListeners();
       }),
     ];
@@ -100,10 +107,23 @@ class HomeController extends ChangeNotifier {
   /// AI import storage (apply, backups, undo).
   final ImportRepository imports;
 
-  ImportBackupInfo? _lastImport;
+  List<ImportBackupInfo> _backups = const [];
 
-  /// The latest pre-import backup, if an import can be undone.
-  ImportBackupInfo? get lastImport => _lastImport;
+  /// Stored backups, newest first (Settings › Import history).
+  List<ImportBackupInfo> get backups => _backups;
+
+  /// The latest backup if it was taken before an import (what "Undo last
+  /// import" undoes), else null.
+  ImportBackupInfo? get lastImport {
+    final latest = _backups.firstOrNull;
+    return latest?.reason == BackupReason.import ? latest : null;
+  }
+
+  /// Restores backup [id]; the current list is backed up first.
+  Future<bool> restoreBackup(int id) {
+    _selectedId = null;
+    return imports.restore(id);
+  }
 
   static const _exportOptionsKey = 'export.options';
   static const _instructionsKey = 'export.instructions';
@@ -215,6 +235,7 @@ class HomeController extends ChangeNotifier {
 
   /// Opens the view for tag [tagId] (or [overdueTagId]).
   void openTag(String tagId) {
+    _navigated = true;
     _tagFilter = tagId;
     _destination = Destination.tag;
     notifyListeners();
@@ -279,8 +300,33 @@ class HomeController extends ChangeNotifier {
     await items.apply(_rules.rollEndedEvents(_tree));
   }
 
+  static const _startViewKey = 'app.startView';
+
+  /// Views the app can start in.
+  static const startViews = [
+    Destination.today,
+    Destination.upcoming,
+    Destination.all,
+    Destination.done,
+  ];
+
+  Destination _startView = Destination.today;
+  bool _startApplied = false;
+  bool _navigated = false;
+
+  /// The view the app opens in (Settings › General).
+  Destination get startView => _startView;
+
+  /// Sets the view the app opens in.
+  Future<void> setStartView(Destination view) {
+    _startView = view;
+    notifyListeners();
+    return settings.setValue(_startViewKey, view.name);
+  }
+
   /// Opens [destination].
   void go(Destination destination) {
+    _navigated = true;
     _destination = destination;
     notifyListeners();
   }

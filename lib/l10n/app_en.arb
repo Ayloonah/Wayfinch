@@ -328,5 +328,25 @@
   "importNowTask": "Now a task",
   "importMovedTop": "Moved to the top level",
   "importMovedUnder": "Moved under \"{parent}\"",
-  "@importMovedUnder": {"placeholders": {"parent": {"type": "String"}}}
+  "@importMovedUnder": {"placeholders": {"parent": {"type": "String"}}},
+
+  "settingsGeneral": "General",
+  "settingStartView": "Open Wayfinch in",
+
+  "settingsImportHistory": "Import history",
+  "settingsImportHistoryHelp": "Your list is backed up before every import. Restore any of the last {count} backups; your current list is backed up first, so you can change your mind.",
+  "@settingsImportHistoryHelp": {"placeholders": {"count": {"type": "int"}}},
+  "importHistoryEmpty": "No backups yet. One is made before each import.",
+  "backupBeforeImport": "Before an import",
+  "backupBeforeImportMode": "Before an import ({mode})",
+  "@backupBeforeImportMode": {"placeholders": {"mode": {"type": "String"}}},
+  "backupBeforeImportDetail": "{count, plural, =1{Before an import ({mode}, 1 change)} other{Before an import ({mode}, {count} changes)}}",
+  "@backupBeforeImportDetail": {"placeholders": {"mode": {"type": "String"}, "count": {"type": "int"}}},
+  "backupBeforeRestore": "Before a restore",
+  "backupItemCount": "{count, plural, =1{1 item} other{{count} items}}",
+  "@backupItemCount": {"placeholders": {"count": {"type": "int"}}},
+  "backupRestore": "Restore",
+  "backupRestoreTitle": "Restore this backup?",
+  "backupRestoreBody": "Your list goes back to exactly how it was at that point. Your current list is backed up first, so you can undo this from Import history.",
+  "backupRestored": "Backup restored."
 }

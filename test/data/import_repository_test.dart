@@ -109,6 +109,39 @@ void main() {
     expect(titles, unorderedEquals(['Parent', 'Child']));
   });
 
+  test('backups record why they were taken; any one can be restored', () async {
+    await items.create(type: ItemType.task, title: 'Original');
+    final first = await plan(
+      '{"type":"task","title":"Import 1"}',
+      ImportMode.add,
+    );
+    await imports.apply(first, colorFor: (_) => 0);
+    final second = await plan(
+      '{"type":"task","title":"Only import 2"}',
+      ImportMode.replace,
+    );
+    await imports.apply(second, colorFor: (_) => 0);
+
+    var history = await imports.watchAll().first;
+    expect(history, hasLength(2));
+    expect(history.first.mode, ImportMode.replace);
+    expect(history.first.changes, 3); // 1 new, 2 removed
+    expect(history.first.itemCount, 2); // before import 2
+    expect(history.last.mode, ImportMode.add);
+    expect(history.last.itemCount, 1); // before import 1
+
+    // Restore the oldest: back to just "Original".
+    expect(await imports.restore(history.last.id), isTrue);
+    expect((await items.loadAll()).map((i) => i.title), ['Original']);
+
+    // The restore itself was backed up first, so it can be undone.
+    history = await imports.watchAll().first;
+    expect(history.first.reason, BackupReason.restore);
+    expect(history.first.itemCount, 1);
+    await imports.undoLatest();
+    expect((await items.loadAll()).map((i) => i.title), ['Only import 2']);
+  });
+
   test('only the last $maxImportBackups backups are kept', () async {
     for (var i = 0; i < maxImportBackups + 3; i++) {
       final p = await plan('{"type":"task","title":"n$i"}', ImportMode.add);

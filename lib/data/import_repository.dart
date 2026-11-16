@@ -6,26 +6,54 @@ import '../domain/exchange/import_plan.dart';
 import 'database.dart';
 import 'items_repository.dart';
 
-/// How many pre-import backups are kept (oldest are dropped).
+/// How many backups are kept (oldest are dropped).
 const maxImportBackups = 10;
 
-/// Info about the most recent pre-import backup.
-class ImportBackupInfo {
-  /// Creates the info.
-  const ImportBackupInfo({required this.id, required this.createdAt});
+/// Why a backup was taken.
+enum BackupReason {
+  /// Right before an AI import.
+  import,
 
-  /// Backup row id.
-  final int id;
-
-  /// When it was taken (= when the import happened).
-  final DateTime createdAt;
+  /// Right before restoring an older backup (so the restore can be undone).
+  restore,
 }
 
-/// Applies AI imports and undoes them.
+/// Info about one stored backup.
+class ImportBackupInfo {
+  /// Creates the info.
+  const ImportBackupInfo({
+    required this.id,
+    required this.createdAt,
+    this.reason = BackupReason.import,
+    this.mode,
+    this.changes,
+    this.itemCount = 0,
+  });
+
+  /// Backup row id (newest = highest).
+  final int id;
+
+  /// When it was taken.
+  final DateTime createdAt;
+
+  /// Why it was taken.
+  final BackupReason reason;
+
+  /// For imports: Add or Replace (null for older backups).
+  final ImportMode? mode;
+
+  /// For imports: how many changes the import made (null if unknown).
+  final int? changes;
+
+  /// How many items the list had at that point.
+  final int itemCount;
+}
+
+/// Applies AI imports, undoes them, and restores older backups.
 ///
 /// Every import first stores a snapshot of the whole list (items, tags, tag
-/// links, reminders) in the database, so "Undo import" can restore it
-/// exactly. Backups live in the database, so they're encrypted with it.
+/// links, reminders) in the database. Backups live in the database, so
+/// they're encrypted with it. The last [maxImportBackups] are kept.
 class ImportRepository {
   /// Creates a repository over [db]. [items] does the item writes.
   ImportRepository(this._db, this._items, {DateTime Function()? clock})
@@ -45,16 +73,13 @@ class ImportRepository {
   }) {
     return _db.transaction(() async {
       final now = _clock();
-      await _db
-          .into(_db.importBackups)
-          .insert(
-            ImportBackupsCompanion.insert(
-              createdAt: now,
-              payload: await _snapshot(),
-            ),
-          );
-      await _pruneBackups();
-
+      // Snapshot first: before any new tags exist.
+      await _backup(
+        now,
+        reason: BackupReason.import,
+        mode: plan.mode,
+        changes: plan.countFor(keep),
+      );
       final tagIds = await _ensureTags(plan.newTagNames, colorFor, now);
       final changes = plan.build(tagIdsByName: tagIds, keep: keep);
       await _items.applyInTransaction(
@@ -67,20 +92,19 @@ class ImportRepository {
   }
 
   /// The latest backup, live (null when there's nothing to undo).
-  Stream<ImportBackupInfo?> watchLatest() {
+  Stream<ImportBackupInfo?> watchLatest() =>
+      watchAll().map((list) => list.firstOrNull);
+
+  /// Every stored backup, newest first, live.
+  Stream<List<ImportBackupInfo>> watchAll() {
     final query = _db.select(_db.importBackups)
-      ..orderBy([(b) => OrderingTerm.desc(b.id)])
-      ..limit(1);
-    return query.watchSingleOrNull().map(
-      (row) => row == null
-          ? null
-          : ImportBackupInfo(id: row.id, createdAt: row.createdAt),
-    );
+      ..orderBy([(b) => OrderingTerm.desc(b.id)]);
+    return query.watch().map((rows) => rows.map(_info).toList());
   }
 
-  /// Puts the list back exactly as it was before the latest import, and
-  /// drops that backup. Changes made since are lost. Returns false when
-  /// there was nothing to undo.
+  /// Puts the list back exactly as it was before the latest backup was
+  /// taken, and drops that backup. Changes made since are lost. Returns
+  /// false when there was nothing to undo.
   Future<bool> undoLatest() {
     return _db.transaction(() async {
       final row =
@@ -95,6 +119,58 @@ class ImportRepository {
       )..where((b) => b.id.equals(row.id))).go();
       return true;
     });
+  }
+
+  /// Restores backup [id]. The current list is backed up first (as a
+  /// "before restore" backup), so this can be undone too. Returns false if
+  /// that backup no longer exists.
+  Future<bool> restore(int id) {
+    return _db.transaction(() async {
+      final row = await (_db.select(
+        _db.importBackups,
+      )..where((b) => b.id.equals(id))).getSingleOrNull();
+      if (row == null) return false;
+      await _backup(_clock(), reason: BackupReason.restore);
+      await _restore(row.payload);
+      return true;
+    });
+  }
+
+  ImportBackupInfo _info(ImportBackupRow row) {
+    // Only the small header is needed; older backups have none.
+    final data = jsonDecode(row.payload) as Map<String, dynamic>;
+    final meta = data['meta'] as Map<String, dynamic>? ?? const {};
+    return ImportBackupInfo(
+      id: row.id,
+      createdAt: row.createdAt,
+      reason:
+          BackupReason.values.asNameMap()[meta['reason']] ??
+          BackupReason.import,
+      mode: ImportMode.values.asNameMap()[meta['mode']],
+      changes: meta['changes'] as int?,
+      itemCount: (data['items'] as List?)?.length ?? 0,
+    );
+  }
+
+  Future<void> _backup(
+    DateTime now, {
+    required BackupReason reason,
+    ImportMode? mode,
+    int? changes,
+  }) async {
+    await _db
+        .into(_db.importBackups)
+        .insert(
+          ImportBackupsCompanion.insert(
+            createdAt: now,
+            payload: await _snapshot({
+              'reason': reason.name,
+              'mode': ?mode?.name,
+              'changes': ?changes,
+            }),
+          ),
+        );
+    await _pruneBackups();
   }
 
   Future<Map<String, String>> _ensureTags(
@@ -134,7 +210,8 @@ class ImportRepository {
     }
   }
 
-  Future<String> _snapshot() async => jsonEncode({
+  Future<String> _snapshot(Map<String, Object> meta) async => jsonEncode({
+    'meta': meta,
     'items': [for (final r in await _db.select(_db.items).get()) r.toJson()],
     'tags': [for (final r in await _db.select(_db.tags).get()) r.toJson()],
     'itemTags': [

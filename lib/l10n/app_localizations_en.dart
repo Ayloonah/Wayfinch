@@ -960,4 +960,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String importMovedUnder(String parent) {
     return 'Moved under \"$parent\"';
   }
+
+  @override
+  String get settingsGeneral => 'General';
+
+  @override
+  String get settingStartView => 'Open Wayfinch in';
+
+  @override
+  String get settingsImportHistory => 'Import history';
+
+  @override
+  String settingsImportHistoryHelp(int count) {
+    return 'Your list is backed up before every import. Restore any of the last $count backups; your current list is backed up first, so you can change your mind.';
+  }
+
+  @override
+  String get importHistoryEmpty =>
+      'No backups yet. One is made before each import.';
+
+  @override
+  String get backupBeforeImport => 'Before an import';
+
+  @override
+  String backupBeforeImportMode(String mode) {
+    return 'Before an import ($mode)';
+  }
+
+  @override
+  String backupBeforeImportDetail(String mode, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Before an import ($mode, $count changes)',
+      one: 'Before an import ($mode, 1 change)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupBeforeRestore => 'Before a restore';
+
+  @override
+  String backupItemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupRestore => 'Restore';
+
+  @override
+  String get backupRestoreTitle => 'Restore this backup?';
+
+  @override
+  String get backupRestoreBody =>
+      'Your list goes back to exactly how it was at that point. Your current list is backed up first, so you can undo this from Import history.';
+
+  @override
+  String get backupRestored => 'Backup restored.';
 }

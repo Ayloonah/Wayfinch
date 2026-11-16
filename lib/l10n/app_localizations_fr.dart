@@ -968,4 +968,68 @@ class AppLocalizationsFr extends AppLocalizations {
   String importMovedUnder(String parent) {
     return 'Déplacé sous « $parent »';
   }
+
+  @override
+  String get settingsGeneral => 'Général';
+
+  @override
+  String get settingStartView => 'Ouvrir Wayfinch sur';
+
+  @override
+  String get settingsImportHistory => 'Historique des imports';
+
+  @override
+  String settingsImportHistoryHelp(int count) {
+    return 'Ta liste est sauvegardée avant chaque import. Restaure l’une des $count dernières sauvegardes ; ta liste actuelle est sauvegardée d’abord, donc tu peux changer d’avis.';
+  }
+
+  @override
+  String get importHistoryEmpty =>
+      'Pas encore de sauvegarde. Une est faite avant chaque import.';
+
+  @override
+  String get backupBeforeImport => 'Avant un import';
+
+  @override
+  String backupBeforeImportMode(String mode) {
+    return 'Avant un import ($mode)';
+  }
+
+  @override
+  String backupBeforeImportDetail(String mode, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Avant un import ($mode, $count changements)',
+      one: 'Avant un import ($mode, 1 changement)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupBeforeRestore => 'Avant une restauration';
+
+  @override
+  String backupItemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count éléments',
+      one: '1 élément',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupRestore => 'Restaurer';
+
+  @override
+  String get backupRestoreTitle => 'Restaurer cette sauvegarde ?';
+
+  @override
+  String get backupRestoreBody =>
+      'Ta liste redevient exactement comme à ce moment-là. Ta liste actuelle est sauvegardée d’abord, donc tu peux annuler depuis l’historique des imports.';
+
+  @override
+  String get backupRestored => 'Sauvegarde restaurée.';
 }
