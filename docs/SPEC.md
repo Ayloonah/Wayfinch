@@ -315,4 +315,6 @@ Seven milestones, each ending in an app that runs. Wayfinch is usable day to day
 - Direct Google/Outlook calendar sync
 - Smart "merge" import mode (the stable ids already make it possible)
 - Windows Hello unlock
-- Before any public release: a trademark search for "Wayfinch" (USPTO + CIPO) and a Microsoft Store check
+- A code-signed installer and automatic updates
+
+Done before the 1.0 release (November 16, 2026): trademark searches for "Wayfinch" found no marks at the USPTO or CIPO, and the Microsoft Store has no app by that name. Similar marks exist: Finch Care PBC owns FINCH for its habit and self-care pet app (US Reg. 7992822; Canada No. 2422362, class 9), among many other coexisting "finch" software marks (FINCH from several owners, WILLOWFINCH, GOLDFINCH, GREYFINCH…). The name was kept for this free, open-source release; get a trademark lawyer's clearance before selling Wayfinch, listing it in the Microsoft Store or registering the name, and keep the branding away from virtual-pet and self-care themes.

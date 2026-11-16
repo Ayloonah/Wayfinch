@@ -8,7 +8,15 @@ Ask your AI to break a big project into steps, and Wayfinch turns its answer int
 
 Offline-first, private by default, and designed to keep you on track without stressing you out.
 
-> 🚧 **Status:** early development, Windows desktop first. The core to-do list works (Today, Upcoming, All, Done and Tags views, subtasks, recurrence, quick add), along with light/dark themes, accents and a custom theme builder, the full AI loop (Export for AI, Import with preview, Add or Replace, undo), first-run setup with an optional password that encrypts your data, and reminders with a morning digest, quiet hours and snooze (Wayfinch keeps running in the system tray), calendar import/export with `.ics` files, and daily backups. Every planned milestone is in; see the [roadmap](#roadmap).
+> ✅ **Version 1.0 for Windows is here.** Everything planned for the first version is in: the to-do list with subtasks and recurrence, the full AI loop, themes, an optional password that encrypts your data, reminders, calendar import/export and daily backups. See [what's next](#coming-in-future-versions).
+
+## Download
+
+Get **`WayfinchSetup-1.0.0.exe`** from the [latest release](https://github.com/Ayloonah/Wayfinch/releases/latest) and run it. It works on Windows 10 and 11 (64-bit).
+
+- It installs just for you by default (no admin needed), or for everyone on the PC if you prefer.
+- The installer isn't code-signed yet, so Windows may say "Windows protected your PC". Click **More info**, then **Run anyway**.
+- Uninstalling keeps your list unless you tick the box to delete it.
 
 ---
 
@@ -104,6 +112,8 @@ This builds the app and writes `build/installer/WayfinchSetup-<version>.exe` (th
 
 ## Roadmap
 
+### In version 1.0
+
 - [x] **Foundation:** project setup, encrypted database, data model, EN/FR
 - [x] **Core list:** views, nesting, completing items, recurrence, quick add
 - [x] **Look and feel:** themes, accents, custom theme builder, tags, overdue banner
@@ -111,8 +121,16 @@ This builds the app and writes `build/installer/WayfinchSetup-<version>.exe` (th
 - [x] **Onboarding and Help:** setup, optional password with encryption and recovery code, tutorial, Help
 - [x] **Notifications:** reminders, daily digest, quiet hours, snooze, tray
 - [x] **Calendar and backups:** `.ics` import/export, daily backups
+- [x] **Windows installer**
 
-Later: calendar view, Android/iOS/macOS/web, sync.
+### Coming in future versions
+
+- 🗓️ **Calendar view:** see your week or month as a grid.
+- 📱 **More platforms:** Android, iOS, macOS and the web, with optional sync between your devices.
+- 🔄 **Direct calendar sync** with Google and Outlook, instead of `.ics` files.
+- 🧩 **Smart merge import:** combine your AI's version with yours instead of choosing Add or Replace.
+- 👋 **Windows Hello unlock** for password-protected lists.
+- ✍️ **A signed installer** (no SmartScreen warning) and **automatic updates**.
 
 ## License
 
