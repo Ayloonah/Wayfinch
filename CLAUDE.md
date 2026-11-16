@@ -22,6 +22,10 @@ Prefer well-maintained, widely used packages. Ask before adding any new dependen
 - The three confirm prompts go through `ItemRules` (`lib/domain/item_rules.dart`). Remembered answers live in the settings table. Cancel is only rememberable for "Mark the parent done too?" (see the spec's "Core behaviors").
 - Keep the data layer (Drift, repositories), domain logic (completion rules, import diffing, recurrence) and UI separate. Domain logic must be unit-testable without Flutter widgets.
 - The AI exchange format is versioned (`"version": 1` in the JSON) but the version is never shown in the UI.
+- The logo's sources live in `docs/brand/` (SVGs plus `build.py`, which generates them). Brand colors are fixed and don't follow the accent.
+  - In the app, `FinchLogo` (`WayfinchMarkPainter`) paints the same geometry: `wayfinch-mark.svg` in the app's light theme, `wayfinch-mark-dark.svg` (light check) in its dark theme.
+  - The tray icon and the running window's icon (title bar, taskbar) follow the **Windows system theme** (`SystemUsesLightTheme`, see `lib/app/system_theme.dart`), not the app theme, and swap live: `assets/icons/wayfinch_light.ico` (light system) or `wayfinch_dark.ico` (dark system). Regenerate both with `flutter test tool/render_icons_test.dart`.
+  - Only the exe's embedded icon (`windows/runner/resources/app_icon.ico`, the shortcut and pinned icon) is the outlined `wayfinch.ico`. Toasts use `assets/brand/notification_icon.png`.
 - Theme tokens (colors, accents, priority colors) live in one place. Exact values are in the spec's "Visual design and themes" section.
 
 ## Workflow

@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:path/path.dart' as p;
 import 'package:tray_manager/legacy.dart';
 import 'package:window_manager/legacy.dart';
 import 'package:windows_single_instance/windows_single_instance.dart';
@@ -15,6 +16,7 @@ import 'package:windows_single_instance/windows_single_instance.dart';
 import '../l10n/app_localizations.dart';
 import 'app_session.dart';
 import 'notification_service.dart';
+import 'system_theme.dart';
 
 /// Command-line flag used when Windows starts Wayfinch at login: start
 /// hidden in the tray.
@@ -124,15 +126,38 @@ class Desktop with TrayListener, WindowListener {
   Future<void> _quit() async {
     _quitting = true;
     _service?.dispose();
+    await _themeChanges?.cancel();
     await trayManager.destroy();
     await windowManager.setPreventClose(false);
     await windowManager.destroy();
   }
 
+  // ---- Icons follow the Windows system theme ------------------------------
+
+  /// Sets the tray and running-window (taskbar, title bar) icons for the
+  /// Windows *system* theme: the navy-check mark on light, the light-check
+  /// mark on dark. The exe's embedded icon stays the outlined one.
+  Future<void> _applyThemeIcons(bool systemIsLight) async {
+    final icon = systemIsLight
+        ? 'assets/icons/wayfinch_light.ico'
+        : 'assets/icons/wayfinch_dark.ico';
+    await trayManager.setIcon(icon);
+    await windowManager.setIcon(icon);
+  }
+
+  void _followSystemTheme() {
+    _themeChanges = SystemTheme.changes().listen(
+      (light) => unawaited(_applyThemeIcons(light)),
+    );
+  }
+
+  StreamSubscription<bool>? _themeChanges;
+
   // ---- Tray ---------------------------------------------------------------
 
   Future<void> _setUpTray() async {
-    await trayManager.setIcon('assets/tray_icon.ico');
+    await _applyThemeIcons(SystemTheme.isLight());
+    _followSystemTheme();
     await trayManager.setToolTip(_l10n.appTitle);
     await trayManager.setContextMenu(
       Menu(
@@ -189,6 +214,7 @@ class Desktop with TrayListener, WindowListener {
           appName: _l10n.appTitle,
           appUserModelId: 'Wayfinch.Wayfinch.Desktop',
           guid: '6f7c1b3e-2a4d-4c8e-9b1f-5d3a7e9c2b41',
+          iconPath: _notificationIconPath(),
         ),
       ),
       onDidReceiveNotificationResponse: (response) {
@@ -196,6 +222,20 @@ class Desktop with TrayListener, WindowListener {
         if (args != null) _service?.handle(args);
       },
     );
+  }
+
+  /// The bundled logo for toasts (next to the exe, in Flutter's assets), or
+  /// null if it isn't there.
+  static String? _notificationIconPath() {
+    final path = p.join(
+      File(Platform.resolvedExecutable).parent.path,
+      'data',
+      'flutter_assets',
+      'assets',
+      'brand',
+      'notification_icon.png',
+    );
+    return File(path).existsSync() ? path : null;
   }
 
   // ---- Start with Windows (HKCU Run key, via the built-in reg tool) --------

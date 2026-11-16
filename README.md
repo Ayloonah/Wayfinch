@@ -1,4 +1,6 @@
-# Wayfinch 🐦
+<img src="docs/brand/wayfinch-mark.svg" alt="" width="96" align="right">
+
+# Wayfinch
 
 **A to-do app that teams up with your AI.**
 

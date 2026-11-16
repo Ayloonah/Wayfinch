@@ -249,6 +249,7 @@ Windows only delivers Wayfinch's notifications while the app is running, so clos
 | Snooze from a notification |  | 10 minutes, 1 hour, tomorrow |
 | Overdue | No notification | The banner covers it |
 
+- The tray icon and the running window's icon (title bar, taskbar) follow the Windows system theme, not the app's theme, and switch as soon as it changes: the regular mark on a light system theme, the light-check mark on a dark one. The outlined mark is only the exe's own icon (shortcuts, pinned taskbar button when closed).
 - The tray menu has "Open Wayfinch" and a real "Quit". Clicking the tray icon brings the window back. The first time the window is closed, a notification explains that Wayfinch is still running in the tray.
 - Only one copy runs: launching Wayfinch again brings the running window forward.
 - "Launch at startup" is offered during onboarding and lives in Settings › Notifications. At login Wayfinch starts hidden in the tray.
