@@ -470,7 +470,7 @@ class HomeController extends ChangeNotifier {
     );
     _focusTitleFor = item.id;
     select(item.id);
-    if (parentId == _tutorial?.parent) {
+    if (_inTutorial(parentId)) {
       await completeTutorialStep(TutorialStep.addSubtask);
     }
     return item;
@@ -551,7 +551,7 @@ class HomeController extends ChangeNotifier {
   Future<void> addTagId(Item item, String tagId) async {
     if (item.tagIds.contains(tagId)) return;
     await items.save(item.copyWith(tagIds: [...item.tagIds, tagId]));
-    if (item.id == _tutorial?.parent) {
+    if (_inTutorial(item.id)) {
       await completeTutorialStep(TutorialStep.tag);
     }
   }
@@ -611,12 +611,32 @@ class HomeController extends ChangeNotifier {
 
   /// Checks off a tutorial step when the user did what it teaches (if it's
   /// still open).
+  ///
+  /// If the step has open subtasks of its own (say, the subtask just added
+  /// under "Add a subtask"), only the step is marked done: asking "Close the
+  /// subtasks too?" about something the user just made would be confusing.
   Future<void> completeTutorialStep(TutorialStep step) async {
     final id = _tutorial?.idOf(step);
-    final item = (await items.loadAll()).where((i) => i.id == id).firstOrNull;
-    if (item == null || item.isDone) return;
     _tree = ItemTree(await items.loadAll());
-    await complete(item.id);
+    final item = _tree[id];
+    if (item == null || item.isDone) return;
+    final hasOpenSubtasks = _tree
+        .descendantsOf(item.id)
+        .any((d) => d.isTask && !d.isDone);
+    if (hasOpenSubtasks) {
+      await items.save(item.copyWith(doneAt: _clock()));
+    } else {
+      await complete(item.id);
+    }
+  }
+
+  /// Whether [id] is the tutorial task or anything under it (its steps,
+  /// or subtasks added to them): actions there count for the tutorial.
+  bool _inTutorial(String? id) {
+    final parent = _tutorial?.parent;
+    if (parent == null || id == null) return false;
+    if (id == parent) return true;
+    return _tree.ancestorsOf(id).any((a) => a.id == parent);
   }
 
   /// Called after an export was copied or saved (a tutorial step).

@@ -1345,14 +1345,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tutorialAddSubtaskNotes =>
-      'Open \"Getting started\" and use \"+ Add subtask\", or hover it in the list and click the +.';
+      'Open this step (or \"Getting started\") and use \"+ Add subtask\", or hover it in the list and click the +.';
 
   @override
   String get tutorialTag => 'Give this a tag';
 
   @override
   String get tutorialTagNotes =>
-      'Open \"Getting started\" and click \"+ Tag\" in its details. Pick a tag or type a new one.';
+      'Open this step (or \"Getting started\") and click \"+ Tag\" in its details. Pick a tag or type a new one.';
 
   @override
   String get tutorialExport => 'Export your list for AI';

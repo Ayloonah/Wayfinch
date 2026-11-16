@@ -451,9 +451,9 @@
   "tutorialCheckOff": "Check this off",
   "tutorialCheckOffNotes": "Click the box next to this step. Done items hide themselves; you'll find them in Done.",
   "tutorialAddSubtask": "Add a subtask",
-  "tutorialAddSubtaskNotes": "Open \"Getting started\" and use \"+ Add subtask\", or hover it in the list and click the +.",
+  "tutorialAddSubtaskNotes": "Open this step (or \"Getting started\") and use \"+ Add subtask\", or hover it in the list and click the +.",
   "tutorialTag": "Give this a tag",
-  "tutorialTagNotes": "Open \"Getting started\" and click \"+ Tag\" in its details. Pick a tag or type a new one.",
+  "tutorialTagNotes": "Open this step (or \"Getting started\") and click \"+ Tag\" in its details. Pick a tag or type a new one.",
   "tutorialExport": "Export your list for AI",
   "tutorialExportNotes": "Click \"Export for AI\" in the sidebar, then Copy. Paste it into your AI with a request, and bring the reply back with Import.",
 

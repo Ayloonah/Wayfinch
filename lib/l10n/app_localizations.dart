@@ -2177,7 +2177,7 @@ abstract class AppLocalizations {
   /// No description provided for @tutorialAddSubtaskNotes.
   ///
   /// In en, this message translates to:
-  /// **'Open \"Getting started\" and use \"+ Add subtask\", or hover it in the list and click the +.'**
+  /// **'Open this step (or \"Getting started\") and use \"+ Add subtask\", or hover it in the list and click the +.'**
   String get tutorialAddSubtaskNotes;
 
   /// No description provided for @tutorialTag.
@@ -2189,7 +2189,7 @@ abstract class AppLocalizations {
   /// No description provided for @tutorialTagNotes.
   ///
   /// In en, this message translates to:
-  /// **'Open \"Getting started\" and click \"+ Tag\" in its details. Pick a tag or type a new one.'**
+  /// **'Open this step (or \"Getting started\") and click \"+ Tag\" in its details. Pick a tag or type a new one.'**
   String get tutorialTagNotes;
 
   /// No description provided for @tutorialExport.

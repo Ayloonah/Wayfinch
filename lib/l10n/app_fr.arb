@@ -375,9 +375,9 @@
   "tutorialCheckOff": "Coche cette étape",
   "tutorialCheckOffNotes": "Clique sur la case à côté de cette étape. Les éléments faits se cachent ; tu les retrouves dans Fait.",
   "tutorialAddSubtask": "Ajoute une sous-tâche",
-  "tutorialAddSubtaskNotes": "Ouvre « Premiers pas » et utilise « + Ajouter une sous-tâche », ou survole-la dans la liste et clique sur le +.",
+  "tutorialAddSubtaskNotes": "Ouvre cette étape (ou « Premiers pas ») et utilise « + Ajouter une sous-tâche », ou survole-la dans la liste et clique sur le +.",
   "tutorialTag": "Donne-lui une étiquette",
-  "tutorialTagNotes": "Ouvre « Premiers pas » et clique sur « + Étiquette » dans ses détails. Choisis une étiquette ou tapes-en une nouvelle.",
+  "tutorialTagNotes": "Ouvre cette étape (ou « Premiers pas ») et clique sur « + Étiquette » dans ses détails. Choisis une étiquette ou tapes-en une nouvelle.",
   "tutorialExport": "Exporte ta liste pour l’IA",
   "tutorialExportNotes": "Clique sur « Exporter pour l’IA » dans la barre latérale, puis Copier. Colle-la dans ton IA avec une demande, et ramène la réponse avec Importer.",
 

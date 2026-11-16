@@ -1355,14 +1355,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get tutorialAddSubtaskNotes =>
-      'Ouvre « Premiers pas » et utilise « + Ajouter une sous-tâche », ou survole-la dans la liste et clique sur le +.';
+      'Ouvre cette étape (ou « Premiers pas ») et utilise « + Ajouter une sous-tâche », ou survole-la dans la liste et clique sur le +.';
 
   @override
   String get tutorialTag => 'Donne-lui une étiquette';
 
   @override
   String get tutorialTagNotes =>
-      'Ouvre « Premiers pas » et clique sur « + Étiquette » dans ses détails. Choisis une étiquette ou tapes-en une nouvelle.';
+      'Ouvre cette étape (ou « Premiers pas ») et clique sur « + Étiquette » dans ses détails. Choisis une étiquette ou tapes-en une nouvelle.';
 
   @override
   String get tutorialExport => 'Exporte ta liste pour l’IA';

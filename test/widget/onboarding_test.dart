@@ -220,6 +220,50 @@ void main() {
     expect(ok, isTrue);
   });
 
+  testWidgets('tutorial steps also count when done on the steps themselves', (
+    tester,
+  ) async {
+    final s = await pumpShell(tester);
+    await tapText(tester, "Let's start");
+    await tester.enterText(find.byType(TextField), 'Judhy');
+    await tester.pump();
+    await tapText(tester, 'Next');
+    await tapText(tester, 'Skip for now');
+    await tapText(tester, 'Next');
+    await tapText(tester, 'Next');
+    await tapText(tester, "Let's go!");
+
+    final home = s.home!;
+    final steps = home.tutorial!;
+
+    // A subtask added under the "Add a subtask" step itself.
+    final added = await pumpUntilDone(
+      tester,
+      home.addSubtask(steps.addSubtask, 'New task'),
+    );
+    await settle(tester);
+    expect(home.tree[steps.addSubtask]!.isDone, isTrue);
+    // No "Close the subtasks too?" prompt, and the new subtask stays open.
+    expect(find.text('Close the subtasks too?'), findsNothing);
+    expect(home.tree[added.id]!.isDone, isFalse);
+
+    // A tag on the "Give this a tag" step itself.
+    await pumpUntilDone(tester, home.addTag(home.tree[steps.tag]!, 'tag'));
+    await settle(tester);
+    expect(home.tree[steps.tag]!.isDone, isTrue);
+
+    // Unrelated items don't count.
+    final other = await pumpUntilDone(
+      tester,
+      home.items.create(type: ItemType.task, title: 'Unrelated'),
+    );
+    await settle(tester);
+    await pumpUntilDone(tester, home.addSubtask(other.id, 'Child'));
+    await settle(tester);
+    expect(home.tree[steps.export]!.isDone, isFalse);
+    await finish(tester, s);
+  });
+
   testWidgets('Settings › Profile: set a password, then remove it', (
     tester,
   ) async {
