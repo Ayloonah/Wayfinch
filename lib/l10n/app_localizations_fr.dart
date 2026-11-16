@@ -421,4 +421,146 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get save => 'Enregistrer';
+
+  @override
+  String overdueBanner(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count éléments en retard ont besoin d’un nouveau plan',
+      one: '1 élément en retard a besoin d’un nouveau plan',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get overdueReview => 'Voir';
+
+  @override
+  String get overdueSnooze => 'Masquer jusqu’à demain';
+
+  @override
+  String get overdueTag => 'en retard';
+
+  @override
+  String get autoTag => 'auto';
+
+  @override
+  String get sidebarTags => 'Étiquettes';
+
+  @override
+  String get emptyTag => 'Rien d’ouvert avec cette étiquette.';
+
+  @override
+  String get emptyOverdue => 'Rien en retard. Bien joué !';
+
+  @override
+  String get changeTagColor => 'Couleur de l’étiquette';
+
+  @override
+  String get customColor => 'Couleur personnalisée...';
+
+  @override
+  String get colorArea => 'Saturation et luminosité';
+
+  @override
+  String get colorHue => 'Teinte';
+
+  @override
+  String get colorHex => 'Hex';
+
+  @override
+  String get settingsAppearance => 'Apparence';
+
+  @override
+  String get settingsTheme => 'Thème';
+
+  @override
+  String get themeSystem => 'Système';
+
+  @override
+  String get themeLight => 'Clair';
+
+  @override
+  String get themeDark => 'Sombre';
+
+  @override
+  String get themeSetByCustom =>
+      'Ton thème personnalisé décide si c’est clair ou sombre.';
+
+  @override
+  String get settingsAccent => 'Couleur d’accent';
+
+  @override
+  String get accentSky => 'Ciel';
+
+  @override
+  String get accentHoney => 'Miel';
+
+  @override
+  String get accentMeadow => 'Prairie';
+
+  @override
+  String get accentLilac => 'Lilas';
+
+  @override
+  String get accentMono => 'Mono';
+
+  @override
+  String get accentCustom => 'Personnalisé';
+
+  @override
+  String get customThemeTitle => 'Thème personnalisé';
+
+  @override
+  String get customStartLight => 'Partir du clair';
+
+  @override
+  String get customStartDark => 'Partir du sombre';
+
+  @override
+  String get customAccent => 'Accent';
+
+  @override
+  String get customBackground => 'Arrière-plan';
+
+  @override
+  String get customPanel => 'Panneaux';
+
+  @override
+  String get customSidebar => 'Barre latérale';
+
+  @override
+  String get customText => 'Texte';
+
+  @override
+  String get contrastAllGood => 'Tout devrait être facile à lire.';
+
+  @override
+  String get contrastWarningTitle =>
+      'Certains textes pourraient être difficiles à lire :';
+
+  @override
+  String contrastIssue(String what, String ratio) {
+    return '$what : $ratio:1 (vise 4,5:1)';
+  }
+
+  @override
+  String get contrastTextOnBackground => 'Texte sur l’arrière-plan';
+
+  @override
+  String get contrastTextOnPanel => 'Texte sur les panneaux';
+
+  @override
+  String get contrastTextOnSidebar => 'Texte sur la barre latérale';
+
+  @override
+  String get contrastMutedOnPanel => 'Texte secondaire sur les panneaux';
+
+  @override
+  String get contrastTextOnAccent => 'Texte sur les boutons d’accent';
+
+  @override
+  String get contrastAccentTextOnPanel =>
+      'Texte couleur d’accent sur les panneaux';
 }

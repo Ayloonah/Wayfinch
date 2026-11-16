@@ -4,6 +4,7 @@ import '../../domain/item_rules.dart';
 import '../../l10n/app_localizations.dart';
 import '../home/home_controller.dart';
 import '../theme/tokens.dart';
+import 'appearance_section.dart';
 
 /// Settings. For now: what each of the three prompts does (ask, or a
 /// remembered answer).
@@ -23,48 +24,64 @@ class SettingsPane extends StatelessWidget {
           style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 24),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: Material(
-              color: colors.panel,
-              shape: RoundedRectangleBorder(
-                side: BorderSide(color: colors.border),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
-                      child: Text(
-                        l10n.settingsPrompts,
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-                      child: Text(
-                        l10n.settingsPromptsHelp,
-                        style: TextStyle(color: colors.muted),
-                      ),
-                    ),
-                    for (final kind in PromptKind.values)
-                      PromptSettingRow(kind: kind),
-                  ],
+        const _SettingsCard(children: [AppearanceSection()]),
+        const SizedBox(height: 20),
+        _SettingsCard(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+              child: Text(
+                l10n.settingsPrompts,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+              child: Text(
+                l10n.settingsPromptsHelp,
+                style: TextStyle(color: colors.muted),
+              ),
+            ),
+            for (final kind in PromptKind.values) PromptSettingRow(kind: kind),
+          ],
         ),
       ],
+    );
+  }
+}
+
+/// A rounded panel holding one settings section.
+class _SettingsCard extends StatelessWidget {
+  const _SettingsCard({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = WayfinchColors.of(context);
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 720),
+        child: Material(
+          color: colors.panel,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: colors.border),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: children,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

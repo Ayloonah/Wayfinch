@@ -43,7 +43,7 @@ Prefer well-maintained, widely used packages. Ask before adding any new dependen
 - Migration tests for every Drift schema change.
 - Widget tests for the main flows when practical.
 - Run `flutter analyze` and `flutter test` before opening or updating a PR.
-- To check the UI without touching real data, run the demo entry point (in-memory database with sample items): `flutter run -d windows -t dev/demo_main.dart`.
+- To check the UI without touching real data, run the demo entry point (in-memory database with sample items): `flutter run -d windows -t dev/demo_main.dart`. Optional `--dart-define`s: `DEMO_MODE=light|dark`, `DEMO_ACCENT=sky|honey|meadow|lilac|mono`, `DEMO_VIEW=settings`. Use a release build to launch it outside `flutter run` (a debug build started on its own exits right away, likely because its folder has no `native_assets.json`). A running copy locks `build/`, so close it before rebuilding.
 - Widget tests open the database inside the test's fake-async zone. Run database work with the `pumpUntilDone` helper in `test/widget/app_test.dart`, not `tester.runAsync`, or the test hangs.
 
 ## Style

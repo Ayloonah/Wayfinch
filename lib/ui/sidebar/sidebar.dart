@@ -54,13 +54,157 @@ class Sidebar extends StatelessWidget {
               controller.view(AppView.done).doneThisWeek,
             ),
           ),
-          const Spacer(),
+          const SizedBox(height: 20),
+          const Expanded(child: _TagList()),
           _NavButton(
             destination: Destination.settings,
             icon: Icons.tune,
             label: l10n.navSettings,
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// "TAGS": one row per tag with its open-item count, then the overdue auto
+/// tag. Scrolls when there are many.
+class _TagList extends StatelessWidget {
+  const _TagList();
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = HomeScope.of(context);
+    final colors = WayfinchColors.of(context);
+    final l10n = AppLocalizations.of(context);
+    final tags = controller.tagsById.values.toList()
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    final selectedTag = controller.destination == Destination.tag
+        ? controller.tagFilter
+        : null;
+    return ListView(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
+          child: Text(
+            l10n.sidebarTags.toUpperCase(),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.8,
+              color: colors.muted,
+            ),
+          ),
+        ),
+        for (final tag in tags)
+          _TagRow(
+            label: tag.name,
+            dot: colors.tagColor(tag.color),
+            count: controller.tagCount(tag.id),
+            selected: selectedTag == tag.id,
+            onTap: () => controller.openTag(tag.id),
+          ),
+        _TagRow(
+          label: l10n.overdueTag,
+          dot: colors.warningText,
+          count: controller.overdueCount,
+          selected: selectedTag == overdueTagId,
+          auto: true,
+          onTap: () => controller.openTag(overdueTagId),
+        ),
+      ],
+    );
+  }
+}
+
+class _TagRow extends StatelessWidget {
+  const _TagRow({
+    required this.label,
+    required this.dot,
+    required this.count,
+    required this.selected,
+    required this.onTap,
+    this.auto = false,
+  });
+
+  final String label;
+  final Color dot;
+  final int count;
+  final bool selected;
+  final bool auto;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = WayfinchColors.of(context);
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Material(
+        color: selected ? colors.accentSoft : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: SizedBox(
+            height: 40,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: dot,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: selected
+                            ? FontWeight.w800
+                            : FontWeight.w600,
+                        color: selected ? colors.accentText : colors.text,
+                      ),
+                    ),
+                  ),
+                  if (auto) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.warningBackground,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        l10n.autoTag,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: colors.warningText,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  Text(
+                    '$count',
+                    style: TextStyle(fontSize: 13, color: colors.muted),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

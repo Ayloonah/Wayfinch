@@ -33,6 +33,12 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  fonts:
+    # Nunito variable font (all weights in one file), SIL Open Font License:
+    # see assets/fonts/OFL.txt
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-Variable.ttf
 
 # Use the SQLCipher build bundled with package:sqlite3 so the database file
 # can be encrypted (see the "hooks" docs of package:sqlite3).

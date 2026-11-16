@@ -17,7 +17,14 @@ enum AppView {
 
   /// Completed items.
   done,
+
+  /// Open items with one tag, or the overdue auto tag.
+  tag,
 }
+
+/// The id of the "overdue" auto tag. It is computed, never stored, and users
+/// can't assign or delete it.
+const overdueTagId = '__overdue__';
 
 /// Kinds of section headers in a list.
 enum SectionKind {
@@ -133,12 +140,25 @@ class ViewBuilder {
   final Set<String> showDoneFor;
 
   /// Builds [view].
-  ViewData build(AppView view) => switch (view) {
+  ///
+  /// [tagId] is used by [AppView.tag].
+  ViewData build(AppView view, {String? tagId}) => switch (view) {
     AppView.today => today(),
     AppView.upcoming => upcoming(),
     AppView.all => all(),
     AppView.done => done(),
+    AppView.tag => tag(tagId ?? overdueTagId),
   };
+
+  /// Open items carrying tag [tagId], as trees. For [overdueTagId], every
+  /// overdue item.
+  ViewData tag(String tagId) {
+    final matched = tree.all.where((i) {
+      if (!i.isVisible(now)) return false;
+      return tagId == overdueTagId ? _isOverdue(i) : i.tagIds.contains(tagId);
+    }).toList();
+    return ViewData(_forest(matched), count: matched.length);
+  }
 
   /// Overdue section, then today's tasks and events.
   ViewData today() {

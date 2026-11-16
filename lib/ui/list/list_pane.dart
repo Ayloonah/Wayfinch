@@ -4,8 +4,11 @@ import '../../domain/views.dart';
 import '../format.dart';
 import '../home/home_controller.dart';
 import '../theme/tokens.dart';
+import '../widgets/finch_logo.dart';
 import 'item_row.dart';
+import 'overdue_banner.dart';
 import 'quick_add_field.dart';
+import 'tag_color_button.dart';
 
 /// The middle pane: view title, quick add and the item list.
 class ListPane extends StatelessWidget {
@@ -19,14 +22,20 @@ class ListPane extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = HomeScope.of(context);
     final data = controller.view(view);
+    final isOverdueTag =
+        view == AppView.tag && controller.tagFilter == overdueTagId;
     return Padding(
       padding: const EdgeInsets.fromLTRB(32, 24, 32, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (controller.showOverdueBanner) ...[
+            const OverdueBanner(),
+            const SizedBox(height: 18),
+          ],
           _Header(view: view, data: data),
           const SizedBox(height: 18),
-          if (view != AppView.done) ...[
+          if (view != AppView.done && !isOverdueTag) ...[
             const QuickAddField(),
             const SizedBox(height: 18),
           ],
@@ -51,21 +60,30 @@ class _Header extends StatelessWidget {
     final colors = WayfinchColors.of(context);
     final f = Formats.of(context);
     final l10n = f.l10n;
+    final tag = controller.tagsById[controller.tagFilter];
+    final isOverdueTag =
+        view == AppView.tag && controller.tagFilter == overdueTagId;
     final title = switch (view) {
       AppView.today => l10n.navToday,
       AppView.upcoming => l10n.navUpcoming,
       AppView.all => l10n.navAll,
       AppView.done => l10n.navDone,
+      AppView.tag => isOverdueTag ? l10n.overdueTag : (tag?.name ?? ''),
     };
     final subtitle = switch (view) {
       AppView.today => _todaySubtitle(f, controller),
       AppView.upcoming => l10n.upcomingSubtitle,
       AppView.all => l10n.allSubtitle(data.count),
       AppView.done => l10n.doneSubtitle(data.doneThisWeek),
+      AppView.tag => l10n.allSubtitle(data.count),
     };
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
+        if (view == AppView.tag && tag != null) ...[
+          TagColorButton(tag: tag),
+          const SizedBox(width: 12),
+        ],
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,7 +103,7 @@ class _Header extends StatelessWidget {
             ],
           ),
         ),
-        if (view != AppView.done)
+        if (view != AppView.done && !isOverdueTag)
           FilledButton.icon(
             style: FilledButton.styleFrom(
               backgroundColor: colors.accent,
@@ -137,13 +155,23 @@ class _ListCard extends StatelessWidget {
         AppView.upcoming => f.l10n.emptyUpcoming,
         AppView.all => f.l10n.emptyAll,
         AppView.done => f.l10n.emptyDone,
+        AppView.tag =>
+          HomeScope.of(context).tagFilter == overdueTagId
+              ? f.l10n.emptyOverdue
+              : f.l10n.emptyTag,
       };
       return Padding(
         padding: const EdgeInsets.only(top: 48),
-        child: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16, color: colors.muted),
+        child: Column(
+          children: [
+            const FinchLogo(size: 72),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: colors.muted),
+            ),
+          ],
         ),
       );
     }

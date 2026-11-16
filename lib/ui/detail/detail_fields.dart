@@ -315,7 +315,7 @@ class _TagsFieldState extends State<_TagsField> {
             onTap: () => controller.removeTag(widget.item, tag.id),
             child: Tooltip(
               message: l10n.removeTag(tag.name),
-              child: TagChip(name: tag.name, color: Color(tag.color)),
+              child: TagChip(name: tag.name, color: colors.tagColor(tag.color)),
             ),
           ),
         if (_adding)

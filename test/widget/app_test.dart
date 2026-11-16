@@ -12,6 +12,8 @@ import 'package:wayfinch/domain/item_enums.dart';
 import 'package:wayfinch/domain/item_rules.dart';
 import 'package:wayfinch/ui/app.dart';
 import 'package:wayfinch/ui/home/home_controller.dart';
+import 'package:wayfinch/ui/theme/appearance_controller.dart';
+import 'package:wayfinch/ui/theme/tokens.dart';
 
 /// Sunday, Nov 15, 2026, 10:00.
 final _now = DateTime(2026, 11, 15, 10);
@@ -34,6 +36,7 @@ class _Harness {
   final TagsRepository tags;
   final SettingsRepository settings;
   late final HomeController controller;
+  late final AppearanceController appearance = AppearanceController(settings);
 }
 
 void main() {
@@ -49,7 +52,9 @@ void main() {
     tester.platformDispatcher.localesTestValue = [locale];
     final h = _Harness(WayfinchDatabase(NativeDatabase.memory()));
     if (seed != null) await pumpUntilDone(tester, seed(h));
-    await tester.pumpWidget(WayfinchApp(controller: h.controller));
+    await tester.pumpWidget(
+      WayfinchApp(controller: h.controller, appearance: h.appearance),
+    );
     await settle(tester);
     return h;
   }
@@ -57,6 +62,7 @@ void main() {
   Future<void> finish(WidgetTester tester, _Harness h) async {
     await tester.pumpWidget(const SizedBox());
     h.controller.dispose();
+    h.appearance.dispose();
     await pumpUntilDone(tester, h.db.close());
     tester.view.reset();
     tester.platformDispatcher.clearLocalesTestValue();
@@ -91,7 +97,8 @@ void main() {
     await tester.tap(find.text('Upcoming'));
     await settle(tester);
     expect(find.text('Lab report'), findsOneWidget);
-    expect(find.text('school'), findsOneWidget);
+    // On the row and in the sidebar's tag list.
+    expect(find.text('school'), findsNWidgets(2));
     expect(
       find.textContaining(RegExp(r'^Tomorrow, 5:00\sPM$')),
       findsOneWidget,
@@ -333,6 +340,137 @@ void main() {
     expect(find.text('Nothing due today. Enjoy the calm.'), findsOneWidget);
     final next = h.controller.tree.all.where((i) => !i.isDone).single;
     expect(next.due, DateTime(2026, 11, 22, 15));
+    await finish(tester, h);
+  });
+
+  testWidgets('overdue banner: Review opens Today, Snooze hides it', (
+    tester,
+  ) async {
+    final h = await pumpApp(
+      tester,
+      seed: (h) async {
+        await h.items.create(
+          type: ItemType.task,
+          title: 'Late one',
+          due: DateTime(2026, 11, 13),
+        );
+        await h.items.create(
+          type: ItemType.task,
+          title: 'Late two',
+          due: DateTime(2026, 11, 14, 9),
+          dueHasTime: true,
+        );
+      },
+    );
+    expect(find.text('2 overdue items need a new plan'), findsOneWidget);
+
+    await tester.tap(find.text('All'));
+    await settle(tester);
+    expect(find.text('2 overdue items need a new plan'), findsOneWidget);
+    await tester.tap(find.text('Review'));
+    await settle(tester);
+    expect(h.controller.destination, Destination.today);
+
+    await tester.tap(find.text('Snooze until tomorrow'));
+    await settle(tester);
+    expect(find.text('2 overdue items need a new plan'), findsNothing);
+    expect(
+      await pumpUntilDone(tester, h.settings.getValue('banner.snoozedUntil')),
+      DateTime(2026, 11, 16).toIso8601String(),
+    );
+    await finish(tester, h);
+  });
+
+  testWidgets('sidebar tags open the Tags view; quick add keeps the tag', (
+    tester,
+  ) async {
+    final h = await pumpApp(
+      tester,
+      seed: (h) async {
+        final school = await h.tags.findOrCreate(
+          'school',
+          colorFor: (_) => 0xFF7950F2,
+        );
+        await h.items.create(
+          type: ItemType.task,
+          title: 'Essay',
+          tagIds: [school.id],
+        );
+        await h.items.create(type: ItemType.task, title: 'Untagged');
+      },
+    );
+    await tester.tap(find.text('school'));
+    await settle(tester);
+    expect(h.controller.destination, Destination.tag);
+    expect(find.text('Essay'), findsOneWidget);
+    expect(find.text('Untagged'), findsNothing);
+
+    await tester.enterText(find.byType(TextField).first, 'Read chapter 3');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await settle(tester);
+    expect(find.text('Read chapter 3'), findsOneWidget);
+    final added = h.controller.tree.all.firstWhere(
+      (i) => i.title == 'Read chapter 3',
+    );
+    expect(added.tagIds, hasLength(1));
+
+    // The overdue auto tag is always listed.
+    expect(find.text('overdue'), findsOneWidget);
+    expect(find.text('auto'), findsOneWidget);
+    await finish(tester, h);
+  });
+
+  testWidgets('Settings: dark mode and accents apply right away', (
+    tester,
+  ) async {
+    final h = await pumpApp(tester);
+    await tester.tap(find.text('Settings'));
+    await settle(tester);
+    await tester.tap(find.text('Dark'));
+    await settle(tester);
+    final scaffold = tester.widget<Scaffold>(find.byType(Scaffold).first);
+    final bg = Theme.of(tester.element(find.byType(Scaffold).first))
+        .scaffoldBackgroundColor;
+    expect(scaffold, isNotNull);
+    expect(bg, const Color(0xFF121418));
+
+    await tester.tap(find.byTooltip('Honey'));
+    await settle(tester);
+    final colors = Theme.of(tester.element(find.byType(Scaffold).first))
+        .extension<WayfinchColors>()!;
+    expect(colors.accent, const Color(0xFFFABF66));
+    expect(
+      await pumpUntilDone(tester, h.settings.getValue('theme.accent')),
+      'honey',
+    );
+    await finish(tester, h);
+  });
+
+  testWidgets('custom theme builder shows and warns about contrast', (
+    tester,
+  ) async {
+    final h = await pumpApp(tester);
+    await tester.tap(find.text('Settings'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Custom'));
+    await settle(tester);
+    expect(find.text('Custom theme'), findsOneWidget);
+    expect(find.text('Everything should be easy to read.'), findsOneWidget);
+    expect(
+      find.text('Your custom theme decides light or dark.'),
+      findsOneWidget,
+    );
+
+    // Unreadable palette: warnings appear, nothing is blocked.
+    await pumpUntilDone(
+      tester,
+      h.appearance.setCustom(
+        CustomTheme.lightStart.copyWith(text: const Color(0xFFDDDDDD)),
+      ),
+    );
+    await settle(tester);
+    expect(find.text('Some text may be hard to read:'), findsOneWidget);
+    expect(find.textContaining('Text on panels:'), findsOneWidget);
     await finish(tester, h);
   });
 
