@@ -8,6 +8,7 @@ import '../format.dart';
 import '../home/home_controller.dart';
 import '../prompts/prompts.dart';
 import '../theme/tokens.dart';
+import '../widgets/celebration.dart';
 import 'detail_fields.dart';
 
 /// How long the "Deleted · Undo" message stays up.
@@ -264,7 +265,10 @@ class _Actions extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                onPressed: () => controller.toggleDone(item.id),
+                onPressed: () async {
+                  final celebrate = Celebration.prepare(context);
+                  if (await controller.toggleDone(item.id)) celebrate();
+                },
                 child: Text(item.isDone ? l10n.markAsNotDone : l10n.markAsDone),
               ),
             )

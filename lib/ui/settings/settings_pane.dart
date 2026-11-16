@@ -4,6 +4,7 @@ import '../../domain/item_rules.dart';
 import '../../l10n/app_localizations.dart';
 import '../home/home_controller.dart';
 import '../theme/tokens.dart';
+import 'appearance_section.dart';
 
 /// Settings. For now: what each of the three prompts does (ask, or a
 /// remembered answer).
@@ -23,51 +24,70 @@ class SettingsPane extends StatelessWidget {
           style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 24),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: Material(
-              color: colors.panel,
-              shape: RoundedRectangleBorder(
-                side: BorderSide(color: colors.border),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
-                      child: Text(
-                        l10n.settingsPrompts,
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-                      child: Text(
-                        l10n.settingsPromptsHelp,
-                        style: TextStyle(color: colors.muted),
-                      ),
-                    ),
-                    for (final kind in PromptKind.values)
-                      PromptSettingRow(kind: kind),
-                  ],
+        const _SettingsCard(children: [AppearanceSection()]),
+        const SizedBox(height: 20),
+        _SettingsCard(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+              child: Text(
+                l10n.settingsPrompts,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+              child: Text(
+                l10n.settingsPromptsHelp,
+                style: TextStyle(color: colors.muted),
+              ),
+            ),
+            for (final kind in PromptKind.values) PromptSettingRow(kind: kind),
+          ],
         ),
       ],
     );
   }
 }
+
+/// A rounded panel holding one settings section.
+class _SettingsCard extends StatelessWidget {
+  const _SettingsCard({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = WayfinchColors.of(context);
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 720),
+        child: Material(
+          color: colors.panel,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: colors.border),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: children,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Width of every prompt choice dropdown in Settings.
+const promptChoiceWidth = 250.0;
 
 /// One prompt's setting: "Ask me" or a remembered answer.
 class PromptSettingRow extends StatelessWidget {
@@ -101,16 +121,30 @@ class PromptSettingRow extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 20),
       title: Text(situation),
-      trailing: DropdownButton<PromptAnswer?>(
-        value: controller.remembered[kind],
-        underline: const SizedBox.shrink(),
-        onChanged: (answer) => controller.setRemembered(kind, answer),
-        items: [
-          DropdownMenuItem(value: null, child: Text(l10n.choiceAsk)),
-          DropdownMenuItem(value: PromptAnswer.confirm, child: Text(always)),
-          if (never != null)
-            DropdownMenuItem(value: PromptAnswer.cancel, child: Text(never)),
-        ],
+      // A fixed width keeps all three dropdowns lined up, whatever their
+      // longest option.
+      trailing: SizedBox(
+        width: promptChoiceWidth,
+        child: DropdownButton<PromptAnswer?>(
+          isExpanded: true,
+          value: controller.remembered[kind],
+          underline: const SizedBox.shrink(),
+          borderRadius: BorderRadius.circular(12),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          onChanged: (answer) => controller.setRemembered(kind, answer),
+          items: [
+            DropdownMenuItem(value: null, child: Text(l10n.choiceAsk)),
+            DropdownMenuItem(
+              value: PromptAnswer.confirm,
+              child: Text(always, overflow: TextOverflow.ellipsis),
+            ),
+            if (never != null)
+              DropdownMenuItem(
+                value: PromptAnswer.cancel,
+                child: Text(never, overflow: TextOverflow.ellipsis),
+              ),
+          ],
+        ),
       ),
     );
   }

@@ -29,6 +29,9 @@ enum Destination {
   /// Done view.
   done,
 
+  /// One tag's items (see [HomeController.tagFilter]).
+  tag,
+
   /// Settings.
   settings;
 
@@ -38,6 +41,7 @@ enum Destination {
     upcoming => AppView.upcoming,
     all => AppView.all,
     done => AppView.done,
+    tag => AppView.tag,
     settings => null,
   };
 }
@@ -66,6 +70,11 @@ class HomeController extends ChangeNotifier {
         _remembered = map;
         notifyListeners();
       }),
+      settings.watchAll().listen((values) {
+        _bannerSnoozedUntil = DateTime.tryParse(values[_snoozeKey] ?? '');
+        _overdueTagColor = int.tryParse(values[_overdueColorKey] ?? '');
+        notifyListeners();
+      }),
     ];
     _ticker = Timer.periodic(const Duration(seconds: 30), (_) => tick());
   }
@@ -92,8 +101,75 @@ class HomeController extends ChangeNotifier {
   bool _loaded = false;
   late DateTime _now;
   Destination _destination = Destination.today;
+  String? _tagFilter;
   String? _selectedId;
   final Set<String> _showDoneFor = {};
+  DateTime? _bannerSnoozedUntil;
+
+  static const _snoozeKey = 'banner.snoozedUntil';
+  static const _overdueColorKey = 'tag.overdue.color';
+  int? _overdueTagColor;
+
+  /// The color the user picked for the "overdue" auto tag, or null for the
+  /// theme's warning color.
+  int? get overdueTagColor => _overdueTagColor;
+
+  /// Sets the "overdue" auto tag's color (null = back to the default).
+  Future<void> setOverdueTagColor(int? color) {
+    _overdueTagColor = color;
+    notifyListeners();
+    return settings.setValue(_overdueColorKey, color?.toString());
+  }
+
+  /// The tag shown by [Destination.tag]: a tag id, or [overdueTagId].
+  String? get tagFilter => _tagFilter;
+
+  /// Number of overdue items right now.
+  int get overdueCount =>
+      view(AppView.today).entries
+          .whereType<SectionHeader>()
+          .where((h) => h.kind == SectionKind.overdue)
+          .fold(0, (sum, h) => sum + h.count);
+
+  /// Whether the overdue banner shows: something is overdue and it isn't
+  /// snoozed for today.
+  bool get showOverdueBanner {
+    final until = _bannerSnoozedUntil;
+    final snoozed = until != null && _now.isBefore(until);
+    return !snoozed && overdueCount > 0;
+  }
+
+  /// Hides the overdue banner until tomorrow.
+  Future<void> snoozeBanner() {
+    final tomorrow = addDays(startOfDay(_clock()), 1);
+    _bannerSnoozedUntil = tomorrow;
+    notifyListeners();
+    return settings.setValue(_snoozeKey, tomorrow.toIso8601String());
+  }
+
+  /// Opens the Today view (where the overdue section is).
+  void reviewOverdue() => go(Destination.today);
+
+  /// Opens the view for tag [tagId] (or [overdueTagId]).
+  void openTag(String tagId) {
+    _tagFilter = tagId;
+    _destination = Destination.tag;
+    notifyListeners();
+  }
+
+  /// In a (real) tag's view, new items get that tag.
+  List<String> get _currentTagIds {
+    final tag = _tagFilter;
+    if (_destination != Destination.tag || tag == null) return const [];
+    return _tags.containsKey(tag) ? [tag] : const [];
+  }
+
+  /// Number of open items with tag [tagId] (or overdue items).
+  int tagCount(String tagId) => _viewBuilder.tag(tagId).count;
+
+  /// Changes a tag's color.
+  Future<void> setTagColor(String tagId, int color) =>
+      tags.setColor(tagId, color);
 
   /// Whether the first load from the database finished.
   bool get loaded => _loaded;
@@ -117,8 +193,10 @@ class HomeController extends ChangeNotifier {
   Item? get selected => _tree[_selectedId];
 
   /// Builds a list view for the current state.
-  ViewData view(AppView view) =>
-      ViewBuilder(_tree, _now, showDoneFor: _showDoneFor).build(view);
+  ViewData view(AppView view) => _viewBuilder.build(view, tagId: _tagFilter);
+
+  ViewBuilder get _viewBuilder =>
+      ViewBuilder(_tree, _now, showDoneFor: _showDoneFor);
 
   ItemRules get _rules =>
       ItemRules(preferences: settings, ask: asker, newId: newId, clock: _clock);
@@ -165,9 +243,10 @@ class HomeController extends ChangeNotifier {
     if (due == null && _destination == Destination.today) {
       due = startOfDay(_clock());
     }
-    final tagIds = <String>[];
+    final tagIds = <String>[..._currentTagIds];
     for (final name in parsed.tags) {
-      tagIds.add((await tags.findOrCreate(name, colorFor: tagColorFor)).id);
+      final id = (await tags.findOrCreate(name, colorFor: tagColorFor)).id;
+      if (!tagIds.contains(id)) tagIds.add(id);
     }
     await items.create(
       type: ItemType.task,
@@ -185,6 +264,7 @@ class HomeController extends ChangeNotifier {
       type: ItemType.task,
       title: title,
       due: _destination == Destination.today ? startOfDay(_clock()) : null,
+      tagIds: _currentTagIds,
     );
     _focusTitleFor = item.id;
     select(item.id);
@@ -215,17 +295,28 @@ class HomeController extends ChangeNotifier {
   }
 
   /// Marks a task done (with prompts and recurrence).
-  Future<void> complete(String id) async {
+  ///
+  /// Returns whether [id] actually got completed (false when cancelled).
+  Future<bool> complete(String id) async {
     final changes = await _rules.complete(_tree, id);
-    if (changes != null) await items.apply(changes);
+    if (changes == null || changes.isEmpty) return false;
+    await items.apply(changes);
+    return true;
   }
 
   /// Reopens a done task.
   Future<void> reopen(String id) => items.apply(_rules.reopen(_tree, id));
 
   /// Toggles a task between done and open.
-  Future<void> toggleDone(String id) =>
-      _tree[id]?.isDone == true ? reopen(id) : complete(id);
+  ///
+  /// Returns true when it was completed (worth a little celebration).
+  Future<bool> toggleDone(String id) async {
+    if (_tree[id]?.isDone == true) {
+      await reopen(id);
+      return false;
+    }
+    return complete(id);
+  }
 
   /// Sets a task's due date (may ask to push its parent's).
   Future<void> setDue(String id, DateTime? due, {required bool hasTime}) async {
@@ -273,6 +364,12 @@ class HomeController extends ChangeNotifier {
     final tag = await tags.findOrCreate(name, colorFor: tagColorFor);
     if (item.tagIds.contains(tag.id)) return;
     await items.save(item.copyWith(tagIds: [...item.tagIds, tag.id]));
+  }
+
+  /// Adds the existing tag [tagId] to [item].
+  Future<void> addTagId(Item item, String tagId) async {
+    if (item.tagIds.contains(tagId)) return;
+    await items.save(item.copyWith(tagIds: [...item.tagIds, tagId]));
   }
 
   /// Removes tag [tagId] from [item].

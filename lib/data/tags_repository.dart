@@ -51,5 +51,11 @@ class TagsRepository {
     });
   }
 
+  /// Changes tag [id]'s color (32-bit ARGB) and bumps its `updatedAt`.
+  Future<void> setColor(String id, int color) =>
+      (_db.update(_db.tags)..where((t) => t.id.equals(id))).write(
+        TagsCompanion(color: Value(color), updatedAt: Value(_clock())),
+      );
+
   Tag _toTag(TagRow row) => Tag(id: row.id, name: row.name, color: row.color);
 }

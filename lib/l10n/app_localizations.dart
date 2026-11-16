@@ -497,8 +497,14 @@ abstract class AppLocalizations {
   /// No description provided for @tagHint.
   ///
   /// In en, this message translates to:
-  /// **'Tag name'**
+  /// **'Find or create a tag'**
   String get tagHint;
+
+  /// Tag picker option that creates a new tag.
+  ///
+  /// In en, this message translates to:
+  /// **'Create \"{name}\"'**
+  String createTag(String name);
 
   /// No description provided for @removeTag.
   ///
@@ -727,6 +733,276 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save'**
   String get save;
+
+  /// Overdue banner at the top of every view.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 overdue item needs a new plan} other{{count} overdue items need a new plan}}'**
+  String overdueBanner(int count);
+
+  /// No description provided for @overdueReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get overdueReview;
+
+  /// No description provided for @overdueSnooze.
+  ///
+  /// In en, this message translates to:
+  /// **'Snooze until tomorrow'**
+  String get overdueSnooze;
+
+  /// Name of the automatic tag for overdue items (lowercase like user tags).
+  ///
+  /// In en, this message translates to:
+  /// **'overdue'**
+  String get overdueTag;
+
+  /// Small badge marking the overdue tag as automatic.
+  ///
+  /// In en, this message translates to:
+  /// **'auto'**
+  String get autoTag;
+
+  /// No description provided for @sidebarTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get sidebarTags;
+
+  /// No description provided for @emptyTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing open with this tag.'**
+  String get emptyTag;
+
+  /// No description provided for @emptyOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing overdue. Nicely done!'**
+  String get emptyOverdue;
+
+  /// No description provided for @changeTagColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Change color'**
+  String get changeTagColor;
+
+  /// No description provided for @changeTagColorMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Change color...'**
+  String get changeTagColorMenu;
+
+  /// Title of the tag color dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Color for \"{name}\"'**
+  String tagColorTitle(String name);
+
+  /// No description provided for @customColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom color...'**
+  String get customColor;
+
+  /// No description provided for @useDefaultColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Use default'**
+  String get useDefaultColor;
+
+  /// No description provided for @colorArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturation and brightness'**
+  String get colorArea;
+
+  /// No description provided for @colorHue.
+  ///
+  /// In en, this message translates to:
+  /// **'Hue'**
+  String get colorHue;
+
+  /// No description provided for @colorHex.
+  ///
+  /// In en, this message translates to:
+  /// **'Hex'**
+  String get colorHex;
+
+  /// No description provided for @settingsAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get settingsAppearance;
+
+  /// No description provided for @settingsTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get settingsTheme;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get themeSystem;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// No description provided for @themeSetByCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Your custom theme decides light or dark.'**
+  String get themeSetByCustom;
+
+  /// No description provided for @settingsAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'Accent'**
+  String get settingsAccent;
+
+  /// No description provided for @accentSky.
+  ///
+  /// In en, this message translates to:
+  /// **'Sky'**
+  String get accentSky;
+
+  /// No description provided for @accentHoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Honey'**
+  String get accentHoney;
+
+  /// No description provided for @accentMeadow.
+  ///
+  /// In en, this message translates to:
+  /// **'Meadow'**
+  String get accentMeadow;
+
+  /// No description provided for @accentLilac.
+  ///
+  /// In en, this message translates to:
+  /// **'Lilac'**
+  String get accentLilac;
+
+  /// No description provided for @accentMono.
+  ///
+  /// In en, this message translates to:
+  /// **'Mono'**
+  String get accentMono;
+
+  /// No description provided for @accentCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get accentCustom;
+
+  /// No description provided for @customThemeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom theme'**
+  String get customThemeTitle;
+
+  /// No description provided for @customStartLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Start from light'**
+  String get customStartLight;
+
+  /// No description provided for @customStartDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Start from dark'**
+  String get customStartDark;
+
+  /// No description provided for @customAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'Accent'**
+  String get customAccent;
+
+  /// No description provided for @customBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Background'**
+  String get customBackground;
+
+  /// No description provided for @customPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Panels'**
+  String get customPanel;
+
+  /// No description provided for @customSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Sidebar'**
+  String get customSidebar;
+
+  /// No description provided for @customText.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get customText;
+
+  /// No description provided for @contrastAllGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything should be easy to read.'**
+  String get contrastAllGood;
+
+  /// No description provided for @contrastWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Text may be hard to read here:'**
+  String get contrastWarningTitle;
+
+  /// No description provided for @contrastTextOnBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Text on the background'**
+  String get contrastTextOnBackground;
+
+  /// No description provided for @contrastTextOnPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Text on panels'**
+  String get contrastTextOnPanel;
+
+  /// No description provided for @contrastTextOnSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Text on the sidebar'**
+  String get contrastTextOnSidebar;
+
+  /// No description provided for @contrastMutedOnPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Secondary text on panels'**
+  String get contrastMutedOnPanel;
+
+  /// No description provided for @contrastTextOnAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'Text on accent buttons'**
+  String get contrastTextOnAccent;
+
+  /// No description provided for @contrastAccentTextOnPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Accent-colored text on panels'**
+  String get contrastAccentTextOnPanel;
 }
 
 class _AppLocalizationsDelegate

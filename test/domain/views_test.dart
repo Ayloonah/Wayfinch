@@ -162,6 +162,35 @@ void main() {
     expect(data.doneThisWeek, 1);
   });
 
+  group('Tags view', () {
+    test('lists open items with the tag, as a tree', () {
+      final tree = ItemTree([
+        task('a').copyWith(tagIds: ['school']),
+        task('a1', parent: 'a').copyWith(tagIds: ['school']),
+        task('b').copyWith(tagIds: ['work']),
+        task('done', doneAt: now).copyWith(tagIds: ['school']),
+      ]);
+      final data = ViewBuilder(tree, now).tag('school');
+      expect(data.count, 2);
+      expect(
+        data.entries.whereType<ItemEntry>().map((e) => (e.item.id, e.depth)),
+        [('a', 0), ('a1', 1)],
+      );
+    });
+
+    test('the overdue auto tag lists every overdue item', () {
+      final tree = ItemTree([
+        task('late', due: DateTime(2026, 11, 14)),
+        task('fine', due: DateTime(2026, 11, 20)),
+      ]);
+      final data = ViewBuilder(
+        tree,
+        now,
+      ).build(AppView.tag, tagId: overdueTagId);
+      expect(titles(data), ['late']);
+    });
+  });
+
   group('each item shows once', () {
     test('Today: an overdue subtask only shows in Overdue', () {
       final tree = ItemTree([

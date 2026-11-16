@@ -267,7 +267,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addTag => '+ Tag';
 
   @override
-  String get tagHint => 'Tag name';
+  String get tagHint => 'Find or create a tag';
+
+  @override
+  String createTag(String name) {
+    return 'Create \"$name\"';
+  }
 
   @override
   String removeTag(String name) {
@@ -417,4 +422,149 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get save => 'Save';
+
+  @override
+  String overdueBanner(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count overdue items need a new plan',
+      one: '1 overdue item needs a new plan',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get overdueReview => 'Review';
+
+  @override
+  String get overdueSnooze => 'Snooze until tomorrow';
+
+  @override
+  String get overdueTag => 'overdue';
+
+  @override
+  String get autoTag => 'auto';
+
+  @override
+  String get sidebarTags => 'Tags';
+
+  @override
+  String get emptyTag => 'Nothing open with this tag.';
+
+  @override
+  String get emptyOverdue => 'Nothing overdue. Nicely done!';
+
+  @override
+  String get changeTagColor => 'Change color';
+
+  @override
+  String get changeTagColorMenu => 'Change color...';
+
+  @override
+  String tagColorTitle(String name) {
+    return 'Color for \"$name\"';
+  }
+
+  @override
+  String get customColor => 'Custom color...';
+
+  @override
+  String get useDefaultColor => 'Use default';
+
+  @override
+  String get colorArea => 'Saturation and brightness';
+
+  @override
+  String get colorHue => 'Hue';
+
+  @override
+  String get colorHex => 'Hex';
+
+  @override
+  String get settingsAppearance => 'Appearance';
+
+  @override
+  String get settingsTheme => 'Theme';
+
+  @override
+  String get themeSystem => 'System';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get themeSetByCustom => 'Your custom theme decides light or dark.';
+
+  @override
+  String get settingsAccent => 'Accent';
+
+  @override
+  String get accentSky => 'Sky';
+
+  @override
+  String get accentHoney => 'Honey';
+
+  @override
+  String get accentMeadow => 'Meadow';
+
+  @override
+  String get accentLilac => 'Lilac';
+
+  @override
+  String get accentMono => 'Mono';
+
+  @override
+  String get accentCustom => 'Custom';
+
+  @override
+  String get customThemeTitle => 'Custom theme';
+
+  @override
+  String get customStartLight => 'Start from light';
+
+  @override
+  String get customStartDark => 'Start from dark';
+
+  @override
+  String get customAccent => 'Accent';
+
+  @override
+  String get customBackground => 'Background';
+
+  @override
+  String get customPanel => 'Panels';
+
+  @override
+  String get customSidebar => 'Sidebar';
+
+  @override
+  String get customText => 'Text';
+
+  @override
+  String get contrastAllGood => 'Everything should be easy to read.';
+
+  @override
+  String get contrastWarningTitle => 'Text may be hard to read here:';
+
+  @override
+  String get contrastTextOnBackground => 'Text on the background';
+
+  @override
+  String get contrastTextOnPanel => 'Text on panels';
+
+  @override
+  String get contrastTextOnSidebar => 'Text on the sidebar';
+
+  @override
+  String get contrastMutedOnPanel => 'Secondary text on panels';
+
+  @override
+  String get contrastTextOnAccent => 'Text on accent buttons';
+
+  @override
+  String get contrastAccentTextOnPanel => 'Accent-colored text on panels';
 }

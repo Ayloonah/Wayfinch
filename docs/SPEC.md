@@ -51,9 +51,9 @@ Everything is an **item**, and every item is either a task or an event. Items ne
 | createdAt, updatedAt | all | Kept for history and future sync |
 | source | all | manual, ai-import or ics-import (+ ICS UID) |
 
-- **Overdue** is computed, never stored: `due < now && doneAt == null`. Changing the due date clears it instantly. It shows as a special "overdue" auto tag that users can't assign or delete.
+- **Overdue** is computed, never stored: `due < now && doneAt == null`. Changing the due date clears it instantly. It shows as a special "overdue" auto tag that users can't assign or delete, but can recolor (default: the theme's warning color, with "Use default" to go back to it).
 - **Nesting:** unlimited depth in the data. Every level indents further in the UI so subtasks always read as subtasks: a full step for the first 4 levels, then a smaller step per extra level.
-- **Tags** are user-created with a color picked from a curated palette, or any color via a picker.
+- **Tags** are user-created with a color picked from a curated palette, or any color via a picker. New tags take the next palette color. A tag's color can be changed from three places, all opening the same color dialog: the tag's dot in the sidebar (or right-click → "Change color..."), a tag chip in the detail panel (its menu also has "Remove tag"), and the dot next to the name in the tag's own view. Curated colors have a lighter partner for dark mode; a custom color shows exactly as picked.
 
 ## Core behaviors
 
@@ -220,9 +220,17 @@ Neutral backgrounds, with color used only where it means something: priority, ta
 | Warning background / text | #FFE2A8 / #6B3A00 | #3A2A10 / #FFCF7A |
 
 - **Priority colors:** High red (#E03131 light, #FF8787 dark), Medium orange (#E67700 / #FFC078), Low blue (#1971C2 / #74C0FC). Each also has a flag icon and a text label, so color is never the only signal.
-- **Font:** Nunito (400 to 800).
-- **Custom theme builder:** color pickers plus an automatic contrast check that warns (but doesn't block) when text may be hard to read.
-- **Delight:** a small celebration animation when something is completed, and the finch mascot in onboarding and empty states.
+- **Font:** Nunito (400 to 800), bundled with the app (offline) as the official variable font, with its OFL license in `assets/fonts`.
+- **Theme mode:** System (follows Windows; the default), Light or Dark, in Settings › Appearance.
+- **Custom theme builder:** a sixth "Custom" accent option.
+  - The user picks five colors: accent, background, panels, sidebar and text. They can start from a light or a dark base.
+  - Everything else is derived: borders, secondary text, text on the accent, and accent-colored text darkened or lightened until readable.
+  - The custom theme decides light or dark by itself (from the panel color), so the mode setting doesn't apply while it's active.
+  - An automatic contrast check (WCAG AA, 4.5:1) names the areas where text may be hard to read (e.g. "Text on panels"), without showing numbers. It never blocks.
+  - Color pickers are built in (hue, saturation/brightness, hex), with no extra dependency.
+- **Delight:**
+  - A small confetti burst when a task is completed (skipped when the system asks for reduced motion).
+  - The finch mascot in empty states, and later in onboarding.
 
 ## Milestones
 

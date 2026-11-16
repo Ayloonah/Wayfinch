@@ -14,6 +14,7 @@ import 'package:wayfinch/domain/dates.dart';
 import 'package:wayfinch/domain/item_enums.dart';
 import 'package:wayfinch/ui/app.dart';
 import 'package:wayfinch/ui/home/home_controller.dart';
+import 'package:wayfinch/ui/theme/appearance_controller.dart';
 import 'package:wayfinch/ui/theme/tokens.dart';
 
 Future<void> main() async {
@@ -22,14 +23,29 @@ Future<void> main() async {
   final items = ItemsRepository(db);
   final tags = TagsRepository(db);
   await _seed(items, tags);
+  final settings = SettingsRepository(db);
+  // Optional look for screenshots, e.g.
+  //   --dart-define=DEMO_MODE=dark --dart-define=DEMO_ACCENT=honey
+  //   --dart-define=DEMO_VIEW=settings
+  const mode = String.fromEnvironment('DEMO_MODE');
+  const accent = String.fromEnvironment('DEMO_ACCENT');
+  const view = String.fromEnvironment('DEMO_VIEW');
+  if (mode.isNotEmpty) await settings.setValue('theme.mode', mode);
+  if (accent.isNotEmpty) await settings.setValue('theme.accent', accent);
   final controller = HomeController(
     items: items,
     tags: tags,
-    settings: SettingsRepository(db),
+    settings: settings,
   );
   final id = await _firstParent(items);
   controller.select(id);
-  runApp(WayfinchApp(controller: controller));
+  if (view == 'settings') controller.go(Destination.settings);
+  runApp(
+    WayfinchApp(
+      controller: controller,
+      appearance: AppearanceController(settings),
+    ),
+  );
 }
 
 Future<String> _firstParent(ItemsRepository items) async {

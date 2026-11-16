@@ -41,6 +41,33 @@ class SettingsRepository implements PromptPreferences {
     }
   }
 
+  /// The value stored under [key], or null.
+  Future<String?> getValue(String key) async {
+    final row = await (_db.select(
+      _db.settings,
+    )..where((s) => s.key.equals(key))).getSingleOrNull();
+    return row?.value;
+  }
+
+  /// Stores [value] under [key], or removes the key when null.
+  Future<void> setValue(String key, String? value) async {
+    if (value == null) {
+      await (_db.delete(_db.settings)..where((s) => s.key.equals(key))).go();
+    } else {
+      await _db
+          .into(_db.settings)
+          .insertOnConflictUpdate(
+            SettingsCompanion.insert(key: key, value: value),
+          );
+    }
+  }
+
+  /// All stored settings as key/value pairs, updated live.
+  Stream<Map<String, String>> watchAll() => _db
+      .select(_db.settings)
+      .watch()
+      .map((rows) => {for (final r in rows) r.key: r.value});
+
   /// Remembered prompt answers (null = ask), updated live.
   Stream<Map<PromptKind, PromptAnswer?>> watchRemembered() =>
       _db.select(_db.settings).watch().map((rows) {

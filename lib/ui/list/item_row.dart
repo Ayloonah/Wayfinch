@@ -8,6 +8,7 @@ import '../../domain/views.dart';
 import '../format.dart';
 import '../home/home_controller.dart';
 import '../theme/tokens.dart';
+import '../widgets/celebration.dart';
 
 /// Full-width indentation steps for the first levels; deeper levels keep
 /// indenting with a smaller step so the page doesn't run out of room.
@@ -130,7 +131,10 @@ class _Checkbox extends StatelessWidget {
         message: item.isDone ? f.l10n.markNotDone : f.l10n.markDone,
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
-          onTap: () => controller.toggleDone(item.id),
+          onTap: () async {
+            final celebrate = Celebration.prepare(context);
+            if (await controller.toggleDone(item.id)) celebrate();
+          },
           child: Container(
             width: 24,
             height: 24,
@@ -203,7 +207,8 @@ class _Meta extends StatelessWidget {
           text: f.l10n.subtaskProgress(entry.subtasksDone, entry.subtasksTotal),
           bold: true,
         ),
-      for (final tag in tags) TagChip(name: tag.name, color: Color(tag.color)),
+      for (final tag in tags)
+        TagChip(name: tag.name, color: colors.tagColor(tag.color)),
     ];
     if (parts.isEmpty) return const SizedBox.shrink();
     return Padding(
