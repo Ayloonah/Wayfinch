@@ -248,7 +248,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       _Step.notifications => _Page(
         title: l10n.onboardingNotifTitle,
         body: l10n.onboardingNotifBody,
-        child: _NotificationChoices(
+        child: NotificationChoices(
           prefs: _prefs,
           onChanged: (p) => setState(() => _prefs = p),
         ),
@@ -512,11 +512,25 @@ class _MiniPreview extends StatelessWidget {
   }
 }
 
-class _NotificationChoices extends StatelessWidget {
-  const _NotificationChoices({required this.prefs, required this.onChanged});
+/// Default reminders, the morning digest, (in Settings) quiet hours, and
+/// starting with Windows. Used in setup and in Settings › Notifications.
+class NotificationChoices extends StatelessWidget {
+  /// Creates the choices.
+  const NotificationChoices({
+    super.key,
+    required this.prefs,
+    required this.onChanged,
+    this.showQuietHours = false,
+  });
 
+  /// Current choices.
   final NotificationPrefs prefs;
+
+  /// Called with the changed choices.
   final ValueChanged<NotificationPrefs> onChanged;
+
+  /// Whether to show the quiet-hours rows (Settings only).
+  final bool showQuietHours;
 
   @override
   Widget build(BuildContext context) {
@@ -593,6 +607,36 @@ class _NotificationChoices extends StatelessWidget {
               child: Text(time.format(context)),
             ),
           ),
+        if (showQuietHours) ...[
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.notifQuietHours),
+            subtitle: Text(l10n.notifQuietHoursBody),
+            value: prefs.quietEnabled,
+            onChanged: (v) => onChanged(prefs.copyWith(quietEnabled: v)),
+          ),
+          if (prefs.quietEnabled)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.notifQuietFromTo),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _TimeButton(
+                    minutes: prefs.quietStartMinutes,
+                    onPicked: (m) =>
+                        onChanged(prefs.copyWith(quietStartMinutes: m)),
+                  ),
+                  const Text('–'),
+                  _TimeButton(
+                    minutes: prefs.quietEndMinutes,
+                    onPicked: (m) =>
+                        onChanged(prefs.copyWith(quietEndMinutes: m)),
+                  ),
+                ],
+              ),
+            ),
+        ],
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           title: Text(l10n.notifLaunchAtStartup),
@@ -606,6 +650,29 @@ class _NotificationChoices extends StatelessWidget {
           style: TextStyle(fontSize: 13, color: colors.muted),
         ),
       ],
+    );
+  }
+}
+
+/// A time-of-day button (minutes after midnight) that opens a time picker.
+class _TimeButton extends StatelessWidget {
+  const _TimeButton({required this.minutes, required this.onPicked});
+
+  final int minutes;
+  final ValueChanged<int> onPicked;
+
+  @override
+  Widget build(BuildContext context) {
+    final time = TimeOfDay(hour: minutes ~/ 60, minute: minutes % 60);
+    return TextButton(
+      onPressed: () async {
+        final picked = await showTimePicker(
+          context: context,
+          initialTime: time,
+        );
+        if (picked != null) onPicked(picked.hour * 60 + picked.minute);
+      },
+      child: Text(time.format(context)),
     );
   }
 }

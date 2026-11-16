@@ -8,6 +8,7 @@ import '../home/home_controller.dart';
 import '../list/item_row.dart' show TagChip;
 import '../theme/tokens.dart';
 import 'date_time_picker.dart';
+import 'reminders_field.dart';
 import 'tag_picker.dart';
 import '../widgets/tag_color_dialog.dart';
 
@@ -70,6 +71,10 @@ class FieldGrid extends StatelessWidget {
         _FieldRow(
           label: l10n.fieldTags,
           child: _TagsField(item: item),
+        ),
+        _FieldRow(
+          label: l10n.fieldReminders,
+          child: RemindersField(item: item),
         ),
         _FieldRow(
           label: l10n.fieldRepeat,

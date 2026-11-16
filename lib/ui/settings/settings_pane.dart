@@ -7,6 +7,7 @@ import '../theme/tokens.dart';
 import 'appearance_section.dart';
 import 'general_section.dart';
 import 'import_history_section.dart';
+import 'notifications_section.dart';
 import 'profile_section.dart';
 
 /// Settings. For now: what each of the three prompts does (ask, or a
@@ -32,6 +33,8 @@ class SettingsPane extends StatelessWidget {
         const _SettingsCard(children: [GeneralSection()]),
         const SizedBox(height: 20),
         const _SettingsCard(children: [AppearanceSection()]),
+        const SizedBox(height: 20),
+        const _SettingsCard(children: [NotificationsSection()]),
         const SizedBox(height: 20),
         _SettingsCard(
           children: [

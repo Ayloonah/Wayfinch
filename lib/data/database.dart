@@ -24,7 +24,7 @@ class WayfinchDatabase extends _$WayfinchDatabase {
   WayfinchDatabase(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -35,6 +35,9 @@ class WayfinchDatabase extends _$WayfinchDatabase {
       },
       from2To3: (m, schema) async {
         await m.createTable(schema.importBackups);
+      },
+      from3To4: (m, schema) async {
+        await m.addColumn(schema.items, schema.items.customReminders);
       },
     ),
     beforeOpen: (details) async {

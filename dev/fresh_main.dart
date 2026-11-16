@@ -8,12 +8,17 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:wayfinch/app/app_session.dart';
+import 'package:wayfinch/app/desktop.dart';
 import 'package:wayfinch/ui/app.dart';
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Tray, close-to-tray and toasts as in the real app, but never touching
+  // the "start with Windows" registry entry.
+  final desktop = await Desktop.start(args, manageStartup: false);
   final dir = Directory.systemTemp.createTempSync('wayfinch_fresh_');
   final session = AppSession(dataDir: dir);
+  desktop.attach(session);
   runApp(WayfinchShell(session: session));
   await session.start();
 }

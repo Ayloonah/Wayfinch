@@ -1198,6 +1198,129 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get reminderAtTime => 'At the time';
+
+  @override
+  String reminderDefault(String label) {
+    return '$label (default)';
+  }
+
+  @override
+  String get reminderRemove => 'Remove reminder';
+
+  @override
+  String get reminderAdd => 'Add a reminder';
+
+  @override
+  String get reminderAddButton => '+ Reminder';
+
+  @override
+  String get reminderUseDefault => 'Use default';
+
+  @override
+  String get remindersDateOnly =>
+      'Add a time to get a reminder. Date-only tasks show up in the morning digest.';
+
+  @override
+  String get remindersNeedDate => 'Add a date first.';
+
+  @override
+  String get fieldReminders => 'Reminders';
+
+  @override
+  String get settingsNotifications => 'Notifications';
+
+  @override
+  String get notifQuietHours => 'Quiet hours';
+
+  @override
+  String get notifQuietHoursBody => 'Reminders wait until quiet hours end.';
+
+  @override
+  String get notifQuietFromTo => 'From / to';
+
+  @override
+  String get notifSnooze10 => '10 min';
+
+  @override
+  String get notifSnooze60 => '1 hour';
+
+  @override
+  String get notifSnoozeTomorrow => 'Tomorrow';
+
+  @override
+  String notifDueAt(String time) {
+    return 'Due at $time';
+  }
+
+  @override
+  String notifDueOn(String day, String time) {
+    return 'Due $day at $time';
+  }
+
+  @override
+  String notifStartsAt(String time) {
+    return 'Starts at $time';
+  }
+
+  @override
+  String notifStartsOn(String day, String time) {
+    return 'Starts $day at $time';
+  }
+
+  @override
+  String digestTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count things on today',
+      one: '1 thing on today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String digestTitleName(String name, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Morning, $name! $count things on today',
+      one: 'Morning, $name! 1 thing on today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String digestMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+ $count more',
+      one: '+ 1 more',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get digestNothing => 'A free day';
+
+  @override
+  String get digestNothingBody => 'Nothing due today. Enjoy it!';
+
+  @override
+  String get trayOpen => 'Open Wayfinch';
+
+  @override
+  String get trayQuit => 'Quit';
+
+  @override
+  String get trayHintTitle => 'Wayfinch is still here';
+
+  @override
+  String get trayHintBody =>
+      'It\'s in the system tray so reminders keep coming. Right-click the icon to quit.';
+
+  @override
   String get passwordLabel => 'Password';
 
   @override
@@ -1411,6 +1534,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get helpAiBody =>
       'Export for AI copies your list with the format rules below and your own instructions. Paste it into any AI with a request (\"plan my final project\"), then paste the reply into Import. You\'ll see what\'s new, changed and removed before anything happens. Add only adds new items; Replace makes your list match the AI\'s version (done items are never removed). Your list is backed up first, and you can undo.';
+
+  @override
+  String get helpNotificationsTitle => 'Reminders and notifications';
+
+  @override
+  String get helpNotificationsBody =>
+      'Tasks with a time remind you 1 hour before and events 15 minutes before; change the defaults in Settings › Notifications, or set an item\'s own reminders from its details. Date-only tasks show up in the morning digest instead. Snooze a reminder from its notification. During quiet hours, reminders wait until the end. Closing the window keeps Wayfinch in the system tray so reminders still arrive; right-click the tray icon to quit.';
 
   @override
   String get helpThemesTitle => 'Themes';

@@ -8,6 +8,7 @@ import 'generated/schema.dart';
 import 'generated/schema_v1.dart' as v1;
 import 'generated/schema_v2.dart' as v2;
 import 'generated/schema_v3.dart' as v3;
+import 'generated/schema_v4.dart' as v4;
 
 /// Migration tests: every schema version must upgrade cleanly from each
 /// earlier one, keep its data, and match the exported schema.
@@ -30,6 +31,33 @@ void main() {
         await verifier.migrateAndValidate(db, latest);
       });
     }
+  });
+
+  test('v3 -> v4 keeps items, which follow the default reminders', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 3,
+      newVersion: 4,
+      createOld: v3.DatabaseAtV3.new,
+      createNew: v4.DatabaseAtV4.new,
+      openTestedDatabase: WayfinchDatabase.new,
+      createItems: (batch, oldDb) {
+        batch.insert(
+          oldDb.items,
+          v3.ItemsCompanion.insert(
+            id: 'a1b2',
+            type: 'task',
+            title: 'Still here',
+            createdAt: '2026-11-15T09:00:00.000',
+            updatedAt: '2026-11-15T09:00:00.000',
+          ),
+        );
+      },
+      validateItems: (newDb) async {
+        final item = (await newDb.select(newDb.items).get()).single;
+        expect(item.id, 'a1b2');
+        expect(item.customReminders, 0); // stored false
+      },
+    );
   });
 
   test('v2 -> v3 keeps items and settings, and adds import backups', () async {

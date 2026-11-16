@@ -194,6 +194,39 @@ void main() {
     expect(after[p.id]!.updatedAt, before[p.id]!.updatedAt);
   });
 
+  test(
+    'custom reminders round-trip, survive restore, and can be reset',
+    () async {
+      final item = await repo.create(
+        type: ItemType.task,
+        title: 'Dentist',
+        due: DateTime(2026, 11, 20, 14),
+        dueHasTime: true,
+      );
+      expect((await repo.getById(item.id))!.customReminders, isFalse);
+
+      await repo.save(
+        item.copyWith(customReminders: true, reminderOffsets: [1440, 30]),
+      );
+      var loaded = (await repo.getById(item.id))!;
+      expect(loaded.customReminders, isTrue);
+      expect(loaded.reminderOffsets, [30, 1440]);
+
+      await repo.deleteWithSubtasks(item.id);
+      await repo.restore([loaded]);
+      loaded = (await repo.getById(item.id))!;
+      expect(loaded.reminderOffsets, [30, 1440]);
+
+      await repo.save(
+        loaded.copyWith(customReminders: false, reminderOffsets: const []),
+      );
+      loaded = (await repo.getById(item.id))!;
+      expect(loaded.customReminders, isFalse);
+      expect(loaded.reminderOffsets, isEmpty);
+      expect(await db.select(db.reminders).get(), isEmpty);
+    },
+  );
+
   group('settings', () {
     test('remembered answers persist and can be cleared', () async {
       final settings = SettingsRepository(db);

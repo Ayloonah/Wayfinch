@@ -1904,6 +1904,180 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 day before} other{{count} days before}}'**
   String reminderDays(int count);
 
+  /// No description provided for @reminderAtTime.
+  ///
+  /// In en, this message translates to:
+  /// **'At the time'**
+  String get reminderAtTime;
+
+  /// No description provided for @reminderDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} (default)'**
+  String reminderDefault(String label);
+
+  /// No description provided for @reminderRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove reminder'**
+  String get reminderRemove;
+
+  /// No description provided for @reminderAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a reminder'**
+  String get reminderAdd;
+
+  /// No description provided for @reminderAddButton.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Reminder'**
+  String get reminderAddButton;
+
+  /// No description provided for @reminderUseDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Use default'**
+  String get reminderUseDefault;
+
+  /// No description provided for @remindersDateOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a time to get a reminder. Date-only tasks show up in the morning digest.'**
+  String get remindersDateOnly;
+
+  /// No description provided for @remindersNeedDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a date first.'**
+  String get remindersNeedDate;
+
+  /// No description provided for @fieldReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get fieldReminders;
+
+  /// No description provided for @settingsNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get settingsNotifications;
+
+  /// No description provided for @notifQuietHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet hours'**
+  String get notifQuietHours;
+
+  /// No description provided for @notifQuietHoursBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders wait until quiet hours end.'**
+  String get notifQuietHoursBody;
+
+  /// No description provided for @notifQuietFromTo.
+  ///
+  /// In en, this message translates to:
+  /// **'From / to'**
+  String get notifQuietFromTo;
+
+  /// No description provided for @notifSnooze10.
+  ///
+  /// In en, this message translates to:
+  /// **'10 min'**
+  String get notifSnooze10;
+
+  /// No description provided for @notifSnooze60.
+  ///
+  /// In en, this message translates to:
+  /// **'1 hour'**
+  String get notifSnooze60;
+
+  /// No description provided for @notifSnoozeTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get notifSnoozeTomorrow;
+
+  /// No description provided for @notifDueAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Due at {time}'**
+  String notifDueAt(String time);
+
+  /// No description provided for @notifDueOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Due {day} at {time}'**
+  String notifDueOn(String day, String time);
+
+  /// No description provided for @notifStartsAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts at {time}'**
+  String notifStartsAt(String time);
+
+  /// No description provided for @notifStartsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts {day} at {time}'**
+  String notifStartsOn(String day, String time);
+
+  /// No description provided for @digestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 thing on today} other{{count} things on today}}'**
+  String digestTitle(int count);
+
+  /// No description provided for @digestTitleName.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Morning, {name}! 1 thing on today} other{Morning, {name}! {count} things on today}}'**
+  String digestTitleName(String name, int count);
+
+  /// No description provided for @digestMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{+ 1 more} other{+ {count} more}}'**
+  String digestMore(int count);
+
+  /// No description provided for @digestNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'A free day'**
+  String get digestNothing;
+
+  /// No description provided for @digestNothingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing due today. Enjoy it!'**
+  String get digestNothingBody;
+
+  /// No description provided for @trayOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Wayfinch'**
+  String get trayOpen;
+
+  /// No description provided for @trayQuit.
+  ///
+  /// In en, this message translates to:
+  /// **'Quit'**
+  String get trayQuit;
+
+  /// No description provided for @trayHintTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Wayfinch is still here'**
+  String get trayHintTitle;
+
+  /// No description provided for @trayHintBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s in the system tray so reminders keep coming. Right-click the icon to quit.'**
+  String get trayHintBody;
+
   /// No description provided for @passwordLabel.
   ///
   /// In en, this message translates to:
@@ -2293,6 +2467,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Export for AI copies your list with the format rules below and your own instructions. Paste it into any AI with a request (\"plan my final project\"), then paste the reply into Import. You\'ll see what\'s new, changed and removed before anything happens. Add only adds new items; Replace makes your list match the AI\'s version (done items are never removed). Your list is backed up first, and you can undo.'**
   String get helpAiBody;
+
+  /// No description provided for @helpNotificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders and notifications'**
+  String get helpNotificationsTitle;
+
+  /// No description provided for @helpNotificationsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks with a time remind you 1 hour before and events 15 minutes before; change the defaults in Settings › Notifications, or set an item\'s own reminders from its details. Date-only tasks show up in the morning digest instead. Snooze a reminder from its notification. During quiet hours, reminders wait until the end. Closing the window keeps Wayfinch in the system tray so reminders still arrive; right-click the tray icon to quit.'**
+  String get helpNotificationsBody;
 
   /// No description provided for @helpThemesTitle.
   ///

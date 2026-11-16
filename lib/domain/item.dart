@@ -24,6 +24,8 @@ class Item {
     required this.createdAt,
     required this.updatedAt,
     this.tagIds = const [],
+    this.customReminders = false,
+    this.reminderOffsets = const [],
   });
 
   /// Stable UUID.
@@ -80,6 +82,14 @@ class Item {
   /// Ids of the tags on this item.
   final List<String> tagIds;
 
+  /// Whether this item has its own reminders. When false it follows the
+  /// global defaults (see `effectiveReminders`).
+  final bool customReminders;
+
+  /// Minutes before due (task) or start (event) to remind, when
+  /// [customReminders] is true. Empty means no reminders.
+  final List<int> reminderOffsets;
+
   /// Whether this is a task.
   bool get isTask => type == ItemType.task;
 
@@ -120,6 +130,8 @@ class Item {
     DateTime? createdAt,
     DateTime? updatedAt,
     List<String>? tagIds,
+    bool? customReminders,
+    List<int>? reminderOffsets,
   }) {
     return Item(
       id: id ?? this.id,
@@ -144,6 +156,8 @@ class Item {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       tagIds: tagIds ?? this.tagIds,
+      customReminders: customReminders ?? this.customReminders,
+      reminderOffsets: reminderOffsets ?? this.reminderOffsets,
     );
   }
 

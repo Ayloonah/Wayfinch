@@ -210,7 +210,7 @@ Setup takes five short screens, then the app teaches itself through a tutorial t
 
 Then a short **"How to use it with your AI"** screen showing the copy → paste → import loop as a small diagram.
 
-- **Applying the choices:** the password (and the file encryption) is applied only when setup finishes; until then, Back changes nothing. The notification choices are saved now and take effect with the notifications milestone.
+- **Applying the choices:** the password (and the file encryption) is applied only when setup finishes; until then, Back changes nothing. The notification choices are saved right away.
 - **Existing data:** someone who already has items but never ran setup (e.g. from before this feature) sees setup once, but the tutorial isn't added.
 - **Tutorial as tasks:** a pre-loaded "Getting started" task (due today) whose subtasks teach by doing: check this off, add a subtask, give this a tag, export your list for AI.
   - Every step but "Check this off" checks itself off when the user does it: adding a subtask or a tag anywhere in the tutorial (the task, its steps, or their subtasks), or copying or saving an export. Automatic checks never prompt. When that was the last step, the whole tutorial closes: "Getting started" and anything still open under it (practice subtasks added while learning) are marked done, not deleted, with a "You finished…" message.
@@ -218,7 +218,7 @@ Then a short **"How to use it with your AI"** screen showing the copy → paste 
 - **Skippable:** marking the parent done closes the whole tutorial (through the usual parent-completion prompt). No nagging.
 - **Not replayable.** The Help page covers everything instead: basics, nesting, AI import/export (including the exact format rules the AI receives), calendar, themes, backups.
   - Help is a sidebar destination with searchable, expandable sections; searching opens the matches.
-  - Calendar and notification sections come with those features.
+  - It has a Notifications section; the calendar section comes with that feature.
 
 ## Notifications
 
@@ -233,8 +233,16 @@ Windows only delivers Wayfinch's notifications while the app is running, so clos
 | Snooze from a notification |  | 10 minutes, 1 hour, tomorrow |
 | Overdue | No notification | The banner covers it |
 
-- The tray menu has a real "Quit".
-- "Launch at startup" is offered during onboarding and lives in Settings.
+- The tray menu has "Open Wayfinch" and a real "Quit". Clicking the tray icon brings the window back. The first time the window is closed, a notification explains that Wayfinch is still running in the tray.
+- Only one copy runs: launching Wayfinch again brings the running window forward.
+- "Launch at startup" is offered during onboarding and lives in Settings › Notifications. At login Wayfinch starts hidden in the tray.
+- **Which tasks get reminders:** only tasks with a due time. Date-only tasks are covered by the daily digest. Events remind before their start. Done tasks and ended events never remind.
+- **Per-item reminders:** the detail panel's Reminders row shows the item's reminders (marked "default" while it follows the global setting). Adding or removing one gives the item its own list (it can be empty, meaning no reminders); "Use default" goes back to the global setting. Choices: at the time, 5, 15, 30 minutes, 1 or 2 hours, 1 day before.
+- **Global defaults** (Settings › Notifications, and onboarding): one choice each for tasks and events, or "No reminder".
+- **Quiet hours:** a start and end time (default 22:00–07:00 once turned on; the window can cross midnight). Reminders and the digest that come due during quiet hours are held and shown when the window ends.
+- **Missed reminders:** if Wayfinch wasn't running or the PC was asleep, reminders more than 30 minutes late are skipped rather than shown late. The first time notifications run, they start from "now" instead of replaying the past.
+- **Daily digest:** once a day at or after the chosen time (default 08:00), even if the app starts later. Title "Morning, {name}! N things on today", with the first 3 items from Today and "+ N more". A free day gets a short "Nothing due today" note. Clicking it opens Wayfinch.
+- **Snooze:** each reminder has 10 min / 1 hour / Tomorrow buttons. Clicking the reminder itself opens the item.
 
 ## Visual design and themes
 

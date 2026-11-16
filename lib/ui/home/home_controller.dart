@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import '../../data/database.dart' show newId;
 import '../../data/import_repository.dart';
 import '../../data/items_repository.dart';
+import '../../data/notification_prefs.dart';
 import '../../data/settings_repository.dart';
 import '../../data/tags_repository.dart';
 import '../../domain/dates.dart';
@@ -88,6 +89,7 @@ class HomeController extends ChangeNotifier {
         _overdueTagColor = int.tryParse(values[_overdueColorKey] ?? '');
         _firstName = values[_firstNameKey] ?? '';
         _tutorial = TutorialSteps.decode(values[_tutorialKey]);
+        _notificationPrefs = NotificationPrefs.fromMap(values);
         _viewOrder = _parseViewOrder(values[_viewOrderKey]);
         _tagOrder = (values[_tagOrderKey] ?? '')
             .split(',')
@@ -546,6 +548,33 @@ class HomeController extends ChangeNotifier {
     final tag = await tags.findOrCreate(name, colorFor: tagColorFor);
     await addTagId(item, tag.id);
   }
+
+  // ---- Reminders and notification settings ------------------------------
+
+  NotificationPrefs _notificationPrefs = const NotificationPrefs();
+
+  /// Current notification preferences (defaults, digest, quiet hours...).
+  NotificationPrefs get notificationPrefs => _notificationPrefs;
+
+  /// Saves notification preferences.
+  Future<void> saveNotificationPrefs(NotificationPrefs prefs) {
+    _notificationPrefs = prefs;
+    notifyListeners();
+    return prefs.save(settings);
+  }
+
+  /// Gives [item] its own reminders ([offsets] in minutes; empty = none).
+  Future<void> setReminders(Item item, List<int> offsets) => items.save(
+    item.copyWith(
+      customReminders: true,
+      reminderOffsets: ({...offsets}.toList()..sort()),
+    ),
+  );
+
+  /// Puts [item] back on the default reminders.
+  Future<void> useDefaultReminders(Item item) => items.save(
+    item.copyWith(customReminders: false, reminderOffsets: const []),
+  );
 
   /// Adds the existing tag [tagId] to [item].
   Future<void> addTagId(Item item, String tagId) async {
