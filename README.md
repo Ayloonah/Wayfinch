@@ -6,7 +6,7 @@ Ask your AI to break a big project into steps, and Wayfinch turns its answer int
 
 Offline-first, private by default, and designed to keep you on track without stressing you out.
 
-> 🚧 **Status:** early development. Windows desktop comes first, and more platforms come later.
+> 🚧 **Status:** early development, Windows desktop first. The core to-do list works: Today, Upcoming, All and Done views, subtasks, recurrence and quick add. The AI loop, themes and notifications are next (see the [roadmap](#roadmap)).
 
 ---
 
@@ -68,6 +68,12 @@ flutter pub get
 flutter run -d windows
 ```
 
+**Try it with sample data** (in-memory database, nothing is saved):
+
+```bash
+flutter run -d windows -t dev/demo_main.dart
+```
+
 **Checks**
 
 ```bash
@@ -82,8 +88,8 @@ flutter test
 
 ## Roadmap
 
-- [ ] **Foundation:** project setup, encrypted database, data model, EN/FR
-- [ ] **Core list:** views, nesting, completing items, recurrence
+- [x] **Foundation:** project setup, encrypted database, data model, EN/FR
+- [x] **Core list:** views, nesting, completing items, recurrence, quick add
 - [ ] **Look and feel:** themes, accents, tags, overdue banner
 - [ ] **AI loop:** Export for AI, Import with preview, add vs replace, undo
 - [ ] **Onboarding and Help**

@@ -52,24 +52,32 @@ Everything is an **item**, and every item is either a task or an event. Items ne
 | source | all | manual, ai-import or ics-import (+ ICS UID) |
 
 - **Overdue** is computed, never stored: `due < now && doneAt == null`. Changing the due date clears it instantly. It shows as a special "overdue" auto tag that users can't assign or delete.
-- **Nesting:** unlimited depth in the data. The UI indents up to 3 or 4 levels, then collapses deeper levels.
+- **Nesting:** unlimited depth in the data. Every level indents further in the UI so subtasks always read as subtasks: a full step for the first 4 levels, then a smaller step per extra level.
 - **Tags** are user-created with a color picked from a curated palette, or any color via a picker.
 
 ## Core behaviors
 
-Three situations ask the user before acting, all with the same prompt: **Confirm / Cancel / Always do this**.
+Three situations ask the user before acting, all with the same prompt: **Confirm / Cancel**, plus a "don't ask again" checkbox.
 
-| Situation | What the prompt says |
-| --- | --- |
-| A subtask's due date moves past its parent's | This will also push the parent's due date |
-| A parent is marked done with open subtasks | This will also close its open subtasks |
-| The last open subtask is marked done | Mark the parent done too? |
+| Situation | What the prompt says | Checkbox |
+| --- | --- | --- |
+| A subtask's due date moves past its parent's | This will also push the parent's due date | "Always do this without asking" |
+| A parent is marked done with open subtasks | This will also close its open subtasks | "Always do this without asking" |
+| The last open subtask is marked done | Mark the parent done too? | "Remember my answer" |
 
-- Every "Always do this" choice has a toggle in Settings, so the prompts can be turned back on.
+- **Cancel** on the first two stops the whole action (the date change, or completing the parent). Their checkbox therefore only takes effect with Confirm; a Cancel is never remembered there, since that would silently block the action. "Mark the parent done too?" can remember either answer.
+- Pushing a parent's date also pushes any further ancestors that would end up earlier than the new date. "Mark the parent done too?" repeats up the tree, one level at a time.
+- **Settings** has a dropdown per prompt: "Ask me" or the remembered choice, so prompts can always be turned back on.
 - **Done items** are hidden from every view by default and live in the Done view, with a simple progress stat ("23 done this week"). Inside a parent, hidden done subtasks show as "2 completed subtasks hidden · Show".
+- **Reopening** a done task reopens only that task.
 - **Events** move to Done automatically once their end time passes. Events have no checkbox.
 - **Recurring items:** completing one creates the next occurrence from its RRULE.
-- **Default sort** in every view: due date, then priority as the tiebreaker.
+  - Its subtasks are copied to the new occurrence: new ids, all open, dates shifted by the same number of days.
+  - The rule moves to the new occurrence, so the finished one never repeats twice.
+  - A recurring event rolls forward once it ends; missed occurrences are skipped.
+- **Deleting** an item also deletes its subtasks, after one confirmation when it has any. A "Deleted … · Undo" message stays up for 10 seconds, and Undo restores everything exactly as it was (same ids and history).
+- **Default sort** in every view: due date (a date without a time counts as the end of that day; no date sorts last), then priority as the tiebreaker.
+- **Each item shows once per view.** In Today, an overdue item shows only in the Overdue section, even if its parent is due today. In Upcoming, a subtask shows under its own day.
 
 ## Screens and layout
 
@@ -86,8 +94,15 @@ A three-pane desktop layout: **sidebar | list | detail panel**. The detail panel
 
 - **Sidebar:** logo + greeting with the user's first name, search, the views, tags with counts, then Export for AI, Import, Help and Settings at the bottom.
 - **Overdue banner:** sits at the top of every view ("3 overdue items need a new plan"). "Review" jumps to Today's overdue section; "Snooze until tomorrow" hides it for the day.
-- **Quick add** field at the top of the list.
+- **Quick add** field at the top of the list. It understands, in English and French:
+  - **Dates:** today/tomorrow (aujourd'hui/demain), weekday names, and month + day like "Dec 5" or "5 déc".
+  - **Times:** "5pm", "17:00" or "17h30".
+  - **Tags and priority:** `#tag`, and `!high`, `!med`, `!low` (or `!haute`, `!moyenne`, `!basse`).
+  - Without a date, items added in Today are due today.
 - **Detail panel:** Task/Event toggle, title, due or start/end, priority, tags, reminders, repeat, subtask progress bar, notes, Mark as done, Delete.
+  - **Date and time** are picked together in one dialog (calendar plus an optional time) and saved in one step.
+  - A subtask's panel links back to its parent.
+- **Adding subtasks:** "+ Add subtask" in the detail panel, or the **+** on a list row (shown on hover and on the selected row), creates a subtask and opens it right away with its title ready to type.
 
 ## AI exchange: format, export, import
 

@@ -18,7 +18,8 @@ Prefer well-maintained, widely used packages. Ask before adding any new dependen
 
 - Every item has a stable UUID plus `createdAt` / `updatedAt`. Never reuse or regenerate ids: AI import/export and future sync depend on them.
 - "Overdue" is computed (`due < now && doneAt == null`), never stored.
-- Items nest with unlimited depth in the data (`parentId`). The UI caps visual indentation around 3 to 4 levels.
+- Items nest with unlimited depth in the data (`parentId`). Every level indents further in the UI (full step for the first 4 levels, smaller step after) so subtasks always read as subtasks.
+- The three confirm prompts go through `ItemRules` (`lib/domain/item_rules.dart`). Remembered answers live in the settings table. Cancel is only rememberable for "Mark the parent done too?" (see the spec's "Core behaviors").
 - Keep the data layer (Drift, repositories), domain logic (completion rules, import diffing, recurrence) and UI separate. Domain logic must be unit-testable without Flutter widgets.
 - The AI exchange format is versioned (`"version": 1` in the JSON) but the version is never shown in the UI.
 - Theme tokens (colors, accents, priority colors) live in one place. Exact values are in the spec's "Visual design and themes" section.
@@ -42,6 +43,8 @@ Prefer well-maintained, widely used packages. Ask before adding any new dependen
 - Migration tests for every Drift schema change.
 - Widget tests for the main flows when practical.
 - Run `flutter analyze` and `flutter test` before opening or updating a PR.
+- To check the UI without touching real data, run the demo entry point (in-memory database with sample items): `flutter run -d windows -t dev/demo_main.dart`.
+- Widget tests open the database inside the test's fake-async zone. Run database work with the `pumpUntilDone` helper in `test/widget/app_test.dart`, not `tester.runAsync`, or the test hangs.
 
 ## Style
 
