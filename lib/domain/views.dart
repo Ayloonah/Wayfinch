@@ -51,7 +51,7 @@ class SectionHeader extends ListEntry {
   /// Which section.
   final SectionKind kind;
 
-  /// Number of items matched in the section.
+  /// Number of top-level rows in the section.
   final int count;
 
   /// The day, for [SectionKind.day].
@@ -78,12 +78,32 @@ class ItemEntry extends ListEntry {
   /// Whether it's overdue right now.
   final bool isOverdue;
 
-  /// Done direct subtasks.
+  /// Done subtasks (leaves only; see [subtaskProgress]).
   final int subtasksDone;
 
-  /// All direct subtasks.
+  /// All subtasks (leaves only; see [subtaskProgress]).
   final int subtasksTotal;
 }
+
+/// Subtask progress of item [id]: its leaf subtasks at every depth (tasks
+/// with no subtasks of their own), and how many are done. Inner parents
+/// aren't counted, so "2 of 5" means five real steps.
+({int done, int total}) subtaskProgress(ItemTree tree, String id) {
+  var done = 0;
+  var total = 0;
+  for (final d in tree.descendantsOf(id)) {
+    if (!d.isTask) continue;
+    if (tree.childrenOf(d.id).any((c) => c.isTask)) continue;
+    total++;
+    if (d.isDone) done++;
+  }
+  return (done: done, total: total);
+}
+
+/// Number of top-level rows in [entries]: the items a list "has" (their
+/// subtasks show as progress instead). Every count in the app uses this.
+int topLevelCount(Iterable<ListEntry> entries) =>
+    entries.whereType<ItemEntry>().where((e) => e.depth == 0).length;
 
 /// "2 completed subtasks hidden · Show" (or "Hide" when [shown]).
 class HiddenDoneEntry extends ListEntry {
@@ -116,7 +136,8 @@ class ViewData {
   /// Rows in order.
   final List<ListEntry> entries;
 
-  /// Number of matched items (for sidebar counts).
+  /// Number of top-level rows (see [topLevelCount]); used for the sidebar
+  /// and the view's subtitle.
   final int count;
 
   /// Tasks completed since Monday (Done view stat).
@@ -157,7 +178,8 @@ class ViewBuilder {
       if (!i.isVisible(now)) return false;
       return tagId == overdueTagId ? _isOverdue(i) : i.tagIds.contains(tagId);
     }).toList();
-    return ViewData(_forest(matched), count: matched.length);
+    final entries = _forest(matched);
+    return ViewData(entries, count: topLevelCount(entries));
   }
 
   /// Overdue section, then today's tasks and events.
@@ -180,15 +202,20 @@ class ViewBuilder {
     final overdueIds = {for (final i in overdue) i.id};
     final todayIds = {for (final i in todays) i.id};
     final entries = <ListEntry>[];
-    if (overdue.isNotEmpty) {
-      entries.add(SectionHeader(SectionKind.overdue, overdue.length));
-      entries.addAll(_forest(overdue, shownElsewhere: todayIds));
+    var count = 0;
+    void section(SectionKind kind, List<Item> items, Set<String> elsewhere) {
+      if (items.isEmpty) return;
+      final rows = _forest(items, shownElsewhere: elsewhere);
+      final n = topLevelCount(rows);
+      count += n;
+      entries
+        ..add(SectionHeader(kind, n))
+        ..addAll(rows);
     }
-    if (todays.isNotEmpty) {
-      entries.add(SectionHeader(SectionKind.today, todays.length));
-      entries.addAll(_forest(todays, shownElsewhere: overdueIds));
-    }
-    return ViewData(entries, count: overdue.length + todays.length);
+
+    section(SectionKind.overdue, overdue, todayIds);
+    section(SectionKind.today, todays, overdueIds);
+    return ViewData(entries, count: count);
   }
 
   /// The next 7 days after today, one section per day that has items.
@@ -211,12 +238,13 @@ class ViewBuilder {
         for (final i in items) i.id,
     };
     for (final (day, matched) in days) {
-      count += matched.length;
       final own = {for (final i in matched) i.id};
-      entries.add(SectionHeader(SectionKind.day, matched.length, day: day));
-      entries.addAll(
-        _forest(matched, shownElsewhere: allMatched.difference(own)),
-      );
+      final rows = _forest(matched, shownElsewhere: allMatched.difference(own));
+      final n = topLevelCount(rows);
+      count += n;
+      entries
+        ..add(SectionHeader(SectionKind.day, n, day: day))
+        ..addAll(rows);
     }
     return ViewData(entries, count: count);
   }
@@ -224,7 +252,8 @@ class ViewBuilder {
   /// Every open item, as a tree.
   ViewData all() {
     final visible = tree.all.where((i) => i.isVisible(now)).toList();
-    return ViewData(_forest(visible), count: visible.length);
+    final entries = _forest(visible);
+    return ViewData(entries, count: topLevelCount(entries));
   }
 
   /// Completed tasks and ended events, most recent first.
@@ -311,13 +340,13 @@ class ViewBuilder {
   }
 
   ItemEntry _entry(Item item, int depth) {
-    final subtasks = tree.childrenOf(item.id).where((c) => c.isTask);
+    final progress = subtaskProgress(tree, item.id);
     return ItemEntry(
       item: item,
       depth: depth,
       isOverdue: _isOverdue(item),
-      subtasksDone: subtasks.where((c) => c.isDone).length,
-      subtasksTotal: subtasks.length,
+      subtasksDone: progress.done,
+      subtasksTotal: progress.total,
     );
   }
 

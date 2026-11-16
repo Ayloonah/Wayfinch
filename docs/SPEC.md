@@ -76,6 +76,8 @@ Three situations ask the user before acting, all with the same prompt: **Confirm
   - The rule moves to the new occurrence, so the finished one never repeats twice.
   - A recurring event rolls forward once it ends; missed occurrences are skipped.
 - **Deleting** an item also deletes its subtasks, after one confirmation when it has any. A "Deleted … · Undo" message stays up for 10 seconds, and Undo restores everything exactly as it was (same ids and history).
+- **Counts** follow one rule everywhere (sidebar, view subtitles like "4 tasks, 1 event", section headers, tag counts, the overdue banner): count the **top-level rows** a view shows. Subtasks shown under their parent don't add to the count; a subtask that shows on its own (its parent isn't in that view) counts as a row.
+- **Subtask progress** ("2 of 4" on a row, "2 of 4 done" in the detail panel) counts **leaf subtasks** at every depth: tasks with no subtasks of their own. Inner parents aren't counted, and events under a task aren't steps.
 - **Default sort** in every view: due date (a date without a time counts as the end of that day; no date sorts last), then priority as the tiebreaker.
 - **Each item shows once per view.** In Today, an overdue item shows only in the Overdue section, even if its parent is due today. In Upcoming, a subtask shows under its own day.
 
