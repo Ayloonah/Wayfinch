@@ -15,6 +15,7 @@ class WayfinchApp extends StatelessWidget {
     super.key,
     required this.controller,
     required this.appearance,
+    this.onReady,
   });
 
   /// App state and actions.
@@ -22,6 +23,9 @@ class WayfinchApp extends StatelessWidget {
 
   /// Theme settings.
   final AppearanceController appearance;
+
+  /// Passed to [HomeScreen.onReady] (dev demo only).
+  final void Function(BuildContext context)? onReady;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +47,7 @@ class WayfinchApp extends StatelessWidget {
           darkTheme: buildTheme(appearance.colorsFor(Brightness.dark)),
           themeMode: appearance.themeMode,
           builder: (context, child) => Celebration(child: child!),
-          home: HomeScreen(controller: controller),
+          home: HomeScreen(controller: controller, onReady: onReady),
         ),
       ),
     );

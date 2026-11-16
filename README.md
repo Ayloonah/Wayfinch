@@ -6,7 +6,7 @@ Ask your AI to break a big project into steps, and Wayfinch turns its answer int
 
 Offline-first, private by default, and designed to keep you on track without stressing you out.
 
-> 🚧 **Status:** early development, Windows desktop first. The core to-do list works (Today, Upcoming, All, Done and Tags views, subtasks, recurrence, quick add), along with light/dark themes, accents and a custom theme builder. The AI loop and notifications are next (see the [roadmap](#roadmap)).
+> 🚧 **Status:** early development, Windows desktop first. The core to-do list works (Today, Upcoming, All, Done and Tags views, subtasks, recurrence, quick add), along with light/dark themes, accents and a custom theme builder, and the full AI loop (Export for AI, Import with preview, Add or Replace, undo). Onboarding and notifications are next (see the [roadmap](#roadmap)).
 
 ---
 
@@ -91,7 +91,7 @@ flutter test
 - [x] **Foundation:** project setup, encrypted database, data model, EN/FR
 - [x] **Core list:** views, nesting, completing items, recurrence, quick add
 - [x] **Look and feel:** themes, accents, custom theme builder, tags, overdue banner
-- [ ] **AI loop:** Export for AI, Import with preview, add vs replace, undo
+- [x] **AI loop:** Export for AI, Import with preview, add vs replace, undo
 - [ ] **Onboarding and Help**
 - [ ] **Notifications:** reminders, daily digest, tray
 - [ ] **Calendar and backups:** `.ics` import/export, daily backups

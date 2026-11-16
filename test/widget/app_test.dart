@@ -3,11 +3,14 @@ import 'dart:async';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wayfinch/data/database.dart';
+import 'package:wayfinch/data/import_repository.dart';
 import 'package:wayfinch/data/items_repository.dart';
 import 'package:wayfinch/data/settings_repository.dart';
 import 'package:wayfinch/data/tags_repository.dart';
+import 'package:wayfinch/domain/exchange/exchange_export.dart';
 import 'package:wayfinch/domain/item_enums.dart';
 import 'package:wayfinch/domain/item_rules.dart';
 import 'package:wayfinch/ui/app.dart';
@@ -28,6 +31,7 @@ class _Harness {
       items: items,
       tags: tags,
       settings: settings,
+      imports: ImportRepository(db, items, clock: () => _now),
       clock: () => _now,
     );
   }
@@ -636,6 +640,150 @@ void main() {
     await finish(tester, h);
   });
 
+  testWidgets('Export for AI shows rules, instructions and the list; copies', (
+    tester,
+  ) async {
+    String? copied;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          copied = (call.arguments as Map)['text'] as String?;
+        }
+        return null;
+      },
+    );
+    final h = await pumpApp(
+      tester,
+      seed: (h) async {
+        await h.items.create(type: ItemType.task, title: 'Write report');
+        final done = await h.items.create(type: ItemType.task, title: 'Old');
+        await h.items.save(done.copyWith(doneAt: _now));
+      },
+    );
+    await tester.tap(find.text('Export for AI'));
+    await settle(tester);
+    expect(find.text('WHAT GETS COPIED'), findsOneWidget);
+    expect(selectable('"title": "Write report"'), findsOneWidget);
+    expect(selectable('"title": "Old"'), findsNothing);
+    expect(selectable('Today is 2026-11-15'), findsOneWidget);
+
+    // Include done items: they show up, and the choice is saved.
+    await tester.tap(find.textContaining('Done items', findRichText: true));
+    await settle(tester);
+    expect(selectable('"title": "Old"'), findsOneWidget);
+
+    await tester.enterText(dialogField(), 'Break things into small steps.');
+    await tester.pump();
+    await tester.tap(find.text('Copy to clipboard'));
+    await settle(tester);
+    expect(copied, contains('## Format rules'));
+    expect(
+      copied,
+      contains('## My instructions\nBreak things into small steps.'),
+    );
+    expect(copied, contains('"format": "wayfinch"'));
+    expect(find.text('Copied! Paste it into your AI.'), findsOneWidget);
+    expect(
+      ExportOptions.decode(
+        await pumpUntilDone(tester, h.settings.getValue('export.options')),
+      ).doneItems,
+      isTrue,
+    );
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      null,
+    );
+    await tester.pump(const Duration(seconds: 1)); // flush instruction save
+    await finish(tester, h);
+  });
+
+  testWidgets('Import: review, keep a removal, apply, then undo', (
+    tester,
+  ) async {
+    late String reportId;
+    final h = await pumpApp(
+      tester,
+      seed: (h) async {
+        reportId = (await h.items.create(
+          type: ItemType.task,
+          title: 'Report',
+          due: DateTime(2026, 11, 15),
+        )).id;
+        await h.items.create(type: ItemType.task, title: 'Books');
+        await h.items.create(type: ItemType.task, title: 'Laundry');
+      },
+    );
+    await tester.tap(find.text('Import'));
+    await settle(tester);
+    await tester.enterText(
+      dialogField(),
+      'Here you go!\n```json\n'
+      '{"format":"wayfinch","version":1,"items":['
+      '{"id":"$reportId","type":"task","title":"Report v2","due":"2026-11-17"},'
+      '{"type":"task","title":"Book a room","tags":["school"]}]}\n```',
+    );
+    await tester.pump();
+    await tester.tap(find.text('Review changes'));
+    await settle(tester);
+
+    expect(find.text('Review your import'), findsOneWidget);
+    expect(find.text('+ 1 new'), findsOneWidget);
+    expect(find.text('1 changed'), findsOneWidget);
+    expect(find.text('2 removed'), findsOneWidget);
+    expect(
+      find.text('Your AI removed 2 items. Make sure that\'s on purpose.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Renamed from "Report"'), findsOneWidget);
+
+    // Keep "Books".
+    await tester.tap(find.text('Keep this item').first);
+    await settle(tester);
+    expect(find.text('1 removed'), findsOneWidget);
+    await tester.tap(find.text('Import 3 changes'));
+    await settle(tester);
+    expect(find.text('Imported 3 changes'), findsOneWidget);
+    final titles = h.controller.tree.all.map((i) => i.title).toSet();
+    expect(titles, {'Report v2', 'Book a room', 'Books'});
+    expect(h.controller.tagsById.values.single.name, 'school');
+
+    await tester.tap(find.text('Undo'));
+    await settle(tester);
+    expect(h.controller.tree.all.map((i) => i.title).toSet(), {
+      'Report',
+      'Books',
+      'Laundry',
+    });
+    expect(h.controller.lastImport, isNull);
+    await finish(tester, h);
+  });
+
+  testWidgets('Import shows friendly errors for a bad reply', (tester) async {
+    final h = await pumpApp(tester);
+    await tester.tap(find.text('Import'));
+    await settle(tester);
+    await tester.enterText(
+      dialogField(),
+      '{"format":"wayfinch","version":1,"items":['
+      '{"type":"task","title":"x","due":"next friday","colour":"red"}]}',
+    );
+    await tester.pump();
+    await tester.tap(find.text('Review changes'));
+    await settle(tester);
+    expect(find.text('This reply can\'t be imported yet:'), findsOneWidget);
+    expect(
+      find.textContaining('Item 1: unknown field "colour".'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('Item 1: "due" should look like'),
+      findsOneWidget,
+    );
+    expect(find.text('Review your import'), findsNothing);
+    await finish(tester, h);
+  });
+
   testWidgets('French UI', (tester) async {
     final h = await pumpApp(tester, locale: const Locale('fr'));
     expect(find.text('Bonjour'), findsOneWidget);
@@ -679,3 +827,13 @@ Future<T> pumpUntilDone<T>(WidgetTester tester, Future<T> future) async {
   if (!done) throw StateError('Timed out waiting for database work');
   return result;
 }
+
+/// The first text field inside the open dialog.
+Finder dialogField() => find
+    .descendant(of: find.byType(Dialog), matching: find.byType(TextField))
+    .first;
+
+/// A SelectableText (the export preview) containing [text].
+Finder selectable(String text) => find.byWidgetPredicate(
+  (w) => w is SelectableText && (w.data ?? '').contains(text),
+);

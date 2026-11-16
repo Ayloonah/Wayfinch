@@ -78,6 +78,48 @@ class ItemsRepository {
     });
   }
 
+  /// Applies updates, inserts and deletes without starting a transaction
+  /// (the caller runs one). Updates go first, so anything moved out from
+  /// under a deleted item is safe; deletes run deepest-first.
+  Future<void> applyInTransaction({
+    required List<Item> updated,
+    required List<Item> created,
+    required List<String> deletedIds,
+  }) async {
+    final now = _clock();
+    for (final item in updated) {
+      await _update(item.copyWith(updatedAt: now));
+    }
+    // Parents before children.
+    final pending = [...created];
+    final ids = {for (final i in created) i.id};
+    final placed = <String>{};
+    while (pending.isNotEmpty) {
+      final ready = pending
+          .where(
+            (i) =>
+                i.parentId == null ||
+                !ids.contains(i.parentId) ||
+                placed.contains(i.parentId),
+          )
+          .toList();
+      if (ready.isEmpty) throw StateError('Cycle in imported items');
+      for (final item in ready) {
+        await _insert(item.copyWith(createdAt: now, updatedAt: now));
+        placed.add(item.id);
+        pending.remove(item);
+      }
+    }
+    if (deletedIds.isEmpty) return;
+    final tree = ItemTree(await loadAll());
+    int depth(String id) => tree.ancestorsOf(id).length;
+    final ordered = [...deletedIds]
+      ..sort((a, b) => depth(b).compareTo(depth(a)));
+    for (final id in ordered) {
+      await (_db.delete(_db.items)..where((t) => t.id.equals(id))).go();
+    }
+  }
+
   /// Deletes [id] and all its subtasks.
   Future<void> deleteWithSubtasks(String id) async {
     await _db.transaction(() async {

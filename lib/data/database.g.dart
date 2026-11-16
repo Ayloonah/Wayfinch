@@ -2036,6 +2036,262 @@ class SettingsCompanion extends UpdateCompanion<SettingRow> {
   }
 }
 
+class $ImportBackupsTable extends ImportBackups
+    with TableInfo<$ImportBackupsTable, ImportBackupRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ImportBackupsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _payloadMeta = const VerificationMeta(
+    'payload',
+  );
+  @override
+  late final GeneratedColumn<String> payload = GeneratedColumn<String>(
+    'payload',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, createdAt, payload];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'import_backups';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ImportBackupRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('payload')) {
+      context.handle(
+        _payloadMeta,
+        payload.isAcceptableOrUnknown(data['payload']!, _payloadMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_payloadMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ImportBackupRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ImportBackupRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      payload: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payload'],
+      )!,
+    );
+  }
+
+  @override
+  $ImportBackupsTable createAlias(String alias) {
+    return $ImportBackupsTable(attachedDatabase, alias);
+  }
+}
+
+class ImportBackupRow extends DataClass implements Insertable<ImportBackupRow> {
+  /// Row id (newest = highest).
+  final int id;
+
+  /// When the backup was taken.
+  final DateTime createdAt;
+
+  /// The snapshot: items, tags, tag links and reminders, as JSON.
+  final String payload;
+  const ImportBackupRow({
+    required this.id,
+    required this.createdAt,
+    required this.payload,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['payload'] = Variable<String>(payload);
+    return map;
+  }
+
+  ImportBackupsCompanion toCompanion(bool nullToAbsent) {
+    return ImportBackupsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      payload: Value(payload),
+    );
+  }
+
+  factory ImportBackupRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ImportBackupRow(
+      id: serializer.fromJson<int>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      payload: serializer.fromJson<String>(json['payload']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'payload': serializer.toJson<String>(payload),
+    };
+  }
+
+  ImportBackupRow copyWith({int? id, DateTime? createdAt, String? payload}) =>
+      ImportBackupRow(
+        id: id ?? this.id,
+        createdAt: createdAt ?? this.createdAt,
+        payload: payload ?? this.payload,
+      );
+  ImportBackupRow copyWithCompanion(ImportBackupsCompanion data) {
+    return ImportBackupRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      payload: data.payload.present ? data.payload.value : this.payload,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImportBackupRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('payload: $payload')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, createdAt, payload);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ImportBackupRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.payload == this.payload);
+}
+
+class ImportBackupsCompanion extends UpdateCompanion<ImportBackupRow> {
+  final Value<int> id;
+  final Value<DateTime> createdAt;
+  final Value<String> payload;
+  const ImportBackupsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.payload = const Value.absent(),
+  });
+  ImportBackupsCompanion.insert({
+    this.id = const Value.absent(),
+    required DateTime createdAt,
+    required String payload,
+  }) : createdAt = Value(createdAt),
+       payload = Value(payload);
+  static Insertable<ImportBackupRow> custom({
+    Expression<int>? id,
+    Expression<DateTime>? createdAt,
+    Expression<String>? payload,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (payload != null) 'payload': payload,
+    });
+  }
+
+  ImportBackupsCompanion copyWith({
+    Value<int>? id,
+    Value<DateTime>? createdAt,
+    Value<String>? payload,
+  }) {
+    return ImportBackupsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      payload: payload ?? this.payload,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (payload.present) {
+      map['payload'] = Variable<String>(payload.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImportBackupsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('payload: $payload')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$WayfinchDatabase extends GeneratedDatabase {
   _$WayfinchDatabase(QueryExecutor e) : super(e);
   $WayfinchDatabaseManager get managers => $WayfinchDatabaseManager(this);
@@ -2044,6 +2300,7 @@ abstract class _$WayfinchDatabase extends GeneratedDatabase {
   late final $ItemTagsTable itemTags = $ItemTagsTable(this);
   late final $RemindersTable reminders = $RemindersTable(this);
   late final $SettingsTable settings = $SettingsTable(this);
+  late final $ImportBackupsTable importBackups = $ImportBackupsTable(this);
   late final Index itemsParentId = Index(
     'items_parent_id',
     'CREATE INDEX items_parent_id ON items (parent_id)',
@@ -2066,6 +2323,7 @@ abstract class _$WayfinchDatabase extends GeneratedDatabase {
     itemTags,
     reminders,
     settings,
+    importBackups,
     itemsParentId,
     itemsDue,
     itemsIcsUid,
@@ -3891,6 +4149,181 @@ typedef $$SettingsTableProcessedTableManager =
       SettingRow,
       PrefetchHooks Function()
     >;
+typedef $$ImportBackupsTableCreateCompanionBuilder =
+    ImportBackupsCompanion Function({
+      Value<int> id,
+      required DateTime createdAt,
+      required String payload,
+    });
+typedef $$ImportBackupsTableUpdateCompanionBuilder =
+    ImportBackupsCompanion Function({
+      Value<int> id,
+      Value<DateTime> createdAt,
+      Value<String> payload,
+    });
+
+class $$ImportBackupsTableFilterComposer
+    extends Composer<_$WayfinchDatabase, $ImportBackupsTable> {
+  $$ImportBackupsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ImportBackupsTableOrderingComposer
+    extends Composer<_$WayfinchDatabase, $ImportBackupsTable> {
+  $$ImportBackupsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ImportBackupsTableAnnotationComposer
+    extends Composer<_$WayfinchDatabase, $ImportBackupsTable> {
+  $$ImportBackupsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get payload =>
+      $composableBuilder(column: $table.payload, builder: (column) => column);
+}
+
+class $$ImportBackupsTableTableManager
+    extends
+        RootTableManager<
+          _$WayfinchDatabase,
+          $ImportBackupsTable,
+          ImportBackupRow,
+          $$ImportBackupsTableFilterComposer,
+          $$ImportBackupsTableOrderingComposer,
+          $$ImportBackupsTableAnnotationComposer,
+          $$ImportBackupsTableCreateCompanionBuilder,
+          $$ImportBackupsTableUpdateCompanionBuilder,
+          (
+            ImportBackupRow,
+            BaseReferences<
+              _$WayfinchDatabase,
+              $ImportBackupsTable,
+              ImportBackupRow
+            >,
+          ),
+          ImportBackupRow,
+          PrefetchHooks Function()
+        > {
+  $$ImportBackupsTableTableManager(
+    _$WayfinchDatabase db,
+    $ImportBackupsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ImportBackupsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ImportBackupsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ImportBackupsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> payload = const Value.absent(),
+              }) => ImportBackupsCompanion(
+                id: id,
+                createdAt: createdAt,
+                payload: payload,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required DateTime createdAt,
+                required String payload,
+              }) => ImportBackupsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                payload: payload,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ImportBackupsTable, ImportBackupRow>(table),
+                  BaseReferences<
+                    _$WayfinchDatabase,
+                    $ImportBackupsTable,
+                    ImportBackupRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ImportBackupsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$WayfinchDatabase,
+      $ImportBackupsTable,
+      ImportBackupRow,
+      $$ImportBackupsTableFilterComposer,
+      $$ImportBackupsTableOrderingComposer,
+      $$ImportBackupsTableAnnotationComposer,
+      $$ImportBackupsTableCreateCompanionBuilder,
+      $$ImportBackupsTableUpdateCompanionBuilder,
+      (
+        ImportBackupRow,
+        BaseReferences<
+          _$WayfinchDatabase,
+          $ImportBackupsTable,
+          ImportBackupRow
+        >,
+      ),
+      ImportBackupRow,
+      PrefetchHooks Function()
+    >;
 
 class $WayfinchDatabaseManager {
   final _$WayfinchDatabase _db;
@@ -3904,4 +4337,6 @@ class $WayfinchDatabaseManager {
       $$RemindersTableTableManager(_db, _db.reminders);
   $$SettingsTableTableManager get settings =>
       $$SettingsTableTableManager(_db, _db.settings);
+  $$ImportBackupsTableTableManager get importBackups =>
+      $$ImportBackupsTableTableManager(_db, _db.importBackups);
 }

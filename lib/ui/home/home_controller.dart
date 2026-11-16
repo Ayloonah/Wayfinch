@@ -3,10 +3,14 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../data/database.dart' show newId;
+import '../../data/import_repository.dart';
 import '../../data/items_repository.dart';
 import '../../data/settings_repository.dart';
 import '../../data/tags_repository.dart';
 import '../../domain/dates.dart';
+import '../../domain/exchange/exchange_export.dart';
+import '../../domain/exchange/exchange_model.dart';
+import '../../domain/exchange/import_plan.dart';
 import '../../domain/item.dart';
 import '../../domain/item_enums.dart';
 import '../../domain/item_rules.dart';
@@ -57,10 +61,15 @@ class HomeController extends ChangeNotifier {
     required this.items,
     required this.tags,
     required this.settings,
+    required this.imports,
     DateTime Function()? clock,
   }) : _clock = clock ?? DateTime.now {
     _now = _clock();
     _subscriptions = [
+      imports.watchLatest().listen((backup) {
+        _lastImport = backup;
+        notifyListeners();
+      }),
       items.watchAll().listen(_onItems),
       tags.watchAll().listen((list) {
         _tags = {for (final t in list) t.id: t};
@@ -87,6 +96,60 @@ class HomeController extends ChangeNotifier {
 
   /// Settings storage.
   final SettingsRepository settings;
+
+  /// AI import storage (apply, backups, undo).
+  final ImportRepository imports;
+
+  ImportBackupInfo? _lastImport;
+
+  /// The latest pre-import backup, if an import can be undone.
+  ImportBackupInfo? get lastImport => _lastImport;
+
+  static const _exportOptionsKey = 'export.options';
+  static const _instructionsKey = 'export.instructions';
+
+  /// Saved "What to include" choices.
+  Future<ExportOptions> loadExportOptions() async =>
+      ExportOptions.decode(await settings.getValue(_exportOptionsKey));
+
+  /// Saves "What to include".
+  Future<void> saveExportOptions(ExportOptions options) =>
+      settings.setValue(_exportOptionsKey, options.encode());
+
+  /// Saved "My instructions" (empty by default).
+  Future<String> loadInstructions() async =>
+      await settings.getValue(_instructionsKey) ?? '';
+
+  /// Saves "My instructions".
+  Future<void> saveInstructions(String text) =>
+      settings.setValue(_instructionsKey, text.isEmpty ? null : text);
+
+  /// The "My list" JSON for [options].
+  ExportResult exportList(ExportOptions options) =>
+      buildExportJson(_tree, _tags, options, _clock());
+
+  /// Counts for the export checkboxes.
+  ExportCounts get exportItemCounts => exportCounts(_tree, _clock());
+
+  /// Plans importing [doc] in [mode] against the current list.
+  ImportPlan planImportOf(ExchangeDocument doc, ImportMode mode) => planImport(
+    tree: _tree,
+    tagsById: _tags,
+    doc: doc,
+    mode: mode,
+    now: _clock(),
+    newId: newId,
+  );
+
+  /// Backs up the list and applies [plan]. Returns the number of changes.
+  Future<int> applyImport(ImportPlan plan, {Set<String> keep = const {}}) =>
+      imports.apply(plan, keep: keep, colorFor: tagColorFor);
+
+  /// Restores the list from before the latest import.
+  Future<bool> undoImport() async {
+    _selectedId = null;
+    return imports.undoLatest();
+  }
 
   final DateTime Function() _clock;
   late final List<StreamSubscription<Object?>> _subscriptions;

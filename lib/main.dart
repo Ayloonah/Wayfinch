@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'data/database_opener.dart';
+import 'data/import_repository.dart';
 import 'data/items_repository.dart';
 import 'data/settings_repository.dart';
 import 'data/tags_repository.dart';
@@ -14,10 +15,12 @@ Future<void> main() async {
   // opens unencrypted. The SQLCipher check still runs.
   final db = openWayfinchDatabase(file: await defaultDatabaseFile());
   final settings = SettingsRepository(db);
+  final items = ItemsRepository(db);
   final controller = HomeController(
-    items: ItemsRepository(db),
+    items: items,
     tags: TagsRepository(db),
     settings: settings,
+    imports: ImportRepository(db, items),
   );
   runApp(
     WayfinchApp(

@@ -4,6 +4,8 @@ import '../../domain/views.dart';
 import '../../l10n/app_localizations.dart';
 import '../home/home_controller.dart';
 import '../theme/tokens.dart';
+import '../exchange/export_dialog.dart';
+import '../exchange/import_dialog.dart';
 import '../widgets/finch_logo.dart';
 import '../widgets/tag_color_dialog.dart';
 
@@ -57,6 +59,18 @@ class Sidebar extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           const Expanded(child: _TagList()),
+          const SizedBox(height: 12),
+          _ActionButton(
+            icon: Icons.auto_awesome_outlined,
+            label: l10n.exportTitle,
+            highlighted: true,
+            onTap: () => showExportDialog(context),
+          ),
+          _ActionButton(
+            icon: Icons.download_outlined,
+            label: l10n.importTitle,
+            onTap: () => showImportDialog(context),
+          ),
           _NavButton(
             destination: Destination.settings,
             icon: Icons.tune,
@@ -373,4 +387,91 @@ class _NavButton extends StatelessWidget {
       ),
     );
   }
+}
+
+/// "Export for AI" (dashed accent outline, as in the mockup) and "Import".
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.highlighted = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool highlighted;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = WayfinchColors.of(context);
+    final color = highlighted ? colors.accentText : colors.text;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: CustomPaint(
+        foregroundPainter: highlighted ? _DashedBorder(color) : null,
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: onTap,
+            child: SizedBox(
+              height: 44,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  children: [
+                    Icon(icon, size: 20, color: color),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        label,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: color,
+                          fontWeight: highlighted
+                              ? FontWeight.w800
+                              : FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DashedBorder extends CustomPainter {
+  _DashedBorder(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rrect = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      const Radius.circular(12),
+    ).deflate(0.75);
+    final path = Path()..addRRect(rrect);
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    for (final metric in path.computeMetrics()) {
+      for (var d = 0.0; d < metric.length; d += 9) {
+        canvas.drawPath(metric.extractPath(d, d + 5), paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedBorder old) => old.color != color;
 }

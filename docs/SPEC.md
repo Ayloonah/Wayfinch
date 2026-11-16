@@ -130,21 +130,42 @@ The exchange format is JSON, validated strictly against a schema. Only the forma
 ```
 
 - `version` is internal only, never shown in the UI. It lets future versions read older files.
-- New items from the AI omit `id`; the app assigns one.
+- New items from the AI omit `id`; the app assigns one. An `id` the app doesn't know is also treated as a new item, with a fresh id (ids from an AI are never trusted to be new).
+- **Fields:**
+  - every item: `id`, `type`, `title`, `notes`, `priority` (none/low/medium/high), `tags` (names), `recurrence` (RRULE or null), `children`
+  - tasks: `due` (`YYYY-MM-DD` or `YYYY-MM-DDTHH:mm`, local time) and `done: true` when finished
+  - events: `start` and `end`
+  - Unknown fields are errors (strict schema).
+- **Existing items:** a field missing from the reply means "leave it as it is". New items get defaults.
 
 ### Export for AI
 
 - One copyable block in three parts: **Format rules** (locked, app-controlled), **My instructions** (user-editable, saved, empty by default with example placeholders), **My list** (the JSON).
-- Format rules tell the AI: reply with only valid JSON in the Wayfinch format, keep every existing id, omit id for new items, don't remove items unless asked.
-- "What to include" checkboxes: open tasks, events, notes, done items. Done items are off by default.
-- Output: Copy to clipboard or Save as file.
+- **Format rules:**
+  - They tell the AI: reply with only valid JSON in the Wayfinch format, keep every existing id, omit id for new items, don't remove items unless asked, don't add other fields.
+  - They describe every field, and include **today's date** so the AI can plan.
+  - The rules text follows the app language; the JSON keys don't.
+- "What to include" checkboxes: open tasks, events, notes, done items. Done items are off by default. The choices are remembered.
+- When a parent is left out (e.g. a done parent with done items unchecked), its included subtasks move up a level in the export.
+- Output: Copy to clipboard or Save as file (a `.txt` with the whole block).
 
 ### Import
 
-1. Paste the AI's reply or open a file. The app strips any text around the JSON, then validates it. Errors say exactly what's wrong.
-2. **Preview:** counts of new, changed and removed items, plus a list of each change. A warning appears when the AI removed anything, with a "Keep this item" button per removal.
-3. **Choose Add or Replace.** Add only adds new items. Replace makes the list match the AI's version, matching items by id so Done history and creation dates survive.
-4. **Backup + undo:** the current list is backed up automatically before every Replace, and an "Undo import" action restores it.
+1. **Paste or open:**
+   - Paste the AI's reply ("Paste from clipboard" or type into the box) or open a file.
+   - The app strips any text and code fences around the JSON, then validates it.
+   - Errors say exactly what's wrong and where ("Item 3 › subtask 1: "due" should look like 2026-12-05..."), with a tip to ask the AI to fix them.
+2. **Preview:**
+   - Counts of new, changed and removed items, done items left alone, and a list of each change with what changed (e.g. "Due Nov 15 → Nov 17", "Priority Medium → High", "Tags added: ta", "Moved under …").
+   - A warning appears when the AI removed anything, with a "Keep this item" button per removal.
+3. **Choose Add or Replace** (Replace is pre-selected, as in the mockup):
+   - **Add** only adds new items, including new subtasks under existing items.
+   - **Replace** makes the list match the AI's version, matching items by id so creation dates and history survive. Any open item missing from the reply is removed, whatever the export included. **Done items (and ended events) are never removed or changed by a missing entry.**
+   - The reply's nesting decides parents. A top-level item whose current parent isn't in the reply but stays (e.g. an unexported done parent) keeps that parent. Anything left under a removed item moves up to the nearest surviving ancestor.
+4. **Backup + undo:**
+   - A snapshot of the whole list (items, tags, tag links, reminders) is stored in the database right before every import, Add or Replace. It's encrypted with the database; the last 10 are kept.
+   - After importing, "Imported N changes · Undo" stays up for 15 seconds.
+   - The Import dialog also offers "Undo last import" (with a confirmation, since it also drops anything changed since). Undo restores the snapshot exactly.
 
 ## Calendar import and export
 
