@@ -9,111 +9,36 @@ import '../../l10n/app_localizations.dart';
 import '../home/home_controller.dart';
 import '../theme/tokens.dart';
 import 'dialog_parts.dart';
-import 'import_dialog.dart' show importUndoDuration;
 import 'import_messages.dart';
 
-/// Opens Calendar: import an .ics file (with a preview) or export one.
-/// Shows "Imported N events · Undo" after an import.
-Future<void> showCalendarDialog(BuildContext context) async {
+/// Whether [text] is an iCalendar file (so Import treats it as a calendar).
+bool looksLikeIcs(String text) =>
+    text.trimLeft().toUpperCase().startsWith('BEGIN:VCALENDAR');
+
+/// Opens "Export to calendar": saves the events (optionally open tasks too)
+/// as an .ics file.
+Future<void> showCalendarExportDialog(BuildContext context) {
   final controller = HomeScope.of(context);
-  final messenger = ScaffoldMessenger.of(context);
-  final l10n = AppLocalizations.of(context);
-  final count = await showDialog<int>(
+  return showDialog<void>(
     context: context,
     builder: (_) =>
-        HomeScope(controller: controller, child: const CalendarDialog()),
+        HomeScope(controller: controller, child: const CalendarExportDialog()),
   );
-  if (count == null) return;
-  messenger
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(
-        content: Text(l10n.calendarImported(count)),
-        duration: importUndoDuration,
-        persist: false,
-        behavior: SnackBarBehavior.floating,
-        width: 460,
-        action: SnackBarAction(
-          label: l10n.undo,
-          onPressed: controller.undoImport,
-        ),
-      ),
-    );
 }
 
-/// The Calendar dialog: a start step (import or export), then a review step
-/// for imports.
-class CalendarDialog extends StatefulWidget {
+/// The "Export to calendar" dialog.
+class CalendarExportDialog extends StatefulWidget {
   /// Creates the dialog.
-  const CalendarDialog({super.key, this.initialText});
-
-  /// An .ics file's text to review right away (tests).
-  final String? initialText;
+  const CalendarExportDialog({super.key});
 
   @override
-  State<CalendarDialog> createState() => _CalendarDialogState();
+  State<CalendarExportDialog> createState() => _CalendarExportDialogState();
 }
 
-class _CalendarDialogState extends State<CalendarDialog> {
-  IcsReadResult? _read;
-  String? _error;
-  bool _includePast = false;
-  bool _exportTasks = false;
-  bool _busy = false;
+class _CalendarExportDialogState extends State<CalendarExportDialog> {
+  bool _tasks = false;
 
-  bool _started = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_started) return;
-    _started = true;
-    final text = widget.initialText;
-    if (text != null) _load(text);
-  }
-
-  void _load(String text) {
-    final l10n = AppLocalizations.of(context);
-    final read = readIcs(text);
-    setState(() {
-      if (!read.isCalendar) {
-        _error = l10n.calendarNotIcs;
-        _read = null;
-      } else if (read.events.isEmpty) {
-        _error = l10n.calendarNoEvents;
-        _read = null;
-      } else {
-        _error = null;
-        _read = read;
-      }
-    });
-  }
-
-  Future<void> _openFile() async {
-    final file = await openFile(
-      acceptedTypeGroups: const [
-        XTypeGroup(label: 'iCalendar', extensions: ['ics']),
-      ],
-    );
-    if (file == null || !mounted) return;
-    String text;
-    try {
-      text = await File(file.path).readAsString();
-    } on FileSystemException {
-      if (mounted) {
-        setState(() => _error = AppLocalizations.of(context).calendarNotIcs);
-      }
-      return;
-    } on FormatException {
-      if (mounted) {
-        setState(() => _error = AppLocalizations.of(context).calendarNotIcs);
-      }
-      return;
-    }
-    if (mounted) _load(text);
-  }
-
-  Future<void> _export() async {
+  Future<void> _save() async {
     final controller = HomeScope.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
@@ -127,97 +52,106 @@ class _CalendarDialogState extends State<CalendarDialog> {
     var path = location.path;
     if (!path.toLowerCase().endsWith('.ics')) path = '$path.ics';
     await File(path)
-        .writeAsString(controller.exportCalendar(includeTasks: _exportTasks));
+        .writeAsString(controller.exportCalendar(includeTasks: _tasks));
     messenger.showSnackBar(SnackBar(content: Text(l10n.calendarExported)));
     if (mounted) Navigator.pop(context);
   }
 
-  Future<void> _apply(IcsImportPlan plan) async {
-    setState(() => _busy = true);
-    final count = await HomeScope.of(context).applyCalendarImport(plan);
-    if (mounted) Navigator.pop(context, count);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final read = _read;
+    final colors = WayfinchColors.of(context);
+    final l10n = AppLocalizations.of(context);
     return Dialog(
       insetPadding: const EdgeInsets.all(32),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: 820,
-          maxHeight: read == null ? 520 : 700,
-        ),
+        constraints: const BoxConstraints(maxWidth: 560),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(32, 28, 32, 24),
-          child: read == null ? _startStep() : _reviewStep(read),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              DialogHeader(
+                icon: Icons.event_outlined,
+                title: l10n.calendarExportTitle,
+                subtitle: l10n.calendarExportBody,
+              ),
+              const SizedBox(height: 16),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                value: _tasks,
+                onChanged: (v) => setState(() => _tasks = v ?? false),
+                title: Text(l10n.calendarExportTasks),
+                subtitle: Text(l10n.calendarExportTasksBody),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(l10n.promptCancel),
+                  ),
+                  const SizedBox(width: 10),
+                  FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(0, 48),
+                      backgroundColor: colors.accent,
+                      foregroundColor: colors.onAccent,
+                    ),
+                    onPressed: _save,
+                    icon: const Icon(Icons.save_alt),
+                    label: Text(l10n.calendarSaveFile),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _startStep() {
-    final colors = WayfinchColors.of(context);
-    final l10n = AppLocalizations.of(context);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        DialogHeader(
-          icon: Icons.event_outlined,
-          title: l10n.calendarTitle,
-          subtitle: l10n.calendarSubtitle,
-        ),
-        const SizedBox(height: 20),
-        _Card(
-          icon: Icons.download_outlined,
-          title: l10n.calendarImportTitle,
-          body: l10n.calendarImportBody,
-          action: FilledButton.icon(
-            style: FilledButton.styleFrom(
-              backgroundColor: colors.accent,
-              foregroundColor: colors.onAccent,
-            ),
-            onPressed: _openFile,
-            icon: const Icon(Icons.folder_open_outlined),
-            label: Text(l10n.calendarOpenFile),
-          ),
-          extra: _error == null
-              ? null
-              : Text(
-                  _error!,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: colors.warningText,
-                  ),
-                ),
-        ),
-        const SizedBox(height: 14),
-        _Card(
-          icon: Icons.upload_outlined,
-          title: l10n.calendarExportTitle,
-          body: l10n.calendarExportBody,
-          action: OutlinedButton.icon(
-            onPressed: _export,
-            icon: const Icon(Icons.save_alt),
-            label: Text(l10n.calendarSaveFile),
-          ),
-          extra: CheckboxListTile(
-            contentPadding: EdgeInsets.zero,
-            dense: true,
-            controlAffinity: ListTileControlAffinity.leading,
-            value: _exportTasks,
-            onChanged: (v) => setState(() => _exportTasks = v ?? false),
-            title: Text(l10n.calendarExportTasks),
-            subtitle: Text(l10n.calendarExportTasksBody),
-          ),
-        ),
-      ],
-    );
+/// The review step of a calendar import, shown inside the Import dialog:
+/// counts, "Include past events", the list of changes, Back and Import.
+class CalendarImportReview extends StatefulWidget {
+  /// Creates the review of [read].
+  const CalendarImportReview({
+    super.key,
+    required this.read,
+    required this.onBack,
+    required this.onApplied,
+  });
+
+  /// The calendar file's events.
+  final IcsReadResult read;
+
+  /// Goes back to the paste step.
+  final VoidCallback onBack;
+
+  /// Called with the number of events added or updated.
+  final ValueChanged<int> onApplied;
+
+  @override
+  State<CalendarImportReview> createState() => _CalendarImportReviewState();
+}
+
+class _CalendarImportReviewState extends State<CalendarImportReview> {
+  bool _includePast = false;
+  bool _busy = false;
+
+  Future<void> _apply(IcsImportPlan plan) async {
+    setState(() => _busy = true);
+    final count = await HomeScope.of(context).applyCalendarImport(plan);
+    if (mounted) widget.onApplied(count);
   }
 
-  Widget _reviewStep(IcsReadResult read) {
+  @override
+  Widget build(BuildContext context) {
+    final read = widget.read;
     final controller = HomeScope.of(context);
     final colors = WayfinchColors.of(context);
     final l10n = AppLocalizations.of(context);
@@ -232,6 +166,7 @@ class _CalendarDialogState extends State<CalendarDialog> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         DialogHeader(
+          icon: Icons.event_outlined,
           title: l10n.calendarReviewTitle,
           subtitle: l10n.calendarReviewSubtitle(read.events.length),
           subtitleIcon: Icon(Icons.check, size: 16, color: colors.accentText),
@@ -319,10 +254,7 @@ class _CalendarDialogState extends State<CalendarDialog> {
                 ),
               ),
             ),
-            TextButton(
-              onPressed: () => setState(() => _read = null),
-              child: Text(l10n.importBack),
-            ),
+            TextButton(onPressed: widget.onBack, child: Text(l10n.importBack)),
             const SizedBox(width: 8),
             FilledButton(
               style: FilledButton.styleFrom(
@@ -336,70 +268,6 @@ class _CalendarDialogState extends State<CalendarDialog> {
           ],
         ),
       ],
-    );
-  }
-}
-
-/// One option on the start step: icon, title, explanation, a button and
-/// optional extra content underneath.
-class _Card extends StatelessWidget {
-  const _Card({
-    required this.icon,
-    required this.title,
-    required this.body,
-    required this.action,
-    this.extra,
-  });
-
-  final IconData icon;
-  final String title;
-  final String body;
-  final Widget action;
-  final Widget? extra;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = WayfinchColors.of(context);
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-      decoration: BoxDecoration(
-        border: Border.all(color: colors.border, width: 1.5),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: colors.accentText),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(body, style: TextStyle(color: colors.muted)),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              action,
-            ],
-          ),
-          if (extra != null) ...[
-            const SizedBox(height: 8),
-            Padding(padding: const EdgeInsets.only(left: 36), child: extra!),
-          ],
-        ],
-      ),
     );
   }
 }

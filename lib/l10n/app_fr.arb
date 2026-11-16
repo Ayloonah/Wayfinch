@@ -434,11 +434,7 @@
   "helpBackupsTitle": "Sauvegardes et annulation",
   "helpBackupsBody": "Wayfinch sauvegarde toute ta liste une fois par jour et garde les 7 dernières sauvegardes, dans un dossier que tu peux changer dans Paramètres › Sauvegardes (choisis OneDrive ou une clé USB pour garder une copie hors de cet ordinateur). Avec un mot de passe, les sauvegardes sont chiffrées aussi. Ta liste est aussi sauvegardée avant chaque import : annule le dernier depuis la fenêtre Importer, ou restaure l’un des 10 derniers depuis Paramètres › Historique des imports. Restaurer sauvegarde d’abord ta liste actuelle, donc tu peux changer d’avis.",
 
-  "calendarTitle": "Calendrier",
-  "calendarSubtitle": "Importe des événements de Google, Outlook ou Apple Calendar, ou exporte les tiens, avec des fichiers .ics.",
-  "calendarImportTitle": "Importer un calendrier",
-  "calendarImportBody": "Ouvre un fichier .ics. Tu verras ce qui est nouveau et ce qui a changé avant que quoi que ce soit se passe.",
-  "calendarOpenFile": "Ouvrir un fichier .ics",
+  "importCalendar": "Importer un calendrier (.ics)...",
   "calendarExportTitle": "Exporter vers un calendrier",
   "calendarExportBody": "Enregistre tes événements dans un fichier .ics, puis importe-le dans ton app de calendrier.",
   "calendarSaveFile": "Enregistrer le .ics",
@@ -473,5 +469,5 @@
   "backupsOldPasswordTitle": "Mot de passe de cette sauvegarde",
   "backupsOldPasswordBody": "Cette sauvegarde a été faite avec un autre mot de passe. Entre le mot de passe (ou le code de récupération) que tu avais à ce moment-là.",
   "helpCalendarTitle": "Calendriers (.ics)",
-  "helpCalendarBody": "Utilise Calendrier dans la barre latérale. Importer ouvre un fichier .ics exporté de Google, Outlook ou Apple Calendar : les événements déjà terminés sont laissés de côté sauf si tu les inclus, et réimporter le même calendrier met les événements à jour au lieu de les ajouter deux fois. Rien n’est jamais retiré, et tu peux annuler. Les événements d’une journée entière arrivent comme des événements de minuit à minuit. Exporter enregistre tes événements dans un fichier .ics ; active « Exporter aussi les tâches » pour inclure les tâches ouvertes comme de courts événements à leur échéance."
+  "helpCalendarBody": "Pour importer des événements, utilise Importer et choisis « Importer un calendrier (.ics) » (ou ouvre simplement un fichier .ics exporté de Google, Outlook ou Apple Calendar) : les événements déjà terminés sont laissés de côté sauf si tu les inclus, et réimporter le même calendrier met les événements à jour au lieu de les ajouter deux fois. Rien n’est jamais retiré, et tu peux annuler. Les événements d’une journée entière arrivent comme des événements de minuit à minuit. « Exporter vers un calendrier » dans la barre latérale enregistre tes événements dans un fichier .ics ; active « Exporter aussi les tâches » pour inclure les tâches ouvertes comme de courts événements à leur échéance."
 }

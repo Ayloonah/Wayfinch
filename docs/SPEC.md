@@ -178,7 +178,7 @@ The exchange format is JSON, validated strictly against a schema. Only the forma
 
 Calendars come in and go out as .ics files. Direct Google/Outlook sync waits for the online phase.
 
-- **Where:** a "Calendar" button in the sidebar (under Export for AI and Import) opens one dialog with Import and Export.
+- **Where:** importing goes through the regular Import dialog: an "Import a calendar (.ics)..." button, and any .ics file opened (or pasted) there goes to the calendar review. Exporting has its own sidebar action, "Export to a calendar", under Export for AI and Import (so nothing in the sidebar looks like it opens a calendar view).
 - **Import:** .ics events become Wayfinch events, recurring ones included (RRULE). Only events from today forward by default, with an option to include past ones.
   - A repeating event counts as past only once its rule has run out.
   - All-day events come in as events from midnight to midnight (a 3-day trip runs from day 1 00:00 to day 4 00:00).

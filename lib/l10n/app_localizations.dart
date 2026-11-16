@@ -2516,35 +2516,11 @@ abstract class AppLocalizations {
   /// **'Wayfinch backs up your whole list once a day and keeps the last 7, in a folder you can change in Settings › Backups (pick OneDrive or a USB drive to keep a copy off this computer). With a password, backups are encrypted too. Your list is also backed up before every import: undo the last one from the Import dialog, or restore any of the last 10 from Settings › Import history. Restoring backs up your current list first, so you can change your mind.'**
   String get helpBackupsBody;
 
-  /// No description provided for @calendarTitle.
+  /// No description provided for @importCalendar.
   ///
   /// In en, this message translates to:
-  /// **'Calendar'**
-  String get calendarTitle;
-
-  /// No description provided for @calendarSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Bring events in from Google, Outlook or Apple Calendar, or send yours out, with .ics files.'**
-  String get calendarSubtitle;
-
-  /// No description provided for @calendarImportTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Import a calendar'**
-  String get calendarImportTitle;
-
-  /// No description provided for @calendarImportBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Open an .ics file. You\'ll see what\'s new and what changed before anything happens.'**
-  String get calendarImportBody;
-
-  /// No description provided for @calendarOpenFile.
-  ///
-  /// In en, this message translates to:
-  /// **'Open .ics file'**
-  String get calendarOpenFile;
+  /// **'Import a calendar (.ics)...'**
+  String get importCalendar;
 
   /// No description provided for @calendarExportTitle.
   ///
@@ -2747,7 +2723,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpCalendarBody.
   ///
   /// In en, this message translates to:
-  /// **'Use Calendar in the sidebar. Import opens an .ics file exported from Google, Outlook or Apple Calendar: events that already ended are left out unless you include them, and importing the same calendar again updates events instead of adding them twice. Nothing is ever removed, and you can undo. All-day events come in as events from midnight to midnight. Export saves your events as an .ics file; turn on \"Also export tasks\" to include open tasks as short events at their due time.'**
+  /// **'To bring in events, use Import and pick \"Import a calendar (.ics)\" (or just open an .ics file exported from Google, Outlook or Apple Calendar): events that already ended are left out unless you include them, and importing the same calendar again updates events instead of adding them twice. Nothing is ever removed, and you can undo. All-day events come in as events from midnight to midnight. \"Export to calendar\" in the sidebar saves your events as an .ics file; turn on \"Also export tasks\" to include open tasks as short events at their due time.'**
   String get helpCalendarBody;
 }
 

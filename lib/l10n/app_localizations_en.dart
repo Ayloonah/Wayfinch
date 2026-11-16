@@ -1564,21 +1564,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Wayfinch backs up your whole list once a day and keeps the last 7, in a folder you can change in Settings › Backups (pick OneDrive or a USB drive to keep a copy off this computer). With a password, backups are encrypted too. Your list is also backed up before every import: undo the last one from the Import dialog, or restore any of the last 10 from Settings › Import history. Restoring backs up your current list first, so you can change your mind.';
 
   @override
-  String get calendarTitle => 'Calendar';
-
-  @override
-  String get calendarSubtitle =>
-      'Bring events in from Google, Outlook or Apple Calendar, or send yours out, with .ics files.';
-
-  @override
-  String get calendarImportTitle => 'Import a calendar';
-
-  @override
-  String get calendarImportBody =>
-      'Open an .ics file. You\'ll see what\'s new and what changed before anything happens.';
-
-  @override
-  String get calendarOpenFile => 'Open .ics file';
+  String get importCalendar => 'Import a calendar (.ics)...';
 
   @override
   String get calendarExportTitle => 'Export to a calendar';
@@ -1742,5 +1728,5 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpCalendarBody =>
-      'Use Calendar in the sidebar. Import opens an .ics file exported from Google, Outlook or Apple Calendar: events that already ended are left out unless you include them, and importing the same calendar again updates events instead of adding them twice. Nothing is ever removed, and you can undo. All-day events come in as events from midnight to midnight. Export saves your events as an .ics file; turn on \"Also export tasks\" to include open tasks as short events at their due time.';
+      'To bring in events, use Import and pick \"Import a calendar (.ics)\" (or just open an .ics file exported from Google, Outlook or Apple Calendar): events that already ended are left out unless you include them, and importing the same calendar again updates events instead of adding them twice. Nothing is ever removed, and you can undo. All-day events come in as events from midnight to midnight. \"Export to calendar\" in the sidebar saves your events as an .ics file; turn on \"Also export tasks\" to include open tasks as short events at their due time.';
 }

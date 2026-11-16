@@ -49,8 +49,8 @@ class Sidebar extends StatelessWidget {
           ),
           _ActionButton(
             icon: Icons.event_outlined,
-            label: l10n.calendarTitle,
-            onTap: () => showCalendarDialog(context),
+            label: l10n.calendarExportTitle,
+            onTap: () => showCalendarExportDialog(context),
           ),
           _NavButton(
             destination: Destination.help,

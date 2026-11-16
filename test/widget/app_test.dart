@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +15,6 @@ import 'package:wayfinch/domain/item_enums.dart';
 import 'package:wayfinch/domain/views.dart' show overdueTagId;
 import 'package:wayfinch/domain/item_rules.dart';
 import 'package:wayfinch/ui/app.dart';
-import 'package:wayfinch/ui/exchange/calendar_dialog.dart';
 import 'package:wayfinch/ui/home/home_controller.dart';
 import 'package:wayfinch/ui/theme/appearance_controller.dart';
 import 'package:wayfinch/ui/theme/tokens.dart';
@@ -994,15 +991,19 @@ void main() {
     await finish(tester, h);
   });
 
-  testWidgets('Calendar opens from the sidebar with import and export', (
-    tester,
-  ) async {
+  testWidgets('Export to a calendar opens from the sidebar; Import offers '
+      'calendars', (tester) async {
     final h = await pumpApp(tester);
-    await tester.tap(find.text('Calendar'));
+    await tester.tap(find.text('Export to a calendar'));
     await settle(tester);
-    expect(find.text('Import a calendar'), findsOneWidget);
-    expect(find.text('Export to a calendar'), findsOneWidget);
     expect(find.text('Also export tasks'), findsOneWidget);
+    expect(find.text('Save .ics file'), findsOneWidget);
+    await tester.tap(find.byTooltip('Close'));
+    await settle(tester);
+
+    await tester.tap(find.text('Import'));
+    await settle(tester);
+    expect(find.text('Import a calendar (.ics)...'), findsOneWidget);
     await tester.tap(find.byTooltip('Close'));
     await settle(tester);
     await finish(tester, h);
@@ -1019,15 +1020,12 @@ void main() {
         'BEGIN:VEVENT\r\nUID:g2\r\nSUMMARY:Old party\r\n'
         'DTSTART:20261101T200000\r\nDTEND:20261101T230000\r\nEND:VEVENT\r\n'
         'END:VCALENDAR\r\n';
-    unawaited(
-      showDialog<int>(
-        context: tester.element(find.byType(Scaffold).first),
-        builder: (_) => HomeScope(
-          controller: h.controller,
-          child: const CalendarDialog(initialText: ics),
-        ),
-      ),
-    );
+    // A calendar pasted into Import goes to the calendar review.
+    await tester.tap(find.text('Import'));
+    await settle(tester);
+    await tester.enterText(dialogField(), ics);
+    await tester.pump();
+    await tester.tap(find.text('Review changes'));
     await settle(tester);
     expect(find.text('Review the calendar import'), findsOneWidget);
     expect(find.text('+ 1 new'), findsOneWidget);
@@ -1050,6 +1048,7 @@ void main() {
     expect(added.title, 'Dentist');
     expect(added.icsUid, 'g1');
     expect(h.controller.backups.first.reason, BackupReason.calendar);
+    expect(find.text('Imported 1 event'), findsOneWidget);
 
     await pumpUntilDone(tester, h.controller.undoImport());
     await settle(tester);

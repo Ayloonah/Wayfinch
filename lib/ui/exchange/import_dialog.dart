@@ -7,10 +7,12 @@ import 'package:flutter/services.dart';
 import '../../domain/exchange/exchange_model.dart';
 import '../../domain/exchange/exchange_parser.dart';
 import '../../domain/exchange/import_plan.dart';
+import '../../domain/ics/ics_parser.dart';
 import '../../l10n/app_localizations.dart';
 import '../format.dart';
 import '../home/home_controller.dart';
 import '../theme/tokens.dart';
+import 'calendar_dialog.dart';
 import 'dialog_parts.dart';
 import 'import_messages.dart';
 
@@ -23,17 +25,21 @@ Future<void> showImportDialog(BuildContext context) async {
   final controller = HomeScope.of(context);
   final messenger = ScaffoldMessenger.of(context);
   final l10n = AppLocalizations.of(context);
-  final count = await showDialog<int>(
+  final result = await showDialog<ImportOutcome>(
     context: context,
     builder: (_) =>
         HomeScope(controller: controller, child: const ImportDialog()),
   );
-  if (count == null) return;
+  if (result == null) return;
   messenger
     ..hideCurrentSnackBar()
     ..showSnackBar(
       SnackBar(
-        content: Text(l10n.importDone(count)),
+        content: Text(
+          result.calendar
+              ? l10n.calendarImported(result.count)
+              : l10n.importDone(result.count),
+        ),
         duration: importUndoDuration,
         persist: false,
         behavior: SnackBarBehavior.floating,
@@ -46,7 +52,12 @@ Future<void> showImportDialog(BuildContext context) async {
     );
 }
 
-/// The Import dialog (paste step, then review step).
+/// What an import did: how many items it touched, and whether it was a
+/// calendar (.ics) import.
+typedef ImportOutcome = ({int count, bool calendar});
+
+/// The Import dialog (paste step, then review step). An iCalendar file
+/// (opened or pasted) goes to the calendar review instead.
 class ImportDialog extends StatefulWidget {
   /// Creates the dialog.
   const ImportDialog({super.key});
@@ -62,6 +73,8 @@ class _ImportDialogState extends State<ImportDialog> {
   ImportMode _mode = ImportMode.replace;
   final Set<String> _keep = {};
   bool _busy = false;
+  IcsReadResult? _calendar;
+  String? _calendarError;
 
   @override
   void dispose() {
@@ -70,13 +83,26 @@ class _ImportDialogState extends State<ImportDialog> {
   }
 
   void _check() {
+    if (looksLikeIcs(_text.text)) {
+      final read = readIcs(_text.text);
+      final l10n = AppLocalizations.of(context);
+      setState(() {
+        _calendar = read.events.isEmpty ? null : read;
+        _calendarError = read.events.isEmpty ? l10n.calendarNoEvents : null;
+        _errors = const [];
+      });
+      return;
+    }
     final outcome = parseExchange(_text.text);
     setState(() {
       _errors = outcome.errors;
       _doc = outcome.document;
+      _calendarError = null;
       _keep.clear();
     });
   }
+
+  Future<void> _openCalendar() => _openFile(calendarOnly: true);
 
   Future<void> _paste() async {
     final data = await Clipboard.getData(Clipboard.kTextPlain);
@@ -88,18 +114,37 @@ class _ImportDialogState extends State<ImportDialog> {
     });
   }
 
-  Future<void> _openFile() async {
+  Future<void> _openFile({bool calendarOnly = false}) async {
     final file = await openFile(
-      acceptedTypeGroups: const [
-        XTypeGroup(label: 'Wayfinch', extensions: ['json', 'txt']),
+      acceptedTypeGroups: [
+        if (!calendarOnly)
+          const XTypeGroup(label: 'Wayfinch', extensions: ['json', 'txt']),
+        const XTypeGroup(label: 'iCalendar', extensions: ['ics']),
       ],
     );
-    if (file == null) return;
-    final text = await File(file.path).readAsString();
+    if (file == null || !mounted) return;
+    String text;
+    try {
+      text = await File(file.path).readAsString();
+    } on FileSystemException {
+      return;
+    } on FormatException {
+      return;
+    }
+    if (!mounted) return;
     setState(() {
       _text.text = text;
       _errors = const [];
+      _calendarError = null;
     });
+    // A calendar file goes straight to its review.
+    if (looksLikeIcs(text)) {
+      _check();
+    } else if (calendarOnly) {
+      setState(
+        () => _calendarError = AppLocalizations.of(context).calendarNotIcs,
+      );
+    }
   }
 
   Future<void> _undoLast() async {
@@ -130,12 +175,15 @@ class _ImportDialogState extends State<ImportDialog> {
   Future<void> _apply(ImportPlan plan) async {
     setState(() => _busy = true);
     final count = await HomeScope.of(context).applyImport(plan, keep: _keep);
-    if (mounted) Navigator.pop(context, count);
+    if (mounted) {
+      Navigator.pop<ImportOutcome>(context, (count: count, calendar: false));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final doc = _doc;
+    final calendar = _calendar;
     return Dialog(
       insetPadding: const EdgeInsets.all(32),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -143,7 +191,18 @@ class _ImportDialogState extends State<ImportDialog> {
         constraints: const BoxConstraints(maxWidth: 820, maxHeight: 700),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(32, 28, 32, 24),
-          child: doc == null ? _pasteStep() : _reviewStep(doc),
+          child: calendar != null
+              ? CalendarImportReview(
+                  read: calendar,
+                  onBack: () => setState(() => _calendar = null),
+                  onApplied: (count) => Navigator.pop<ImportOutcome>(context, (
+                    count: count,
+                    calendar: true,
+                  )),
+                )
+              : doc == null
+              ? _pasteStep()
+              : _reviewStep(doc),
         ),
       ),
     );
@@ -166,19 +225,31 @@ class _ImportDialogState extends State<ImportDialog> {
         ),
         const SizedBox(height: 18),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            OutlinedButton.icon(
-              onPressed: _paste,
-              icon: const Icon(Icons.content_paste),
-              label: Text(l10n.importPaste),
+            Expanded(
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 8,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: _paste,
+                    icon: const Icon(Icons.content_paste),
+                    label: Text(l10n.importPaste),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: _openFile,
+                    icon: const Icon(Icons.folder_open_outlined),
+                    label: Text(l10n.importOpenFile),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: _openCalendar,
+                    icon: const Icon(Icons.event_outlined),
+                    label: Text(l10n.importCalendar),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(width: 10),
-            OutlinedButton.icon(
-              onPressed: _openFile,
-              icon: const Icon(Icons.folder_open_outlined),
-              label: Text(l10n.importOpenFile),
-            ),
-            const Spacer(),
             if (last != null)
               TextButton.icon(
                 onPressed: _undoLast,
@@ -222,6 +293,16 @@ class _ImportDialogState extends State<ImportDialog> {
         if (_errors.isNotEmpty) ...[
           const SizedBox(height: 12),
           _ErrorBox(messages: [for (final e in _errors) messages.error(e)]),
+        ],
+        if (_calendarError != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            _calendarError!,
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: colors.warningText,
+            ),
+          ),
         ],
         const SizedBox(height: 16),
         Row(
