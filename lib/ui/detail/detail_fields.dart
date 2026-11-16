@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../domain/item.dart';
 import '../../domain/item_enums.dart';
 import '../../domain/recurrence.dart';
+import '../../domain/views.dart' show subtaskProgress;
 import '../format.dart';
 import '../home/home_controller.dart';
 import '../list/item_row.dart' show TagChip;
@@ -427,9 +428,7 @@ class SubtasksSection extends StatelessWidget {
     final controller = HomeScope.of(context);
     final colors = WayfinchColors.of(context);
     final l10n = Formats.of(context).l10n;
-    final subtasks = controller.tree.childrenOf(item.id).where((c) => c.isTask);
-    final total = subtasks.length;
-    final done = subtasks.where((c) => c.isDone).length;
+    final (:done, :total) = subtaskProgress(controller.tree, item.id);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
