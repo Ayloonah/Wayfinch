@@ -13,13 +13,13 @@ Offline-first, private by default, and designed to keep you on track without str
 ## How the AI loop works
 
 ```
-┌──────────────┐   Export for AI   ┌──────────────┐
-│   Wayfinch   │ ────────────────▶ │   Your AI    │
-│  (your list) │                   │ (any chatbot)│
-│              │ ◀──────────────── │              │
-└──────────────┘      Import       └──────────────┘
++--------------+   Export for AI   +---------------+
+|   Wayfinch   | ----------------> |    Your AI    |
+|  (your list) |                   | (any chatbot) |
+|              | <---------------- |               |
++--------------+      Import       +---------------+
 ```
-
+ 
 1. **Export for AI.** Wayfinch builds one copyable block: the format rules your AI needs to follow, your own instructions ("break tasks into steps under 2 hours"), and your list.
 2. **Ask your AI.** Paste it into ChatGPT, Claude, Gemini or whatever you use, along with your request ("I have a final project due Dec 5, plan it out").
 3. **Import.** Paste the reply back. Wayfinch shows you what's new, changed and removed, then you choose to **add** it to your list or **replace** your list.
