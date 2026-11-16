@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../detail/detail_panel.dart';
 import '../list/list_pane.dart';
 import '../prompts/prompts.dart';
@@ -41,6 +42,19 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     widget.controller.asker = (kind, count) =>
         showRulePrompt(context, kind, count);
+    widget.controller.onTutorialFinished = ({required closed}) {
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            closed ? l10n.tutorialFinished : l10n.tutorialFinishedCheckParent,
+          ),
+          behavior: SnackBarBehavior.floating,
+          width: 520,
+        ),
+      );
+    };
   }
 
   @override

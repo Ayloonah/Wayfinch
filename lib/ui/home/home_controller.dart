@@ -609,25 +609,41 @@ class HomeController extends ChangeNotifier {
     return true;
   }
 
+  /// Called when an automatic check finished the tutorial's last step.
+  /// [closed] tells whether "Getting started" itself was marked done too.
+  /// Set by the screen (to show a friendly message).
+  void Function({required bool closed}) onTutorialFinished = ({
+    required closed,
+  }) {};
+
   /// Checks off a tutorial step when the user did what it teaches (if it's
   /// still open).
   ///
-  /// If the step has open subtasks of its own (say, the subtask just added
-  /// under "Add a subtask"), only the step is marked done: asking "Close the
-  /// subtasks too?" about something the user just made would be confusing.
+  /// Automatic checks never prompt: only the step is marked done (its own
+  /// subtasks, if any, stay open), so no "Close the subtasks too?" or "Mark
+  /// the parent done too?" pops up over whatever the user was doing. When
+  /// that was the last step, "Getting started" is marked done too if
+  /// nothing under it is still open, and [onTutorialFinished] is called.
   Future<void> completeTutorialStep(TutorialStep step) async {
-    final id = _tutorial?.idOf(step);
+    final steps = _tutorial;
+    if (steps == null) return;
     _tree = ItemTree(await items.loadAll());
-    final item = _tree[id];
+    final item = _tree[steps.idOf(step)];
     if (item == null || item.isDone) return;
-    final hasOpenSubtasks = _tree
-        .descendantsOf(item.id)
+    final now = _clock();
+    await items.save(item.copyWith(doneAt: now));
+
+    _tree = ItemTree(await items.loadAll());
+    final allStepsDone = TutorialStep.values.every(
+      (s) => _tree[steps.idOf(s)]?.isDone ?? true,
+    );
+    final parent = _tree[steps.parent];
+    if (!allStepsDone || parent == null || parent.isDone) return;
+    final anythingOpen = _tree
+        .descendantsOf(parent.id)
         .any((d) => d.isTask && !d.isDone);
-    if (hasOpenSubtasks) {
-      await items.save(item.copyWith(doneAt: _clock()));
-    } else {
-      await complete(item.id);
-    }
+    if (!anythingOpen) await items.save(parent.copyWith(doneAt: now));
+    onTutorialFinished(closed: !anythingOpen);
   }
 
   /// Whether [id] is the tutorial task or anything under it (its steps,

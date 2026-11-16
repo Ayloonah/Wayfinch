@@ -264,6 +264,73 @@ void main() {
     await finish(tester, s);
   });
 
+  testWidgets('finishing the tutorial automatically never prompts', (
+    tester,
+  ) async {
+    Future<AppSession> setup() async {
+      final s = await pumpShell(tester);
+      await tapText(tester, "Let's start");
+      await tester.enterText(find.byType(TextField), 'Judhy');
+      await tester.pump();
+      await tapText(tester, 'Next');
+      await tapText(tester, 'Skip for now');
+      await tapText(tester, 'Next');
+      await tapText(tester, 'Next');
+      await tapText(tester, "Let's go!");
+      return s;
+    }
+
+    // Everything done, export last: "Getting started" closes by itself.
+    var s = await setup();
+    var home = s.home!;
+    var steps = home.tutorial!;
+    await pumpUntilDone(tester, home.complete(steps.checkOff));
+    await settle(tester);
+    // A subtask added and then finished, so nothing stays open.
+    final mine = await pumpUntilDone(
+      tester,
+      home.addSubtask(steps.parent, 'Mine'),
+    );
+    await settle(tester);
+    await pumpUntilDone(tester, home.complete(mine.id));
+    await settle(tester);
+    await pumpUntilDone(tester, home.addTag(home.tree[steps.parent]!, 't'));
+    await settle(tester);
+    await pumpUntilDone(tester, home.markExported());
+    await settle(tester);
+    expect(find.text('That was the last one!'), findsNothing);
+    expect(home.tree[steps.parent]!.isDone, isTrue);
+    expect(
+      find.text('You finished "Getting started". Nice work!'),
+      findsOneWidget,
+    );
+    await finish(tester, s);
+    dir.deleteSync(recursive: true);
+    dir.createSync();
+
+    // Your own subtask still open: the tutorial stays, with a gentle note.
+    s = await setup();
+    home = s.home!;
+    steps = home.tutorial!;
+    await pumpUntilDone(tester, home.complete(steps.checkOff));
+    await settle(tester);
+    await pumpUntilDone(tester, home.addSubtask(steps.addSubtask, 'Open one'));
+    await settle(tester);
+    await pumpUntilDone(tester, home.addTag(home.tree[steps.tag]!, 't'));
+    await settle(tester);
+    await pumpUntilDone(tester, home.markExported());
+    await settle(tester);
+    expect(find.text('That was the last one!'), findsNothing);
+    expect(home.tree[steps.parent]!.isDone, isFalse);
+    expect(
+      find.text(
+        'Tutorial done! Check off "Getting started" when you\'re ready.',
+      ),
+      findsOneWidget,
+    );
+    await finish(tester, s);
+  });
+
   testWidgets('Settings › Profile: set a password, then remove it', (
     tester,
   ) async {

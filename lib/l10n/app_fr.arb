@@ -371,6 +371,8 @@
   "profilePasswordChanged": "Mot de passe changé.",
 
   "tutorialTitle": "Premiers pas avec Wayfinch",
+  "tutorialFinished": "Tu as terminé « Premiers pas ». Bravo !",
+  "tutorialFinishedCheckParent": "Tutoriel terminé ! Coche « Premiers pas » quand tu veux.",
   "tutorialNotes": "Ces étapes t’apprennent les bases en les faisant. Marque cette tâche comme faite quand tu veux pour passer le reste.",
   "tutorialCheckOff": "Coche cette étape",
   "tutorialCheckOffNotes": "Clique sur la case à côté de cette étape. Les éléments faits se cachent ; tu les retrouves dans Fait.",

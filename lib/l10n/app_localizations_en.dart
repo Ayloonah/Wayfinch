@@ -1330,6 +1330,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tutorialTitle => 'Getting started with Wayfinch';
 
   @override
+  String get tutorialFinished => 'You finished \"Getting started\". Nice work!';
+
+  @override
+  String get tutorialFinishedCheckParent =>
+      'Tutorial done! Check off \"Getting started\" when you\'re ready.';
+
+  @override
   String get tutorialNotes =>
       'These steps teach the basics by doing them. Mark this task done anytime to skip the rest.';
 

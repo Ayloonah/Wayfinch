@@ -447,6 +447,8 @@
   "profilePasswordChanged": "Password changed.",
 
   "tutorialTitle": "Getting started with Wayfinch",
+  "tutorialFinished": "You finished \"Getting started\". Nice work!",
+  "tutorialFinishedCheckParent": "Tutorial done! Check off \"Getting started\" when you're ready.",
   "tutorialNotes": "These steps teach the basics by doing them. Mark this task done anytime to skip the rest.",
   "tutorialCheckOff": "Check this off",
   "tutorialCheckOffNotes": "Click the box next to this step. Done items hide themselves; you'll find them in Done.",

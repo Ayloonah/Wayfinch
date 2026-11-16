@@ -2150,6 +2150,18 @@ abstract class AppLocalizations {
   /// **'Getting started with Wayfinch'**
   String get tutorialTitle;
 
+  /// No description provided for @tutorialFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'You finished \"Getting started\". Nice work!'**
+  String get tutorialFinished;
+
+  /// No description provided for @tutorialFinishedCheckParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Tutorial done! Check off \"Getting started\" when you\'re ready.'**
+  String get tutorialFinishedCheckParent;
+
   /// No description provided for @tutorialNotes.
   ///
   /// In en, this message translates to:

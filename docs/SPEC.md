@@ -213,7 +213,7 @@ Then a short **"How to use it with your AI"** screen showing the copy → paste 
 - **Applying the choices:** the password (and the file encryption) is applied only when setup finishes; until then, Back changes nothing. The notification choices are saved now and take effect with the notifications milestone.
 - **Existing data:** someone who already has items but never ran setup (e.g. from before this feature) sees setup once, but the tutorial isn't added.
 - **Tutorial as tasks:** a pre-loaded "Getting started" task (due today) whose subtasks teach by doing: check this off, add a subtask, give this a tag, export your list for AI.
-  - Every step but "Check this off" checks itself off when the user does it: adding a subtask or a tag anywhere in the tutorial (the task, its steps, or their subtasks), or copying or saving an export. If a step has open subtasks of its own, only the step is checked; its subtasks stay open.
+  - Every step but "Check this off" checks itself off when the user does it: adding a subtask or a tag anywhere in the tutorial (the task, its steps, or their subtasks), or copying or saving an export. Automatic checks never prompt: only the step is checked (its own subtasks stay open). When that was the last step, "Getting started" is marked done too if nothing under it is still open ("You finished…"), otherwise a note says it can be checked off when ready.
   - The tutorial is only created when the list is empty.
 - **Skippable:** marking the parent done closes the whole tutorial (through the usual parent-completion prompt). No nagging.
 - **Not replayable.** The Help page covers everything instead: basics, nesting, AI import/export (including the exact format rules the AI receives), calendar, themes, backups.
