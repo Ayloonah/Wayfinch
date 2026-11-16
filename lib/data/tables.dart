@@ -127,3 +127,17 @@ class Reminders extends Table {
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
+
+/// Small key/value app settings (e.g. which prompts are set to "Always").
+/// Added in schema version 2.
+@DataClassName('SettingRow')
+class Settings extends Table {
+  /// Setting name.
+  TextColumn get key => text()();
+
+  /// Setting value, as text.
+  TextColumn get value => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {key};
+}

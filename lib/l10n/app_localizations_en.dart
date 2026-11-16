@@ -13,25 +13,369 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Wayfinch';
 
   @override
-  String get homeGreeting => 'Hi there!';
+  String get greetingMorning => 'Good morning';
 
   @override
-  String get homeGettingReady =>
-      'Wayfinch is getting ready. Your lists will live here soon.';
+  String get greetingAfternoon => 'Good afternoon';
 
   @override
-  String homeItemCount(int count) {
+  String get greetingEvening => 'Good evening';
+
+  @override
+  String get navToday => 'Today';
+
+  @override
+  String get navUpcoming => 'Upcoming';
+
+  @override
+  String get navAll => 'All';
+
+  @override
+  String get navDone => 'Done';
+
+  @override
+  String get navSettings => 'Settings';
+
+  @override
+  String doneThisWeekShort(int count) {
+    return '$count this week';
+  }
+
+  @override
+  String todaySubtitle(String date, String tasks, String events) {
+    return '$date · $tasks, $events';
+  }
+
+  @override
+  String taskCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count items',
-      one: '1 item',
-      zero: 'No items yet',
+      other: '$count tasks',
+      one: '1 task',
     );
     return '$_temp0';
   }
 
   @override
-  String get databaseOpenError =>
-      'Hmm, Wayfinch couldn\'t open your data. Try restarting the app.';
+  String eventCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count events',
+      one: '1 event',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get upcomingSubtitle => 'The next 7 days';
+
+  @override
+  String allSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count open items',
+      one: '1 open item',
+      zero: 'Nothing open',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String doneSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count done this week',
+      one: '1 done this week',
+      zero: 'Nothing done this week yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get newItem => 'New item';
+
+  @override
+  String get newItemTitle => 'New task';
+
+  @override
+  String get quickAddLabel => 'Quick add';
+
+  @override
+  String get quickAddHint =>
+      'Add a task... try \"Lab report Friday 5pm #school !high\"';
+
+  @override
+  String get sectionOverdue => 'Overdue';
+
+  @override
+  String get sectionToday => 'Today';
+
+  @override
+  String get emptyToday => 'Nothing due today. Enjoy the calm.';
+
+  @override
+  String get emptyUpcoming => 'Nothing planned for the next 7 days.';
+
+  @override
+  String get emptyAll => 'No items yet. Add one above!';
+
+  @override
+  String get emptyDone => 'Nothing done yet. You\'ve got this.';
+
+  @override
+  String hiddenDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count completed subtasks hidden',
+      one: '1 completed subtask hidden',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get show => 'Show';
+
+  @override
+  String get hide => 'Hide';
+
+  @override
+  String get labelToday => 'Today';
+
+  @override
+  String get labelTomorrow => 'Tomorrow';
+
+  @override
+  String get labelYesterday => 'Yesterday';
+
+  @override
+  String dateWithTime(String date, String time) {
+    return '$date, $time';
+  }
+
+  @override
+  String dateDotTime(String date, String time) {
+    return '$date · $time';
+  }
+
+  @override
+  String timeRange(String from, String to) {
+    return '$from – $to';
+  }
+
+  @override
+  String overdueLabel(String when) {
+    return 'Overdue · $when';
+  }
+
+  @override
+  String subtaskProgress(int done, int total) {
+    return '$done of $total';
+  }
+
+  @override
+  String get markDone => 'Mark done';
+
+  @override
+  String get markNotDone => 'Mark not done';
+
+  @override
+  String get priorityNone => 'None';
+
+  @override
+  String get priorityLow => 'Low';
+
+  @override
+  String get priorityMedium => 'Medium';
+
+  @override
+  String get priorityHigh => 'High';
+
+  @override
+  String priorityFlag(String priority) {
+    return '$priority priority';
+  }
+
+  @override
+  String get repeatNone => 'Doesn\'t repeat';
+
+  @override
+  String get repeatDaily => 'Daily';
+
+  @override
+  String get repeatWeekdays => 'Weekdays';
+
+  @override
+  String get repeatWeekly => 'Weekly';
+
+  @override
+  String get repeatBiweekly => 'Every 2 weeks';
+
+  @override
+  String get repeatMonthly => 'Monthly';
+
+  @override
+  String get repeatYearly => 'Yearly';
+
+  @override
+  String get repeatCustom => 'Custom';
+
+  @override
+  String get typeTask => 'Task';
+
+  @override
+  String get typeEvent => 'Event';
+
+  @override
+  String get titleHint => 'What needs doing?';
+
+  @override
+  String get closeDetails => 'Close details';
+
+  @override
+  String get fieldDue => 'Due';
+
+  @override
+  String get fieldStart => 'Starts';
+
+  @override
+  String get fieldEnd => 'Ends';
+
+  @override
+  String get fieldPriority => 'Priority';
+
+  @override
+  String get fieldTags => 'Tags';
+
+  @override
+  String get fieldRepeat => 'Repeat';
+
+  @override
+  String get noDueDate => 'No due date';
+
+  @override
+  String get addTime => 'Add time';
+
+  @override
+  String get clearDate => 'Clear date';
+
+  @override
+  String get addTag => '+ Tag';
+
+  @override
+  String get tagHint => 'Tag name';
+
+  @override
+  String removeTag(String name) {
+    return 'Remove $name';
+  }
+
+  @override
+  String get subtasks => 'Subtasks';
+
+  @override
+  String subtasksProgress(int done, int total) {
+    return '$done of $total done';
+  }
+
+  @override
+  String get addSubtask => '+ Add subtask';
+
+  @override
+  String get subtaskHint => 'Subtask, then Enter';
+
+  @override
+  String get notes => 'Notes';
+
+  @override
+  String get notesHint => 'Anything worth remembering';
+
+  @override
+  String get markAsDone => 'Mark as done';
+
+  @override
+  String get markAsNotDone => 'Mark as not done';
+
+  @override
+  String get deleteItem => 'Delete item';
+
+  @override
+  String get deleteTitle => 'Delete this item?';
+
+  @override
+  String deleteWithSubtasks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'This also deletes its $count subtasks.',
+      one: 'This also deletes its subtask.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get promptPushParentTitle => 'Push the parent\'s date?';
+
+  @override
+  String promptPushParentBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'This will also push the due dates of $count parent items.',
+      one: 'This will also push the parent\'s due date.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get promptCloseSubtasksTitle => 'Close the subtasks too?';
+
+  @override
+  String promptCloseSubtasksBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'This will also close its $count open subtasks.',
+      one: 'This will also close its open subtask.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get promptCompleteParentTitle => 'That was the last one!';
+
+  @override
+  String get promptCompleteParentBody => 'Mark the parent done too?';
+
+  @override
+  String get promptConfirm => 'Confirm';
+
+  @override
+  String get promptCancel => 'Cancel';
+
+  @override
+  String get promptAlways => 'Always do this';
+
+  @override
+  String get settingsPrompts => 'Prompts';
+
+  @override
+  String get settingsPromptsHelp =>
+      'Turn a prompt off to always do it without asking.';
+
+  @override
+  String get settingAskPushParent => 'Ask before pushing a parent\'s due date';
+
+  @override
+  String get settingAskCloseSubtasks => 'Ask before closing open subtasks';
+
+  @override
+  String get settingAskCompleteParent => 'Ask before marking a parent done';
 }

@@ -1,28 +1,132 @@
 {
   "@@locale": "en",
   "appTitle": "Wayfinch",
-  "@appTitle": {
-    "description": "The app name, shown in the window title."
-  },
-  "homeGreeting": "Hi there!",
-  "@homeGreeting": {
-    "description": "Friendly greeting on the placeholder home screen."
-  },
-  "homeGettingReady": "Wayfinch is getting ready. Your lists will live here soon.",
-  "@homeGettingReady": {
-    "description": "Placeholder home screen message while the app is being built."
-  },
-  "homeItemCount": "{count, plural, =0{No items yet} =1{1 item} other{{count} items}}",
-  "@homeItemCount": {
-    "description": "How many items are stored in the database.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "databaseOpenError": "Hmm, Wayfinch couldn't open your data. Try restarting the app.",
-  "@databaseOpenError": {
-    "description": "Shown when the local database fails to open."
-  }
+  "@appTitle": {"description": "The app name."},
+
+  "greetingMorning": "Good morning",
+  "greetingAfternoon": "Good afternoon",
+  "greetingEvening": "Good evening",
+  "@greetingMorning": {"description": "Sidebar greeting under the logo, by time of day. The first name is added in a later milestone."},
+
+  "navToday": "Today",
+  "navUpcoming": "Upcoming",
+  "navAll": "All",
+  "navDone": "Done",
+  "navSettings": "Settings",
+  "doneThisWeekShort": "{count} this week",
+  "@doneThisWeekShort": {"description": "Sidebar count next to Done.", "placeholders": {"count": {"type": "int"}}},
+
+  "todaySubtitle": "{date} · {tasks}, {events}",
+  "@todaySubtitle": {"description": "Under the Today title, e.g. 'Sunday, November 15 · 5 tasks, 2 events'.", "placeholders": {"date": {"type": "String"}, "tasks": {"type": "String"}, "events": {"type": "String"}}},
+  "taskCount": "{count, plural, =1{1 task} other{{count} tasks}}",
+  "@taskCount": {"placeholders": {"count": {"type": "int"}}},
+  "eventCount": "{count, plural, =1{1 event} other{{count} events}}",
+  "@eventCount": {"placeholders": {"count": {"type": "int"}}},
+  "upcomingSubtitle": "The next 7 days",
+  "allSubtitle": "{count, plural, =0{Nothing open} =1{1 open item} other{{count} open items}}",
+  "@allSubtitle": {"placeholders": {"count": {"type": "int"}}},
+  "doneSubtitle": "{count, plural, =0{Nothing done this week yet} =1{1 done this week} other{{count} done this week}}",
+  "@doneSubtitle": {"description": "Done view progress stat.", "placeholders": {"count": {"type": "int"}}},
+
+  "newItem": "New item",
+  "newItemTitle": "New task",
+  "@newItemTitle": {"description": "Title given to an item created with the New item button."},
+  "quickAddLabel": "Quick add",
+  "quickAddHint": "Add a task... try \"Lab report Friday 5pm #school !high\"",
+  "@quickAddHint": {"description": "Placeholder of the quick-add field. Keep the example in a form the parser understands."},
+
+  "sectionOverdue": "Overdue",
+  "sectionToday": "Today",
+  "emptyToday": "Nothing due today. Enjoy the calm.",
+  "emptyUpcoming": "Nothing planned for the next 7 days.",
+  "emptyAll": "No items yet. Add one above!",
+  "emptyDone": "Nothing done yet. You've got this.",
+
+  "hiddenDone": "{count, plural, =1{1 completed subtask hidden} other{{count} completed subtasks hidden}}",
+  "@hiddenDone": {"placeholders": {"count": {"type": "int"}}},
+  "show": "Show",
+  "hide": "Hide",
+
+  "labelToday": "Today",
+  "labelTomorrow": "Tomorrow",
+  "labelYesterday": "Yesterday",
+  "dateWithTime": "{date}, {time}",
+  "@dateWithTime": {"description": "A day and a time, e.g. 'Tomorrow, 9:00 AM'.", "placeholders": {"date": {"type": "String"}, "time": {"type": "String"}}},
+  "dateDotTime": "{date} · {time}",
+  "@dateDotTime": {"description": "A day and a time range, e.g. 'Fri, Nov 20 · 2:00 PM – 3:30 PM'.", "placeholders": {"date": {"type": "String"}, "time": {"type": "String"}}},
+  "timeRange": "{from} – {to}",
+  "@timeRange": {"placeholders": {"from": {"type": "String"}, "to": {"type": "String"}}},
+  "overdueLabel": "Overdue · {when}",
+  "@overdueLabel": {"placeholders": {"when": {"type": "String"}}},
+  "subtaskProgress": "{done} of {total}",
+  "@subtaskProgress": {"description": "Compact subtask progress in a list row.", "placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+
+  "markDone": "Mark done",
+  "markNotDone": "Mark not done",
+  "priorityNone": "None",
+  "priorityLow": "Low",
+  "priorityMedium": "Medium",
+  "priorityHigh": "High",
+  "priorityFlag": "{priority} priority",
+  "@priorityFlag": {"description": "Screen-reader label of the priority flag.", "placeholders": {"priority": {"type": "String"}}},
+
+  "repeatNone": "Doesn't repeat",
+  "repeatDaily": "Daily",
+  "repeatWeekdays": "Weekdays",
+  "repeatWeekly": "Weekly",
+  "repeatBiweekly": "Every 2 weeks",
+  "repeatMonthly": "Monthly",
+  "repeatYearly": "Yearly",
+  "repeatCustom": "Custom",
+
+  "typeTask": "Task",
+  "typeEvent": "Event",
+  "titleHint": "What needs doing?",
+  "closeDetails": "Close details",
+  "fieldDue": "Due",
+  "fieldStart": "Starts",
+  "fieldEnd": "Ends",
+  "fieldPriority": "Priority",
+  "fieldTags": "Tags",
+  "fieldRepeat": "Repeat",
+  "noDueDate": "No due date",
+  "addTime": "Add time",
+  "clearDate": "Clear date",
+  "addTag": "+ Tag",
+  "tagHint": "Tag name",
+  "removeTag": "Remove {name}",
+  "@removeTag": {"placeholders": {"name": {"type": "String"}}},
+  "subtasks": "Subtasks",
+  "subtasksProgress": "{done} of {total} done",
+  "@subtasksProgress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "addSubtask": "+ Add subtask",
+  "subtaskHint": "Subtask, then Enter",
+  "notes": "Notes",
+  "notesHint": "Anything worth remembering",
+  "markAsDone": "Mark as done",
+  "markAsNotDone": "Mark as not done",
+  "deleteItem": "Delete item",
+
+  "deleteTitle": "Delete this item?",
+  "deleteWithSubtasks": "{count, plural, =1{This also deletes its subtask.} other{This also deletes its {count} subtasks.}}",
+  "@deleteWithSubtasks": {"placeholders": {"count": {"type": "int"}}},
+  "delete": "Delete",
+
+  "promptPushParentTitle": "Push the parent's date?",
+  "promptPushParentBody": "{count, plural, =1{This will also push the parent's due date.} other{This will also push the due dates of {count} parent items.}}",
+  "@promptPushParentBody": {"placeholders": {"count": {"type": "int"}}},
+  "promptCloseSubtasksTitle": "Close the subtasks too?",
+  "promptCloseSubtasksBody": "{count, plural, =1{This will also close its open subtask.} other{This will also close its {count} open subtasks.}}",
+  "@promptCloseSubtasksBody": {"placeholders": {"count": {"type": "int"}}},
+  "promptCompleteParentTitle": "That was the last one!",
+  "promptCompleteParentBody": "Mark the parent done too?",
+  "promptConfirm": "Confirm",
+  "promptCancel": "Cancel",
+  "promptAlways": "Always do this",
+
+  "settingsPrompts": "Prompts",
+  "settingsPromptsHelp": "Turn a prompt off to always do it without asking.",
+  "settingAskPushParent": "Ask before pushing a parent's due date",
+  "settingAskCloseSubtasks": "Ask before closing open subtasks",
+  "settingAskCompleteParent": "Ask before marking a parent done"
 }
