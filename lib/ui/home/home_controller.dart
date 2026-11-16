@@ -17,6 +17,7 @@ import '../../domain/item_rules.dart';
 import '../../domain/item_tree.dart';
 import '../../domain/quick_add_parser.dart';
 import '../../domain/views.dart';
+import '../onboarding/tutorial.dart';
 import '../theme/tokens.dart';
 
 /// Sidebar destinations.
@@ -36,17 +37,20 @@ enum Destination {
   /// One tag's items (see [HomeController.tagFilter]).
   tag,
 
+  /// Help.
+  help,
+
   /// Settings.
   settings;
 
-  /// The list view for this destination, or null for settings.
+  /// The list view for this destination, or null for Help and Settings.
   AppView? get view => switch (this) {
     today => AppView.today,
     upcoming => AppView.upcoming,
     all => AppView.all,
     done => AppView.done,
     tag => AppView.tag,
-    settings => null,
+    help || settings => null,
   };
 }
 
@@ -82,6 +86,8 @@ class HomeController extends ChangeNotifier {
       settings.watchAll().listen((values) {
         _bannerSnoozedUntil = DateTime.tryParse(values[_snoozeKey] ?? '');
         _overdueTagColor = int.tryParse(values[_overdueColorKey] ?? '');
+        _firstName = values[_firstNameKey] ?? '';
+        _tutorial = TutorialSteps.decode(values[_tutorialKey]);
         _viewOrder = _parseViewOrder(values[_viewOrderKey]);
         _tagOrder = (values[_tagOrderKey] ?? '')
             .split(',')
@@ -464,6 +470,9 @@ class HomeController extends ChangeNotifier {
     );
     _focusTitleFor = item.id;
     select(item.id);
+    if (parentId == _tutorial?.parent) {
+      await completeTutorialStep(TutorialStep.addSubtask);
+    }
     return item;
   }
 
@@ -535,15 +544,83 @@ class HomeController extends ChangeNotifier {
   Future<void> addTag(Item item, String name) async {
     if (name.trim().isEmpty) return;
     final tag = await tags.findOrCreate(name, colorFor: tagColorFor);
-    if (item.tagIds.contains(tag.id)) return;
-    await items.save(item.copyWith(tagIds: [...item.tagIds, tag.id]));
+    await addTagId(item, tag.id);
   }
 
   /// Adds the existing tag [tagId] to [item].
   Future<void> addTagId(Item item, String tagId) async {
     if (item.tagIds.contains(tagId)) return;
     await items.save(item.copyWith(tagIds: [...item.tagIds, tagId]));
+    if (item.id == _tutorial?.parent) {
+      await completeTutorialStep(TutorialStep.tag);
+    }
   }
+
+  // ---- Profile and tutorial ----------------------------------------------
+
+  static const _firstNameKey = 'profile.firstName';
+  static const _tutorialKey = 'tutorial.steps';
+  String _firstName = '';
+  TutorialSteps? _tutorial;
+
+  /// The user's first name (for greetings); empty until setup.
+  String get firstName => _firstName;
+
+  /// Saves the first name.
+  Future<void> setFirstName(String name) {
+    _firstName = name.trim();
+    notifyListeners();
+    return settings.setValue(_firstNameKey, _firstName);
+  }
+
+  /// The tutorial's item ids, if it was created.
+  TutorialSteps? get tutorial => _tutorial;
+
+  /// Creates the "Getting started" tutorial, but only when the list is
+  /// empty (people who already have items don't get it). Returns whether it
+  /// was created.
+  Future<bool> createTutorial(TutorialTexts texts) async {
+    if (_tree.all.isNotEmpty || (await items.loadAll()).isNotEmpty) {
+      return false;
+    }
+    final parent = await items.create(
+      type: ItemType.task,
+      title: texts.title,
+      notes: texts.notes,
+      due: startOfDay(_clock()),
+    );
+    Future<String> step(int order, String title, String notes) async =>
+        (await items.create(
+          type: ItemType.task,
+          title: title,
+          notes: notes,
+          parentId: parent.id,
+          sortOrder: order,
+        )).id;
+    final steps = TutorialSteps(
+      parent: parent.id,
+      checkOff: await step(0, texts.checkOff, texts.checkOffNotes),
+      addSubtask: await step(1, texts.addSubtask, texts.addSubtaskNotes),
+      tag: await step(2, texts.tag, texts.tagNotes),
+      export: await step(3, texts.export, texts.exportNotes),
+    );
+    _tutorial = steps;
+    await settings.setValue(_tutorialKey, steps.encode());
+    return true;
+  }
+
+  /// Checks off a tutorial step when the user did what it teaches (if it's
+  /// still open).
+  Future<void> completeTutorialStep(TutorialStep step) async {
+    final id = _tutorial?.idOf(step);
+    final item = (await items.loadAll()).where((i) => i.id == id).firstOrNull;
+    if (item == null || item.isDone) return;
+    _tree = ItemTree(await items.loadAll());
+    await complete(item.id);
+  }
+
+  /// Called after an export was copied or saved (a tutorial step).
+  Future<void> markExported() => completeTutorialStep(TutorialStep.export);
 
   /// Removes tag [tagId] from [item].
   Future<void> removeTag(Item item, String tagId) => items.save(

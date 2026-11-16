@@ -7,6 +7,7 @@ import '../theme/tokens.dart';
 import 'appearance_section.dart';
 import 'general_section.dart';
 import 'import_history_section.dart';
+import 'profile_section.dart';
 
 /// Settings. For now: what each of the three prompts does (ask, or a
 /// remembered answer).
@@ -26,6 +27,8 @@ class SettingsPane extends StatelessWidget {
           style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 24),
+        const _SettingsCard(children: [ProfileSection()]),
+        const SizedBox(height: 20),
         const _SettingsCard(children: [GeneralSection()]),
         const SizedBox(height: 20),
         const _SettingsCard(children: [AppearanceSection()]),

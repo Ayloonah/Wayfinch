@@ -1032,4 +1032,411 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get backupRestored => 'Sauvegarde restaurée.';
+
+  @override
+  String greetingMorningName(String name) {
+    return 'Bonjour, $name';
+  }
+
+  @override
+  String greetingAfternoonName(String name) {
+    return 'Bon après-midi, $name';
+  }
+
+  @override
+  String greetingEveningName(String name) {
+    return 'Bonsoir, $name';
+  }
+
+  @override
+  String get navHelp => 'Aide';
+
+  @override
+  String get onboardingStart => 'C’est parti';
+
+  @override
+  String get onboardingNext => 'Suivant';
+
+  @override
+  String get onboardingBack => 'Retour';
+
+  @override
+  String get onboardingSkip => 'Plus tard';
+
+  @override
+  String get onboardingFinish => 'Allons-y !';
+
+  @override
+  String get onboardingWelcomeTitle => 'Salut, moi c’est Wayfinch !';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'Une liste de tâches tranquille qui marche avec ton IA. Demande à ton IA de planifier quelque chose, ramène le plan ici, et je t’aide à suivre tout ça. La configuration prend environ une minute.';
+
+  @override
+  String get onboardingNameTitle => 'Comment je t’appelle ?';
+
+  @override
+  String get onboardingNameBody =>
+      'Juste ton prénom. Il sert aux salutations et reste sur cet ordinateur.';
+
+  @override
+  String get onboardingNameLabel => 'Prénom';
+
+  @override
+  String get onboardingPasswordTitle => 'Un mot de passe ?';
+
+  @override
+  String get onboardingPasswordBody =>
+      'C’est facultatif. Avec un mot de passe, ta liste est chiffrée sur le disque : personne ne peut lire le fichier sans lui. Tu peux en ajouter ou en retirer un plus tard dans les Paramètres.';
+
+  @override
+  String get onboardingVibeTitle => 'Choisis ton style';
+
+  @override
+  String get onboardingVibeBody =>
+      'Clair ou sombre, et une couleur que tu aimes. Tu pourras créer ton propre thème plus tard dans les Paramètres.';
+
+  @override
+  String get onboardingPreviewLabel => 'Aperçu de l’app dans ces couleurs';
+
+  @override
+  String get onboardingPreviewItem1 => 'Finir le rapport';
+
+  @override
+  String get onboardingPreviewItem2 => 'Planifier le voyage';
+
+  @override
+  String get onboardingPreviewItem3 => 'Arroser les plantes';
+
+  @override
+  String get onboardingNotifTitle => 'Rappels';
+
+  @override
+  String get onboardingNotifBody =>
+      'De petits rappels avant les échéances. Tu peux tout changer plus tard, et élément par élément.';
+
+  @override
+  String get onboardingAiTitle => 'Comment l’utiliser avec ton IA';
+
+  @override
+  String get onboardingAiBody =>
+      'Wayfinch ne parle à aucune IA tout seul : c’est toi qui décides de ce qui est partagé.';
+
+  @override
+  String get aiLoopStep1Title => '1. Exporter pour l’IA';
+
+  @override
+  String get aiLoopStep1Body =>
+      'Copie ta liste avec les règles du format et tes instructions.';
+
+  @override
+  String get aiLoopStep2Title => '2. Demande à ton IA';
+
+  @override
+  String get aiLoopStep2Body =>
+      'Colle-la dans n’importe quel chatbot avec ta demande.';
+
+  @override
+  String get aiLoopStep3Title => '3. Importer';
+
+  @override
+  String get aiLoopStep3Body =>
+      'Colle la réponse, vérifie chaque changement, puis applique.';
+
+  @override
+  String get notifTaskReminder => 'Me rappeler avant l’échéance des tâches';
+
+  @override
+  String get notifEventReminder => 'Me rappeler avant le début des événements';
+
+  @override
+  String get notifDigest => 'Résumé du matin';
+
+  @override
+  String get notifDigestBody => 'Un petit résumé de ta journée.';
+
+  @override
+  String get notifDigestTime => 'Heure du résumé';
+
+  @override
+  String get notifLaunchAtStartup => 'Lancer Wayfinch avec Windows';
+
+  @override
+  String get notifLaunchAtStartupBody =>
+      'Les rappels n’arrivent que si Wayfinch est ouvert.';
+
+  @override
+  String get notifTrayNote =>
+      'Fermer la fenêtre laissera Wayfinch tourner discrètement dans la zone de notification, pour que les rappels arrivent quand même.';
+
+  @override
+  String get reminderNone => 'Pas de rappel';
+
+  @override
+  String reminderMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minutes avant',
+      one: '1 minute avant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count heures avant',
+      one: '1 heure avant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours avant',
+      one: '1 jour avant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passwordLabel => 'Mot de passe';
+
+  @override
+  String get passwordConfirmLabel => 'Retape-le';
+
+  @override
+  String get passwordMismatch => 'Ils ne correspondent pas encore.';
+
+  @override
+  String get passwordShow => 'Afficher le mot de passe';
+
+  @override
+  String get passwordHide => 'Masquer le mot de passe';
+
+  @override
+  String get passwordWarning =>
+      'Si tu oublies ton mot de passe et perds ton code de récupération, ta liste est perdue pour de bon. Ni toi ni personne ne pourra la récupérer.';
+
+  @override
+  String get recoveryTitle => 'Ton code de récupération';
+
+  @override
+  String get recoveryExplain =>
+      'Si tu oublies ton mot de passe, ce code ouvre ta liste à sa place. Il n’est affiché qu’une fois : garde-le en lieu sûr (un gestionnaire de mots de passe, ou imprimé et rangé).';
+
+  @override
+  String get recoveryCopy => 'Copier';
+
+  @override
+  String get recoveryCopied => 'Code de récupération copié.';
+
+  @override
+  String get recoverySave => 'Enregistrer dans un fichier';
+
+  @override
+  String get recoveryFileHeader =>
+      'Code de récupération Wayfinch. Garde-le en lieu sûr.';
+
+  @override
+  String get recoverySavedCheck => 'J’ai gardé mon code de récupération';
+
+  @override
+  String get recoveryDone => 'Terminé';
+
+  @override
+  String get recoveryCodeLabel => 'Code de récupération';
+
+  @override
+  String get unlockTitle => 'Content de te revoir';
+
+  @override
+  String get unlockHint => 'Entre ton mot de passe pour ouvrir ta liste.';
+
+  @override
+  String get unlockRecoveryHint =>
+      'Entre le code de récupération gardé quand tu as choisi ton mot de passe.';
+
+  @override
+  String get unlock => 'Déverrouiller';
+
+  @override
+  String get unlockWrongPassword => 'Ce mot de passe n’a pas marché.';
+
+  @override
+  String get unlockWrongCode => 'Ce code n’a pas marché.';
+
+  @override
+  String get unlockUseRecovery =>
+      'Mot de passe oublié ? Utilise ton code de récupération';
+
+  @override
+  String get unlockUsePassword => 'Utiliser mon mot de passe';
+
+  @override
+  String get newPasswordTitle => 'Choisis un nouveau mot de passe';
+
+  @override
+  String get newPasswordBody =>
+      'Tu as ouvert ta liste avec ton code de récupération. Choisis un nouveau mot de passe pour la prochaine fois. Ton code de récupération reste valide.';
+
+  @override
+  String get newPasswordSave => 'Enregistrer le mot de passe';
+
+  @override
+  String get newPasswordKeepOld => 'Garder mon ancien mot de passe';
+
+  @override
+  String get settingsProfile => 'Profil';
+
+  @override
+  String get profilePassword => 'Mot de passe';
+
+  @override
+  String get profilePasswordOn =>
+      'Activé : ta liste est chiffrée sur cet ordinateur.';
+
+  @override
+  String get profilePasswordOff =>
+      'Désactivé : toute personne ayant accès à cet ordinateur pourrait lire le fichier.';
+
+  @override
+  String get profileSetPassword => 'Choisir un mot de passe';
+
+  @override
+  String get profileChangePassword => 'Changer le mot de passe';
+
+  @override
+  String get profileRemovePassword => 'Retirer le mot de passe';
+
+  @override
+  String get profileNewRecoveryCode => 'Nouveau code de récupération';
+
+  @override
+  String get profileCurrentPassword => 'Mot de passe actuel';
+
+  @override
+  String get profileRemoveBody =>
+      'Ta liste ne sera plus chiffrée. Tu pourras remettre un mot de passe quand tu veux.';
+
+  @override
+  String get profileNewCodeBody =>
+      'Ton ancien code de récupération ne marchera plus.';
+
+  @override
+  String get profileTurnOn => 'Activer le mot de passe';
+
+  @override
+  String get profilePasswordChanged => 'Mot de passe changé.';
+
+  @override
+  String get tutorialTitle => 'Premiers pas avec Wayfinch';
+
+  @override
+  String get tutorialNotes =>
+      'Ces étapes t’apprennent les bases en les faisant. Marque cette tâche comme faite quand tu veux pour passer le reste.';
+
+  @override
+  String get tutorialCheckOff => 'Coche cette étape';
+
+  @override
+  String get tutorialCheckOffNotes =>
+      'Clique sur la case à côté de cette étape. Les éléments faits se cachent ; tu les retrouves dans Fait.';
+
+  @override
+  String get tutorialAddSubtask => 'Ajoute une sous-tâche';
+
+  @override
+  String get tutorialAddSubtaskNotes =>
+      'Ouvre « Premiers pas » et utilise « + Ajouter une sous-tâche », ou survole-la dans la liste et clique sur le +.';
+
+  @override
+  String get tutorialTag => 'Donne-lui une étiquette';
+
+  @override
+  String get tutorialTagNotes =>
+      'Ouvre « Premiers pas » et clique sur « + Étiquette » dans ses détails. Choisis une étiquette ou tapes-en une nouvelle.';
+
+  @override
+  String get tutorialExport => 'Exporte ta liste pour l’IA';
+
+  @override
+  String get tutorialExportNotes =>
+      'Clique sur « Exporter pour l’IA » dans la barre latérale, puis Copier. Colle-la dans ton IA avec une demande, et ramène la réponse avec Importer.';
+
+  @override
+  String get helpSearch => 'Chercher dans l’aide';
+
+  @override
+  String get helpNoResults => 'Rien trouvé. Essaie un autre mot.';
+
+  @override
+  String get helpBasicsTitle => 'Se repérer';
+
+  @override
+  String get helpBasicsBody =>
+      'Aujourd’hui montre d’abord les éléments en retard, puis ce qui est dû ou prévu aujourd’hui. À venir montre les 7 prochains jours, Tout montre l’ensemble en arbre, et Fait garde ce que tu as terminé, avec ton total de la semaine. Fais glisser les vues et les étiquettes dans la barre latérale pour les réordonner, et choisis la vue d’ouverture dans Paramètres › Général.\n\nL’ajout rapide comprend les dates, heures, étiquettes et priorités, en français et en anglais : essaie « Rapport vendredi 17h #école !haute » ou « Lab report Friday 5pm #school !high ».';
+
+  @override
+  String get helpItemsTitle => 'Tâches et événements';
+
+  @override
+  String get helpItemsBody =>
+      'Les tâches ont une échéance (avec une heure facultative) ; les événements vont d’un début à une fin. Clique sur un élément pour le modifier dans le panneau de droite ; tout s’enregistre au fur et à mesure. La date et l’heure se choisissent ensemble. Supprimer affiche Annuler pendant 10 secondes.';
+
+  @override
+  String get helpNestingTitle => 'Sous-tâches';
+
+  @override
+  String get helpNestingBody =>
+      'Découpe autant que tu veux : « + Ajouter une sous-tâche » dans les détails, ou le + sur une ligne. Certaines situations demandent d’abord : repousser la date d’un parent quand une sous-tâche la dépasse, fermer les sous-tâches ouvertes quand un parent est fait, et marquer un parent comme fait quand sa dernière sous-tâche l’est. Coche « ne plus demander » pour retenir ta réponse ; change-la quand tu veux dans Paramètres › Confirmations.';
+
+  @override
+  String get helpRecurringTitle => 'Éléments répétés';
+
+  @override
+  String get helpRecurringBody =>
+      'Utilise Répéter dans les détails : tous les jours, en semaine, chaque semaine, toutes les 2 semaines, chaque mois ou chaque année. Terminer une tâche répétée crée la suivante, avec de nouvelles copies de ses sous-tâches. Les événements répétés avancent tout seuls une fois finis.';
+
+  @override
+  String get helpTagsTitle => 'Étiquettes et retards';
+
+  @override
+  String get helpTagsBody =>
+      'Ajoute des étiquettes depuis les détails d’un élément. Clique sur une étiquette dans la barre latérale pour voir tout ce qui la porte. Change sa couleur avec son point dans la barre latérale, par clic droit, ou depuis le menu d’une pastille. Les éléments en retard reçoivent l’étiquette automatique « en retard », et une bannière propose de les revoir ou de la masquer jusqu’à demain.';
+
+  @override
+  String get helpAiTitle => 'Utiliser Wayfinch avec ton IA';
+
+  @override
+  String get helpAiBody =>
+      'Exporter pour l’IA copie ta liste avec les règles du format ci-dessous et tes propres instructions. Colle-la dans n’importe quelle IA avec une demande (« planifie mon projet final »), puis colle la réponse dans Importer. Tu vois ce qui est nouveau, modifié et supprimé avant que quoi que ce soit change. Ajouter ajoute seulement les nouveaux éléments ; Remplacer aligne ta liste sur la version de l’IA (les éléments faits ne sont jamais supprimés). Ta liste est sauvegardée d’abord, et tu peux annuler.';
+
+  @override
+  String get helpThemesTitle => 'Thèmes';
+
+  @override
+  String get helpThemesBody =>
+      'Paramètres › Apparence propose clair, sombre ou système, cinq couleurs d’accent et un créateur de thème qui te prévient quand le texte risque d’être difficile à lire.';
+
+  @override
+  String get helpPasswordTitle => 'Mot de passe et code de récupération';
+
+  @override
+  String get helpPasswordBody =>
+      'Un mot de passe chiffre ta liste sur cet ordinateur. Quand tu en choisis un, tu reçois un code de récupération : il ouvre ta liste si tu oublies le mot de passe. Si tu perds les deux, ta liste est perdue. Gère les deux dans Paramètres › Profil.';
+
+  @override
+  String get helpBackupsTitle => 'Sauvegardes et annulation';
+
+  @override
+  String get helpBackupsBody =>
+      'Ta liste est sauvegardée avant chaque import. Annule le dernier import depuis la fenêtre Importer, ou restaure l’une des 10 dernières sauvegardes depuis Paramètres › Historique des imports. Restaurer sauvegarde d’abord ta liste actuelle, donc tu peux changer d’avis.';
 }

@@ -187,8 +187,13 @@ Calendars come in and go out as .ics files. Direct Google/Outlook sync waits for
 The password is optional, but when it's set the database is encrypted. A forgotten password with no recovery code means the data is gone for good, so the UI must say so plainly.
 
 - **Profile:** first name (required, used in greetings and the daily digest) and an optional password.
-- **Encryption:** SQLCipher, with the key derived from the password using a slow key-derivation function (e.g. Argon2 or PBKDF2).
-- **Recovery code:** shown once after the password is set, with an "I saved it" checkbox before continuing. It can also unlock the database.
+  - Settings › Profile edits the name and can set, change or remove the password, or make a new recovery code. Each action except setting a password asks for the current one.
+- **Encryption:** SQLCipher.
+  - A random database key is wrapped (AES-256-GCM) twice, once with a key derived from the password and once with one derived from the recovery code, using Argon2id. Either one unlocks.
+  - The wrapped keys live in a small vault file next to the database; it holds no secrets in the clear.
+  - Turning the password on or off re-encrypts or decrypts the database file in place (SQLCipher export, swapped in only once complete). Changing the password only re-wraps the key.
+- **Unlock screen** at start when a password is set: password, or "Use your recovery code". After a recovery-code unlock, the app asks for a new password (or "Keep my old password").
+- **Recovery code:** shown once after the password is set, with an "I saved it" checkbox before continuing (Copy and Save as file offered). It can also unlock the database.
 - **Daily auto-backups:** the last 7 are kept, in a folder the user picks. Backups are encrypted the same way as the database.
 - **Pre-import backup:** taken before every Replace import, separate from the daily ones.
 - Windows Hello unlock is a possible later convenience.
@@ -201,13 +206,19 @@ Setup takes five short screens, then the app teaches itself through a tutorial t
 2. First name
 3. Password (optional) → recovery code screen
 4. Pick your vibe: light/dark + accent, with a live preview
-5. Notifications: permission, quick defaults, "Launch at startup"
+5. Notifications: quick defaults (task and event reminders, morning digest and its time), "Launch at startup". Windows needs no permission prompt; the screen explains that reminders arrive while Wayfinch runs in the tray.
 
 Then a short **"How to use it with your AI"** screen showing the copy → paste → import loop as a small diagram.
 
-- **Tutorial as tasks:** a pre-loaded "Getting started" task whose subtasks teach by doing: check this off, add a subtask, give this a tag, export your list for AI.
+- **Applying the choices:** the password (and the file encryption) is applied only when setup finishes; until then, Back changes nothing. The notification choices are saved now and take effect with the notifications milestone.
+- **Existing data:** someone who already has items but never ran setup (e.g. from before this feature) sees setup once, but the tutorial isn't added.
+- **Tutorial as tasks:** a pre-loaded "Getting started" task (due today) whose subtasks teach by doing: check this off, add a subtask, give this a tag, export your list for AI.
+  - Every step but "Check this off" checks itself off when the user does it (adding a subtask to the tutorial, tagging it, copying or saving an export).
+  - The tutorial is only created when the list is empty.
 - **Skippable:** marking the parent done closes the whole tutorial (through the usual parent-completion prompt). No nagging.
 - **Not replayable.** The Help page covers everything instead: basics, nesting, AI import/export (including the exact format rules the AI receives), calendar, themes, backups.
+  - Help is a sidebar destination with searchable, expandable sections; searching opens the matches.
+  - Calendar and notification sections come with those features.
 
 ## Notifications
 

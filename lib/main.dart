@@ -1,31 +1,14 @@
 import 'package:flutter/material.dart';
 
+import 'app/app_session.dart';
 import 'data/database_opener.dart';
-import 'data/import_repository.dart';
-import 'data/items_repository.dart';
-import 'data/settings_repository.dart';
-import 'data/tags_repository.dart';
 import 'ui/app.dart';
-import 'ui/home/home_controller.dart';
-import 'ui/theme/appearance_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // No password setup yet (that's onboarding, milestone 5), so the database
-  // opens unencrypted. The SQLCipher check still runs.
-  final db = openWayfinchDatabase(file: await defaultDatabaseFile());
-  final settings = SettingsRepository(db);
-  final items = ItemsRepository(db);
-  final controller = HomeController(
-    items: items,
-    tags: TagsRepository(db),
-    settings: settings,
-    imports: ImportRepository(db, items),
-  );
-  runApp(
-    WayfinchApp(
-      controller: controller,
-      appearance: AppearanceController(settings),
-    ),
-  );
+  final session = AppSession(dataDir: await wayfinchDataDirectory());
+  runApp(WayfinchShell(session: session));
+  // Unlock screen when a password is set; otherwise the database opens
+  // (and setup runs the first time).
+  await session.start();
 }
