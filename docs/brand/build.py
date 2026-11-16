@@ -1,7 +1,7 @@
 """Generate the Wayfinch mark variants as SVG files."""
 import pathlib
 
-OUT = pathlib.Path(__file__).parent / "assets"
+OUT = pathlib.Path(__file__).parent
 OUT.mkdir(exist_ok=True)
 
 YELLOW, NAVY, ORANGE = "#F7B84B", "#23324A", "#E8833A"
@@ -38,7 +38,7 @@ def body_shapes(fill):
     )
 
 
-def color_svg():
+def color_svg(check=NAVY):
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <title>Wayfinch</title>
   <defs>
@@ -52,7 +52,7 @@ def color_svg():
   <ellipse cx="{CAP["cx"]}" cy="{CAP["cy"]}" rx="{CAP["rx"]}" ry="{CAP["ry"]}" fill="{NAVY}" clip-path="url(#head)"/>
   <path d="{BEAK}" fill="{ORANGE}" stroke="{ORANGE}" stroke-width="10" stroke-linejoin="round"/>
   <circle cx="{EYE["cx"]}" cy="{EYE["cy"]}" r="{EYE["r"]}" fill="{NAVY}"/>
-  <path d="{CHECK}" fill="none" stroke="{NAVY}" stroke-width="{CHECK_W}" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="{CHECK}" fill="none" stroke="{check}" stroke-width="{CHECK_W}" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 '''
 
@@ -99,6 +99,7 @@ def sticker_svg():
 
 
 (OUT / "wayfinch-mark.svg").write_text(color_svg())
+(OUT / "wayfinch-mark-dark.svg").write_text(color_svg(check="#ECEEF2"))
 (OUT / "wayfinch-mark-mono-navy.svg").write_text(mono_svg(NAVY))
 (OUT / "wayfinch-mark-mono-white.svg").write_text(mono_svg("#FFFFFF"))
 (OUT / "wayfinch-app-icon.svg").write_text(sticker_svg())

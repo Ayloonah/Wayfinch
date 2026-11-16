@@ -22,7 +22,7 @@ Prefer well-maintained, widely used packages. Ask before adding any new dependen
 - The three confirm prompts go through `ItemRules` (`lib/domain/item_rules.dart`). Remembered answers live in the settings table. Cancel is only rememberable for "Mark the parent done too?" (see the spec's "Core behaviors").
 - Keep the data layer (Drift, repositories), domain logic (completion rules, import diffing, recurrence) and UI separate. Domain logic must be unit-testable without Flutter widgets.
 - The AI exchange format is versioned (`"version": 1` in the JSON) but the version is never shown in the UI.
-- The logo's sources live in `docs/brand/` (SVGs plus `build.py`, which generates them). The in-app `FinchLogo` paints the same geometry (outlined in dark mode); the app icon is `windows/runner/resources/app_icon.ico`, the tray icons are `assets/tray/tray_light.ico` (white ink, dark taskbar) and `tray_dark.ico`, and toasts use `assets/brand/notification_icon.png`. Brand colors are fixed and don't follow the accent.
+- The logo's sources live in `docs/brand/` (SVGs plus `build.py`, which generates them). The in-app `FinchLogo` paints the same geometry: `wayfinch-mark.svg` in light mode, `wayfinch-mark-dark.svg` (light check) in dark mode, never the outlined version, which is only for the Windows window, taskbar and shortcut icon. The app icon is `windows/runner/resources/app_icon.ico`, the tray icons are `assets/tray/tray_light.ico` (white ink, dark taskbar) and `tray_dark.ico`, and toasts use `assets/brand/notification_icon.png`. Brand colors are fixed and don't follow the accent.
 - Theme tokens (colors, accents, priority colors) live in one place. Exact values are in the spec's "Visual design and themes" section.
 
 ## Workflow

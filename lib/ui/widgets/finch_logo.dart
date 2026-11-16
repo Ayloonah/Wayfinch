@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
 
-/// The Wayfinch mark: a yellow finch tucked into a navy checkmark.
+/// The Wayfinch mark: a yellow finch tucked into a checkmark.
 ///
 /// Drawn from the same geometry as `docs/brand/wayfinch-mark.svg` (512×512
-/// design grid). In dark mode it gets a white outline (as in
-/// `wayfinch-app-icon.svg`) so the navy check stays visible.
+/// design grid). In dark mode the check is light, as in
+/// `wayfinch-mark-dark.svg`, so it stays visible. (The white-outlined
+/// version is only for the Windows app icon.)
 class FinchLogo extends StatelessWidget {
   /// Creates the logo at [size] pixels.
   const FinchLogo({super.key, this.size = 36});
@@ -24,7 +25,7 @@ class FinchLogo extends StatelessWidget {
       image: true,
       child: CustomPaint(
         size: Size.square(size),
-        painter: _MarkPainter(outlined: dark),
+        painter: _MarkPainter(check: dark ? _checkOnDark : _navy),
       ),
     );
   }
@@ -34,16 +35,13 @@ class FinchLogo extends StatelessWidget {
 const _yellow = Color(0xFFF7B84B);
 const _navy = Color(0xFF23324A);
 const _orange = Color(0xFFE8833A);
-const _white = Color(0xFFFFFFFF);
-
-/// Check thickness and the outline added around everything when outlined.
-const _checkWidth = 87.0;
-const _outline = 22.0;
+const _checkOnDark = Color(0xFFECEEF2);
 
 class _MarkPainter extends CustomPainter {
-  _MarkPainter({required this.outlined});
+  _MarkPainter({required this.check});
 
-  final bool outlined;
+  /// Checkmark color.
+  final Color check;
 
   // The bird is clipped to the area above the check's centerline, so it
   // tucks into the check with no gap.
@@ -101,79 +99,49 @@ class _MarkPainter extends CustomPainter {
       Offset(410, 148),
     ], true);
 
-  static final _check = Path()
+  static final _checkLine = Path()
     ..moveTo(69, 312)
     ..lineTo(202, 449)
     ..lineTo(447, 201);
 
-  static Paint _fill(Color c) => Paint()
-    ..color = c
-    ..isAntiAlias = true;
+  static Paint _fill(Color c) => Paint()..color = c;
 
   static Paint _stroke(Color c, double width) => Paint()
     ..color = c
     ..style = PaintingStyle.stroke
     ..strokeWidth = width
     ..strokeCap = StrokeCap.round
-    ..strokeJoin = StrokeJoin.round
-    ..isAntiAlias = true;
-
-  void _birdShapes(Canvas canvas, Paint paint) {
-    canvas
-      ..drawPath(_head, paint)
-      ..drawPath(_body, paint)
-      ..drawPath(_dip, paint)
-      ..drawPath(_crook, paint);
-  }
+    ..strokeJoin = StrokeJoin.round;
 
   @override
   void paint(Canvas canvas, Size size) {
-    // The outlined version uses a slightly larger grid (-16..528) so the
-    // outline fits.
-    final grid = outlined ? 544.0 : 512.0;
+    final yellow = _fill(_yellow);
     canvas
       ..save()
-      ..scale(size.width / grid);
-    if (outlined) {
-      canvas.translate(16, 16);
-      canvas
-        ..save()
-        ..clipPath(_above);
-      _birdShapes(canvas, _fill(_white));
-      _birdShapes(canvas, _stroke(_white, _outline * 2));
-      canvas
-        ..restore()
-        ..drawPath(_beak, _fill(_white))
-        ..drawPath(_beak, _stroke(_white, _outline * 2))
-        ..drawPath(_check, _stroke(_white, _checkWidth + _outline * 2));
-    }
-
-    canvas
+      ..scale(size.width / 512)
       ..save()
-      ..clipPath(_above);
-    _birdShapes(canvas, _fill(_yellow));
-    canvas
+      ..clipPath(_above)
+      ..drawPath(_head, yellow)
+      ..drawPath(_body, yellow)
+      ..drawPath(_dip, yellow)
+      ..drawPath(_crook, yellow)
       ..drawPath(_wing, _fill(_navy))
-      ..restore();
-
-    // Navy cap, clipped to the head.
-    canvas
+      ..restore()
+      // Navy cap, clipped to the head.
       ..save()
       ..clipPath(_head)
       ..drawOval(
         Rect.fromCenter(center: const Offset(396, 30), width: 136, height: 116),
         _fill(_navy),
       )
-      ..restore();
-
-    canvas
+      ..restore()
       ..drawPath(_beak, _fill(_orange))
       ..drawPath(_beak, _stroke(_orange, 10))
       ..drawCircle(const Offset(364, 122), 17, _fill(_navy))
-      ..drawPath(_check, _stroke(_navy, _checkWidth))
+      ..drawPath(_checkLine, _stroke(check, 87))
       ..restore();
   }
 
   @override
-  bool shouldRepaint(_MarkPainter old) => old.outlined != outlined;
+  bool shouldRepaint(_MarkPainter old) => old.check != check;
 }
