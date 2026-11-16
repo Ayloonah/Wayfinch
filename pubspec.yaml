@@ -40,7 +40,7 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
-    - assets/tray/
+    - assets/icons/
     - assets/brand/notification_icon.png
   fonts:
     # Nunito variable font (all weights in one file), SIL Open Font License:

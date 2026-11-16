@@ -16,6 +16,7 @@ import 'package:windows_single_instance/windows_single_instance.dart';
 import '../l10n/app_localizations.dart';
 import 'app_session.dart';
 import 'notification_service.dart';
+import 'system_theme.dart';
 
 /// Command-line flag used when Windows starts Wayfinch at login: start
 /// hidden in the tray.
@@ -125,20 +126,38 @@ class Desktop with TrayListener, WindowListener {
   Future<void> _quit() async {
     _quitting = true;
     _service?.dispose();
+    await _themeChanges?.cancel();
     await trayManager.destroy();
     await windowManager.setPreventClose(false);
     await windowManager.destroy();
   }
 
+  // ---- Icons follow the Windows system theme ------------------------------
+
+  /// Sets the tray and running-window (taskbar, title bar) icons for the
+  /// Windows *system* theme: the navy-check mark on light, the light-check
+  /// mark on dark. The exe's embedded icon stays the outlined one.
+  Future<void> _applyThemeIcons(bool systemIsLight) async {
+    final icon = systemIsLight
+        ? 'assets/icons/wayfinch_light.ico'
+        : 'assets/icons/wayfinch_dark.ico';
+    await trayManager.setIcon(icon);
+    await windowManager.setIcon(icon);
+  }
+
+  void _followSystemTheme() {
+    _themeChanges = SystemTheme.changes().listen(
+      (light) => unawaited(_applyThemeIcons(light)),
+    );
+  }
+
+  StreamSubscription<bool>? _themeChanges;
+
   // ---- Tray ---------------------------------------------------------------
 
   Future<void> _setUpTray() async {
-    // White ink on a dark taskbar, navy ink on a light one.
-    await trayManager.setIcon(
-      await _taskbarIsLight()
-          ? 'assets/tray/tray_dark.ico'
-          : 'assets/tray/tray_light.ico',
-    );
+    await _applyThemeIcons(SystemTheme.isLight());
+    _followSystemTheme();
     await trayManager.setToolTip(_l10n.appTitle);
     await trayManager.setContextMenu(
       Menu(
@@ -149,21 +168,6 @@ class Desktop with TrayListener, WindowListener {
         ],
       ),
     );
-  }
-
-  /// Whether the Windows taskbar uses the light theme (it's dark by default).
-  static Future<bool> _taskbarIsLight() async {
-    try {
-      final result = await Process.run('reg', [
-        'query',
-        r'HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize',
-        '/v',
-        'SystemUsesLightTheme',
-      ]);
-      return RegExp(r'0x0*1\b').hasMatch('${result.stdout}');
-    } on ProcessException {
-      return false;
-    }
   }
 
   @override

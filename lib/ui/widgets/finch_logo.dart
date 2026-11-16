@@ -25,7 +25,7 @@ class FinchLogo extends StatelessWidget {
       image: true,
       child: CustomPaint(
         size: Size.square(size),
-        painter: _MarkPainter(check: dark ? _checkOnDark : _navy),
+        painter: WayfinchMarkPainter(dark: dark),
       ),
     );
   }
@@ -37,8 +37,16 @@ const _navy = Color(0xFF23324A);
 const _orange = Color(0xFFE8833A);
 const _checkOnDark = Color(0xFFECEEF2);
 
-class _MarkPainter extends CustomPainter {
-  _MarkPainter({required this.check});
+/// Paints the mark into a square: `wayfinch-mark.svg`, or with [dark],
+/// `wayfinch-mark-dark.svg` (light check). Also used by
+/// `tool/render_icons_test.dart` to make the themed Windows icons.
+class WayfinchMarkPainter extends CustomPainter {
+  /// Creates the painter.
+  WayfinchMarkPainter({required this.dark})
+    : check = dark ? _checkOnDark : _navy;
+
+  /// Whether to paint the dark-background version.
+  final bool dark;
 
   /// Checkmark color.
   final Color check;
@@ -143,5 +151,5 @@ class _MarkPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_MarkPainter old) => old.check != check;
+  bool shouldRepaint(WayfinchMarkPainter old) => old.dark != dark;
 }
