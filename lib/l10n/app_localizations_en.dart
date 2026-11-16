@@ -567,4 +567,461 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contrastAccentTextOnPanel => 'Accent-colored text on panels';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get exportTitle => 'Export for AI';
+
+  @override
+  String get exportSubtitle =>
+      'Paste this into your AI with your request, then bring its reply back with Import.';
+
+  @override
+  String get exportWhatToInclude => 'What to include';
+
+  @override
+  String get exportOpenTasks => 'Open tasks';
+
+  @override
+  String get exportEvents => 'Events';
+
+  @override
+  String get exportNotes => 'Notes';
+
+  @override
+  String get exportDoneItems => 'Done items';
+
+  @override
+  String get exportInstructionsHeading => 'My instructions';
+
+  @override
+  String get exportInstructionsSaved => 'Saved for every export';
+
+  @override
+  String get exportInstructionsHint =>
+      'Anything your AI should always know. For example:\nBreak big tasks into steps under 2 hours.\nI\'m usually free after 4 PM on weekdays.\nTag school stuff with \"school\".';
+
+  @override
+  String get exportPreview => 'What gets copied';
+
+  @override
+  String get exportRulesLabel => 'Format rules · set by Wayfinch';
+
+  @override
+  String get exportRulesHeading => 'Format rules';
+
+  @override
+  String get exportListHeading => 'My list';
+
+  @override
+  String exportRules(String today, String skeleton) {
+    return 'You\'re helping me manage my Wayfinch to-do list. Today is $today.\nReply with ONLY valid JSON in the Wayfinch format, with no other text:\n$skeleton\nEach item has \"type\" (\"task\" or \"event\") and \"title\". It can also have \"notes\", \"priority\" (\"none\", \"low\", \"medium\" or \"high\"), \"tags\" (a list of names), \"recurrence\" (an iCal RRULE like \"FREQ=WEEKLY\", or null) and \"children\" (subtasks, same shape).\nTasks: \"due\" as \"YYYY-MM-DD\" or \"YYYY-MM-DDTHH:mm\" (or null), and \"done\": true when finished.\nEvents: \"start\" and \"end\" as \"YYYY-MM-DDTHH:mm\".\nKeep every existing \"id\" exactly as it is. New items: leave \"id\" out.\nDon\'t remove items unless I ask you to. Don\'t add any other fields.';
+  }
+
+  @override
+  String exportSummary(int items, int words) {
+    final intl.NumberFormat wordsNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String wordsString = wordsNumberFormat.format(words);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      items,
+      locale: localeName,
+      other: '$items items',
+      one: '1 item',
+    );
+    return '$_temp0 · about $wordsString words';
+  }
+
+  @override
+  String get exportSaveFile => 'Save as file';
+
+  @override
+  String get exportCopy => 'Copy to clipboard';
+
+  @override
+  String get exportCopied => 'Copied! Paste it into your AI.';
+
+  @override
+  String get exportSaved => 'Saved.';
+
+  @override
+  String get importTitle => 'Import';
+
+  @override
+  String get importSubtitle =>
+      'Paste your AI\'s whole reply. Extra text around the list is fine.';
+
+  @override
+  String get importPaste => 'Paste from clipboard';
+
+  @override
+  String get importOpenFile => 'Open file...';
+
+  @override
+  String get importReview => 'Review changes';
+
+  @override
+  String importUndoLast(String when) {
+    return 'Undo last import ($when)';
+  }
+
+  @override
+  String get importUndoTitle => 'Undo the last import?';
+
+  @override
+  String get importUndoBody =>
+      'Your list goes back to exactly how it was before that import. Anything you changed since will be lost.';
+
+  @override
+  String get importUndoConfirm => 'Undo import';
+
+  @override
+  String get importErrorsTitle => 'This reply can\'t be imported yet:';
+
+  @override
+  String get importErrorsTip =>
+      'Tip: ask your AI to fix these and reply with only the JSON.';
+
+  @override
+  String get importWhereList => 'The list';
+
+  @override
+  String importWhereItem(int n) {
+    return 'Item $n';
+  }
+
+  @override
+  String importWhereSubtask(int n) {
+    return 'subtask $n';
+  }
+
+  @override
+  String get importErrorNoJson =>
+      'No Wayfinch list found in this text. Paste the AI\'s whole reply.';
+
+  @override
+  String importErrorInvalidJson(String detail) {
+    return 'The JSON is broken: $detail';
+  }
+
+  @override
+  String get importErrorNotObject =>
+      'The reply should be one JSON object (the Wayfinch list), not a list or plain text.';
+
+  @override
+  String get importErrorWrongFormat =>
+      'This isn\'t a Wayfinch list (\"format\" should be \"wayfinch\").';
+
+  @override
+  String get importErrorVersion =>
+      'This list was made for a different version of Wayfinch.';
+
+  @override
+  String importErrorMissing(String where, String field) {
+    return '$where: \"$field\" is missing.';
+  }
+
+  @override
+  String importErrorWrongType(String where, String field) {
+    return '$where: \"$field\" has the wrong kind of value.';
+  }
+
+  @override
+  String importErrorUnknownField(String where, String field) {
+    return '$where: unknown field \"$field\".';
+  }
+
+  @override
+  String importErrorType(String where) {
+    return '$where: \"type\" must be \"task\" or \"event\".';
+  }
+
+  @override
+  String importErrorEmptyTitle(String where) {
+    return '$where: the title is empty.';
+  }
+
+  @override
+  String importErrorDate(String where, String field) {
+    return '$where: \"$field\" should look like 2026-12-05 or 2026-12-05T17:30.';
+  }
+
+  @override
+  String importErrorPriority(String where) {
+    return '$where: \"priority\" must be none, low, medium or high.';
+  }
+
+  @override
+  String importErrorRecurrence(String where) {
+    return '$where: \"recurrence\" isn\'t a valid repeat rule.';
+  }
+
+  @override
+  String importErrorFieldForType(String where, String field) {
+    return '$where: \"$field\" doesn\'t belong on this kind of item.';
+  }
+
+  @override
+  String importErrorEventTimes(String where, String field) {
+    return '$where: events need a \"$field\".';
+  }
+
+  @override
+  String importErrorEndBeforeStart(String where) {
+    return '$where: the event ends before it starts.';
+  }
+
+  @override
+  String importErrorDuplicateId(String where, String id) {
+    return '$where: the id \"$id\" is used twice.';
+  }
+
+  @override
+  String get importReviewTitle => 'Review your import';
+
+  @override
+  String get importValid => 'Wayfinch format · looks good';
+
+  @override
+  String get importHow => 'How should this be imported?';
+
+  @override
+  String get importAdd => 'Add to my list';
+
+  @override
+  String get importAddBody =>
+      'New items get added. Nothing is changed or removed.';
+
+  @override
+  String get importReplace => 'Replace my list';
+
+  @override
+  String get importReplaceBody =>
+      'Your list becomes your AI\'s version. History is kept for matching items, and done items stay.';
+
+  @override
+  String importNewCount(int count) {
+    return '+ $count new';
+  }
+
+  @override
+  String importChangedCount(int count) {
+    return '$count changed';
+  }
+
+  @override
+  String importRemovedCount(int count) {
+    return '$count removed';
+  }
+
+  @override
+  String importDoneUntouched(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count done items unaffected',
+      one: '1 done item unaffected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importRemovedWarning(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Your AI removed $count items. Make sure that\'s on purpose.',
+      one: 'Your AI removed 1 item. Make sure that\'s on purpose.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importNothing => 'Nothing to change. Your list already matches.';
+
+  @override
+  String get importBadgeNew => 'New';
+
+  @override
+  String get importBadgeChanged => 'Changed';
+
+  @override
+  String get importBadgeRemoved => 'Removed';
+
+  @override
+  String get importBadgeKept => 'Kept';
+
+  @override
+  String get importKeep => 'Keep this item';
+
+  @override
+  String get importRemoveAnyway => 'Remove it';
+
+  @override
+  String get importBackupNote =>
+      'Your current list is backed up first. You can undo this.';
+
+  @override
+  String get importBack => 'Back';
+
+  @override
+  String importApply(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Import $count changes',
+      one: 'Import 1 change',
+      zero: 'Nothing to import',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Imported $count changes',
+      one: 'Imported 1 change',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importNoDate => 'no date';
+
+  @override
+  String importWasDue(String when) {
+    return 'Was due $when';
+  }
+
+  @override
+  String importRenamed(String from) {
+    return 'Renamed from \"$from\"';
+  }
+
+  @override
+  String importDue(String from, String to) {
+    return 'Due $from → $to';
+  }
+
+  @override
+  String importStart(String from, String to) {
+    return 'Starts $from → $to';
+  }
+
+  @override
+  String importEnd(String from, String to) {
+    return 'Ends $from → $to';
+  }
+
+  @override
+  String importPriority(String from, String to) {
+    return 'Priority $from → $to';
+  }
+
+  @override
+  String importTagsAdded(String names) {
+    return 'Tags added: $names';
+  }
+
+  @override
+  String importTagsRemoved(String names) {
+    return 'Tags removed: $names';
+  }
+
+  @override
+  String get importNotesChanged => 'Notes changed';
+
+  @override
+  String importRepeat(String from, String to) {
+    return 'Repeat: $from → $to';
+  }
+
+  @override
+  String get importMarkedDone => 'Marked done';
+
+  @override
+  String get importReopened => 'Reopened';
+
+  @override
+  String get importNowEvent => 'Now an event';
+
+  @override
+  String get importNowTask => 'Now a task';
+
+  @override
+  String get importMovedTop => 'Moved to the top level';
+
+  @override
+  String importMovedUnder(String parent) {
+    return 'Moved under \"$parent\"';
+  }
+
+  @override
+  String get settingsGeneral => 'General';
+
+  @override
+  String get settingStartView => 'Open Wayfinch in';
+
+  @override
+  String get settingsImportHistory => 'Import history';
+
+  @override
+  String settingsImportHistoryHelp(int count) {
+    return 'Your list is backed up before every import. Restore any of the last $count backups; your current list is backed up first, so you can change your mind.';
+  }
+
+  @override
+  String get importHistoryEmpty =>
+      'No backups yet. One is made before each import.';
+
+  @override
+  String get backupBeforeImport => 'Before an import';
+
+  @override
+  String backupBeforeImportMode(String mode) {
+    return 'Before an import ($mode)';
+  }
+
+  @override
+  String backupBeforeImportDetail(String mode, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Before an import ($mode, $count changes)',
+      one: 'Before an import ($mode, 1 change)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupBeforeRestore => 'Before a restore';
+
+  @override
+  String backupItemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupRestore => 'Restore';
+
+  @override
+  String get backupRestoreTitle => 'Restore this backup?';
+
+  @override
+  String get backupRestoreBody =>
+      'Your list goes back to exactly how it was at that point. Your current list is backed up first, so you can undo this from Import history.';
+
+  @override
+  String get backupRestored => 'Backup restored.';
 }

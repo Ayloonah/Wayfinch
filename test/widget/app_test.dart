@@ -3,12 +3,18 @@ import 'dart:async';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wayfinch/data/database.dart';
+import 'package:wayfinch/data/import_repository.dart';
 import 'package:wayfinch/data/items_repository.dart';
 import 'package:wayfinch/data/settings_repository.dart';
 import 'package:wayfinch/data/tags_repository.dart';
+import 'package:wayfinch/domain/exchange/exchange_export.dart';
+import 'package:wayfinch/domain/exchange/exchange_parser.dart';
+import 'package:wayfinch/domain/exchange/import_plan.dart';
 import 'package:wayfinch/domain/item_enums.dart';
+import 'package:wayfinch/domain/views.dart' show overdueTagId;
 import 'package:wayfinch/domain/item_rules.dart';
 import 'package:wayfinch/ui/app.dart';
 import 'package:wayfinch/ui/home/home_controller.dart';
@@ -28,6 +34,7 @@ class _Harness {
       items: items,
       tags: tags,
       settings: settings,
+      imports: ImportRepository(db, items, clock: () => _now),
       clock: () => _now,
     );
   }
@@ -636,6 +643,283 @@ void main() {
     await finish(tester, h);
   });
 
+  testWidgets('Export for AI shows rules, instructions and the list; copies', (
+    tester,
+  ) async {
+    String? copied;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          copied = (call.arguments as Map)['text'] as String?;
+        }
+        return null;
+      },
+    );
+    final h = await pumpApp(
+      tester,
+      seed: (h) async {
+        await h.items.create(type: ItemType.task, title: 'Write report');
+        final done = await h.items.create(type: ItemType.task, title: 'Old');
+        await h.items.save(done.copyWith(doneAt: _now));
+      },
+    );
+    await tester.tap(find.text('Export for AI'));
+    await settle(tester);
+    expect(find.text('WHAT GETS COPIED'), findsOneWidget);
+    expect(selectable('"title": "Write report"'), findsOneWidget);
+    expect(selectable('"title": "Old"'), findsNothing);
+    expect(selectable('Today is 2026-11-15'), findsOneWidget);
+
+    // Include done items: they show up, and the choice is saved.
+    await tester.tap(find.textContaining('Done items', findRichText: true));
+    await settle(tester);
+    expect(selectable('"title": "Old"'), findsOneWidget);
+
+    await tester.enterText(dialogField(), 'Break things into small steps.');
+    await tester.pump();
+    await tester.tap(find.text('Copy to clipboard'));
+    await settle(tester);
+    expect(copied, contains('## Format rules'));
+    expect(
+      copied,
+      contains('## My instructions\nBreak things into small steps.'),
+    );
+    expect(copied, contains('"format": "wayfinch"'));
+    expect(find.text('Copied! Paste it into your AI.'), findsOneWidget);
+    expect(
+      ExportOptions.decode(
+        await pumpUntilDone(tester, h.settings.getValue('export.options')),
+      ).doneItems,
+      isTrue,
+    );
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      null,
+    );
+    await tester.pump(const Duration(seconds: 1)); // flush instruction save
+    await finish(tester, h);
+  });
+
+  testWidgets('Import: review, keep a removal, apply, then undo', (
+    tester,
+  ) async {
+    late String reportId;
+    final h = await pumpApp(
+      tester,
+      seed: (h) async {
+        reportId = (await h.items.create(
+          type: ItemType.task,
+          title: 'Report',
+          due: DateTime(2026, 11, 15),
+        )).id;
+        await h.items.create(type: ItemType.task, title: 'Books');
+        await h.items.create(type: ItemType.task, title: 'Laundry');
+      },
+    );
+    await tester.tap(find.text('Import'));
+    await settle(tester);
+    await tester.enterText(
+      dialogField(),
+      'Here you go!\n```json\n'
+      '{"format":"wayfinch","version":1,"items":['
+      '{"id":"$reportId","type":"task","title":"Report v2","due":"2026-11-17"},'
+      '{"type":"task","title":"Book a room","tags":["school"]}]}\n```',
+    );
+    await tester.pump();
+    await tester.tap(find.text('Review changes'));
+    await settle(tester);
+
+    expect(find.text('Review your import'), findsOneWidget);
+    expect(find.text('+ 1 new'), findsOneWidget);
+    expect(find.text('1 changed'), findsOneWidget);
+    expect(find.text('2 removed'), findsOneWidget);
+    expect(
+      find.text('Your AI removed 2 items. Make sure that\'s on purpose.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Renamed from "Report"'), findsOneWidget);
+
+    // Keep "Books".
+    await tester.tap(find.text('Keep this item').first);
+    await settle(tester);
+    expect(find.text('1 removed'), findsOneWidget);
+    await tester.tap(find.text('Import 3 changes'));
+    await settle(tester);
+    expect(find.text('Imported 3 changes'), findsOneWidget);
+    final titles = h.controller.tree.all.map((i) => i.title).toSet();
+    expect(titles, {'Report v2', 'Book a room', 'Books'});
+    expect(h.controller.tagsById.values.single.name, 'school');
+
+    await tester.tap(find.text('Undo'));
+    await settle(tester);
+    expect(h.controller.tree.all.map((i) => i.title).toSet(), {
+      'Report',
+      'Books',
+      'Laundry',
+    });
+    expect(h.controller.lastImport, isNull);
+    await finish(tester, h);
+  });
+
+  testWidgets('Import shows friendly errors for a bad reply', (tester) async {
+    final h = await pumpApp(tester);
+    await tester.tap(find.text('Import'));
+    await settle(tester);
+    await tester.enterText(
+      dialogField(),
+      '{"format":"wayfinch","version":1,"items":['
+      '{"type":"task","title":"x","due":"next friday","colour":"red"}]}',
+    );
+    await tester.pump();
+    await tester.tap(find.text('Review changes'));
+    await settle(tester);
+    expect(find.text('This reply can\'t be imported yet:'), findsOneWidget);
+    expect(
+      find.textContaining('Item 1: unknown field "colour".'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('Item 1: "due" should look like'),
+      findsOneWidget,
+    );
+    expect(find.text('Review your import'), findsNothing);
+    await finish(tester, h);
+  });
+
+  testWidgets('start view: chosen in Settings, used at launch', (tester) async {
+    var h = await pumpApp(tester);
+    expect(h.controller.destination, Destination.today);
+    await tester.tap(find.text('Settings'));
+    await settle(tester);
+    await tester.tap(find.text('Today').last); // the "Open Wayfinch in" value
+    await settle(tester);
+    await tester.tap(find.text('All').last);
+    await settle(tester);
+    expect(h.controller.startView, Destination.all);
+    expect(
+      await pumpUntilDone(tester, h.settings.getValue('app.startView')),
+      'all',
+    );
+    await finish(tester, h);
+
+    // A fresh launch with that setting opens All.
+    h = await pumpApp(
+      tester,
+      seed: (h) => h.settings.setValue('app.startView', 'all'),
+    );
+    expect(h.controller.destination, Destination.all);
+    expect(find.text('Nothing open'), findsOneWidget);
+    await finish(tester, h);
+  });
+
+  testWidgets('Import history lists backups and restores one', (tester) async {
+    final h = await pumpApp(
+      tester,
+      seed: (h) => h.items.create(type: ItemType.task, title: 'Keep me'),
+    );
+    final doc = parseExchange(
+      '{"format":"wayfinch","version":1,"items":'
+      '[{"type":"task","title":"From AI"}]}',
+    ).document!;
+    await pumpUntilDone(
+      tester,
+      h.controller.applyImport(
+        h.controller.planImportOf(doc, ImportMode.replace),
+      ),
+    );
+    await settle(tester);
+    expect(h.controller.tree.all.single.title, 'From AI');
+
+    await tester.tap(find.text('Settings'));
+    await settle(tester);
+    expect(find.text('Import history'), findsOneWidget);
+    expect(
+      find.textContaining('Before an import (Replace my list, 2 changes)'),
+      findsOneWidget,
+    );
+    await tester.ensureVisible(find.text('Restore'));
+    await tester.pump();
+    await tester.tap(find.text('Restore'));
+    await settle(tester);
+    expect(find.text('Restore this backup?'), findsOneWidget);
+    await tester.tap(find.text('Restore').last);
+    await settle(tester);
+    expect(h.controller.tree.all.single.title, 'Keep me');
+    expect(find.text('Backup restored.'), findsOneWidget);
+    expect(find.textContaining('Before a restore'), findsOneWidget);
+    await finish(tester, h);
+  });
+
+  testWidgets('sidebar views and tags reorder by dragging; order is saved', (
+    tester,
+  ) async {
+    final h = await pumpApp(
+      tester,
+      seed: (h) async {
+        await h.tags.findOrCreate('alpha', colorFor: (_) => 0xFF7950F2);
+        await h.tags.findOrCreate('beta', colorFor: (_) => 0xFF0C8599);
+      },
+    );
+    expect(h.controller.viewOrder.first, Destination.today);
+
+    // Drag "All" (3rd) above "Today" (1st).
+    final all = tester.getCenter(find.text('All'));
+    final today = tester.getCenter(find.text('Today').first);
+    final drag = await tester.startGesture(all);
+    await tester.pump(const Duration(milliseconds: 50));
+    await drag.moveBy(const Offset(0, -20));
+    await tester.pump();
+    await dragTo(tester, drag, from: all, to: today - const Offset(0, 24));
+    await drag.up();
+    await settle(tester);
+    expect(h.controller.viewOrder.first, Destination.all);
+    expect(
+      await pumpUntilDone(tester, h.settings.getValue('sidebar.viewOrder')),
+      startsWith('all,'),
+    );
+
+    // Tags: drag "overdue" (last) above "alpha" (first).
+    expect(h.controller.sidebarTagIds.last, overdueTagId);
+    final overdue = tester.getCenter(find.text('overdue'));
+    final alpha = tester.getCenter(find.text('alpha'));
+    final drag2 = await tester.startGesture(overdue);
+    await tester.pump(const Duration(milliseconds: 50));
+    await drag2.moveBy(const Offset(0, -20));
+    await tester.pump();
+    await dragTo(tester, drag2, from: overdue, to: alpha - const Offset(0, 24));
+    await drag2.up();
+    await settle(tester);
+    expect(h.controller.sidebarTagIds.first, overdueTagId);
+
+    // A plain click still opens a view.
+    await tester.tap(find.text('Upcoming'));
+    await settle(tester);
+    expect(h.controller.destination, Destination.upcoming);
+    await finish(tester, h);
+  });
+
+  testWidgets('new tags join the end of a saved tag order', (tester) async {
+    final h = await pumpApp(
+      tester,
+      seed: (h) async {
+        final b = await h.tags.findOrCreate('beta', colorFor: (_) => 0);
+        await h.settings.setValue('sidebar.tagOrder', '$overdueTagId,${b.id}');
+      },
+    );
+    await pumpUntilDone(
+      tester,
+      h.tags.findOrCreate('alpha', colorFor: (_) => 0),
+    );
+    await settle(tester);
+    final names = [
+      for (final id in h.controller.sidebarTagIds)
+        id == overdueTagId ? 'overdue' : h.controller.tagsById[id]!.name,
+    ];
+    expect(names, ['overdue', 'beta', 'alpha']);
+    await finish(tester, h);
+  });
+
   testWidgets('French UI', (tester) async {
     final h = await pumpApp(tester, locale: const Locale('fr'));
     expect(find.text('Bonjour'), findsOneWidget);
@@ -678,4 +962,30 @@ Future<T> pumpUntilDone<T>(WidgetTester tester, Future<T> future) async {
   }
   if (!done) throw StateError('Timed out waiting for database work');
   return result;
+}
+
+/// The first text field inside the open dialog.
+Finder dialogField() => find
+    .descendant(of: find.byType(Dialog), matching: find.byType(TextField))
+    .first;
+
+/// A SelectableText (the export preview) containing [text].
+Finder selectable(String text) => find.byWidgetPredicate(
+  (w) => w is SelectableText && (w.data ?? '').contains(text),
+);
+
+/// Moves a drag gesture to [to] in small steps, one frame each, the way a
+/// real mouse drag reaches a reorderable list.
+Future<void> dragTo(
+  WidgetTester tester,
+  TestGesture gesture, {
+  required Offset from,
+  required Offset to,
+}) async {
+  const steps = 12;
+  final step = (to - from) / steps.toDouble();
+  for (var i = 0; i < steps; i++) {
+    await gesture.moveBy(step);
+    await tester.pump(const Duration(milliseconds: 16));
+  }
 }

@@ -7,6 +7,7 @@ import 'package:wayfinch/data/database.dart';
 import 'generated/schema.dart';
 import 'generated/schema_v1.dart' as v1;
 import 'generated/schema_v2.dart' as v2;
+import 'generated/schema_v3.dart' as v3;
 
 /// Migration tests: every schema version must upgrade cleanly from each
 /// earlier one, keep its data, and match the exported schema.
@@ -29,6 +30,37 @@ void main() {
         await verifier.migrateAndValidate(db, latest);
       });
     }
+  });
+
+  test('v2 -> v3 keeps items and settings, and adds import backups', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 2,
+      newVersion: 3,
+      createOld: v2.DatabaseAtV2.new,
+      createNew: v3.DatabaseAtV3.new,
+      openTestedDatabase: WayfinchDatabase.new,
+      createItems: (batch, oldDb) {
+        batch.insert(
+          oldDb.items,
+          v2.ItemsCompanion.insert(
+            id: 'a1b2',
+            type: 'task',
+            title: 'Still here',
+            createdAt: '2026-11-15T09:00:00.000',
+            updatedAt: '2026-11-15T09:00:00.000',
+          ),
+        );
+        batch.insert(
+          oldDb.settings,
+          v2.SettingsCompanion.insert(key: 'theme.mode', value: 'dark'),
+        );
+      },
+      validateItems: (newDb) async {
+        expect((await newDb.select(newDb.items).get()).single.id, 'a1b2');
+        expect((await newDb.select(newDb.settings).get()).single.value, 'dark');
+        expect(await newDb.select(newDb.importBackups).get(), isEmpty);
+      },
+    );
   });
 
   test('v1 -> v2 keeps items, tags and links, and adds settings', () async {

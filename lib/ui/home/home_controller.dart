@@ -3,10 +3,14 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../data/database.dart' show newId;
+import '../../data/import_repository.dart';
 import '../../data/items_repository.dart';
 import '../../data/settings_repository.dart';
 import '../../data/tags_repository.dart';
 import '../../domain/dates.dart';
+import '../../domain/exchange/exchange_export.dart';
+import '../../domain/exchange/exchange_model.dart';
+import '../../domain/exchange/import_plan.dart';
 import '../../domain/item.dart';
 import '../../domain/item_enums.dart';
 import '../../domain/item_rules.dart';
@@ -57,10 +61,15 @@ class HomeController extends ChangeNotifier {
     required this.items,
     required this.tags,
     required this.settings,
+    required this.imports,
     DateTime Function()? clock,
   }) : _clock = clock ?? DateTime.now {
     _now = _clock();
     _subscriptions = [
+      imports.watchAll().listen((backups) {
+        _backups = backups;
+        notifyListeners();
+      }),
       items.watchAll().listen(_onItems),
       tags.watchAll().listen((list) {
         _tags = {for (final t in list) t.id: t};
@@ -73,6 +82,18 @@ class HomeController extends ChangeNotifier {
       settings.watchAll().listen((values) {
         _bannerSnoozedUntil = DateTime.tryParse(values[_snoozeKey] ?? '');
         _overdueTagColor = int.tryParse(values[_overdueColorKey] ?? '');
+        _viewOrder = _parseViewOrder(values[_viewOrderKey]);
+        _tagOrder = (values[_tagOrderKey] ?? '')
+            .split(',')
+            .where((s) => s.isNotEmpty)
+            .toList();
+        _startView =
+            startViews.asNameMap()[values[_startViewKey]] ?? Destination.today;
+        // Open the chosen start view once, unless the user already moved.
+        if (!_startApplied) {
+          _startApplied = true;
+          if (!_navigated) _destination = _startView;
+        }
         notifyListeners();
       }),
     ];
@@ -87,6 +108,73 @@ class HomeController extends ChangeNotifier {
 
   /// Settings storage.
   final SettingsRepository settings;
+
+  /// AI import storage (apply, backups, undo).
+  final ImportRepository imports;
+
+  List<ImportBackupInfo> _backups = const [];
+
+  /// Stored backups, newest first (Settings › Import history).
+  List<ImportBackupInfo> get backups => _backups;
+
+  /// The latest backup if it was taken before an import (what "Undo last
+  /// import" undoes), else null.
+  ImportBackupInfo? get lastImport {
+    final latest = _backups.firstOrNull;
+    return latest?.reason == BackupReason.import ? latest : null;
+  }
+
+  /// Restores backup [id]; the current list is backed up first.
+  Future<bool> restoreBackup(int id) {
+    _selectedId = null;
+    return imports.restore(id);
+  }
+
+  static const _exportOptionsKey = 'export.options';
+  static const _instructionsKey = 'export.instructions';
+
+  /// Saved "What to include" choices.
+  Future<ExportOptions> loadExportOptions() async =>
+      ExportOptions.decode(await settings.getValue(_exportOptionsKey));
+
+  /// Saves "What to include".
+  Future<void> saveExportOptions(ExportOptions options) =>
+      settings.setValue(_exportOptionsKey, options.encode());
+
+  /// Saved "My instructions" (empty by default).
+  Future<String> loadInstructions() async =>
+      await settings.getValue(_instructionsKey) ?? '';
+
+  /// Saves "My instructions".
+  Future<void> saveInstructions(String text) =>
+      settings.setValue(_instructionsKey, text.isEmpty ? null : text);
+
+  /// The "My list" JSON for [options].
+  ExportResult exportList(ExportOptions options) =>
+      buildExportJson(_tree, _tags, options, _clock());
+
+  /// Counts for the export checkboxes.
+  ExportCounts get exportItemCounts => exportCounts(_tree, _clock());
+
+  /// Plans importing [doc] in [mode] against the current list.
+  ImportPlan planImportOf(ExchangeDocument doc, ImportMode mode) => planImport(
+    tree: _tree,
+    tagsById: _tags,
+    doc: doc,
+    mode: mode,
+    now: _clock(),
+    newId: newId,
+  );
+
+  /// Backs up the list and applies [plan]. Returns the number of changes.
+  Future<int> applyImport(ImportPlan plan, {Set<String> keep = const {}}) =>
+      imports.apply(plan, keep: keep, colorFor: tagColorFor);
+
+  /// Restores the list from before the latest import.
+  Future<bool> undoImport() async {
+    _selectedId = null;
+    return imports.undoLatest();
+  }
 
   final DateTime Function() _clock;
   late final List<StreamSubscription<Object?>> _subscriptions;
@@ -152,6 +240,7 @@ class HomeController extends ChangeNotifier {
 
   /// Opens the view for tag [tagId] (or [overdueTagId]).
   void openTag(String tagId) {
+    _navigated = true;
     _tagFilter = tagId;
     _destination = Destination.tag;
     notifyListeners();
@@ -216,8 +305,92 @@ class HomeController extends ChangeNotifier {
     await items.apply(_rules.rollEndedEvents(_tree));
   }
 
+  static const _startViewKey = 'app.startView';
+
+  /// Views the app can start in.
+  static const startViews = [
+    Destination.today,
+    Destination.upcoming,
+    Destination.all,
+    Destination.done,
+  ];
+
+  Destination _startView = Destination.today;
+  bool _startApplied = false;
+  bool _navigated = false;
+
+  static const _viewOrderKey = 'sidebar.viewOrder';
+  static const _tagOrderKey = 'sidebar.tagOrder';
+  List<Destination> _viewOrder = startViews;
+  List<String> _tagOrder = const [];
+
+  /// Sidebar views in the user's order (drag to reorder).
+  List<Destination> get viewOrder => _viewOrder;
+
+  static List<Destination> _parseViewOrder(String? stored) {
+    final names = (stored ?? '').split(',');
+    final byName = startViews.asNameMap();
+    final saved = [for (final n in names) ?byName[n]];
+    // Any view missing from the saved order goes at the end.
+    return [...saved, ...startViews.where((d) => !saved.contains(d))];
+  }
+
+  /// Sidebar tag ids in the user's order, including [overdueTagId]. Tags
+  /// that were never reordered follow, by name; the overdue tag defaults
+  /// to the end.
+  List<String> get sidebarTagIds {
+    final known = {..._tags.keys, overdueTagId};
+    final ordered = [
+      for (final id in _tagOrder)
+        if (known.contains(id)) id,
+    ];
+    final rest = _tags.values.where((t) => !ordered.contains(t.id)).toList()
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return [
+      ...ordered,
+      for (final t in rest) t.id,
+      if (!ordered.contains(overdueTagId)) overdueTagId,
+    ];
+  }
+
+  /// Moves the sidebar view at [oldIndex] to [newIndex] (its final spot).
+  Future<void> moveView(int oldIndex, int newIndex) {
+    _viewOrder = _moved(_viewOrder, oldIndex, newIndex);
+    notifyListeners();
+    return settings.setValue(
+      _viewOrderKey,
+      _viewOrder.map((d) => d.name).join(','),
+    );
+  }
+
+  /// Moves the sidebar tag at [oldIndex] to [newIndex] (its final spot).
+  Future<void> moveTag(int oldIndex, int newIndex) {
+    _tagOrder = _moved(sidebarTagIds, oldIndex, newIndex);
+    notifyListeners();
+    return settings.setValue(_tagOrderKey, _tagOrder.join(','));
+  }
+
+  /// [list] with the element at [oldIndex] moved to end up at [newIndex].
+  static List<T> _moved<T>(List<T> list, int oldIndex, int newIndex) {
+    final copy = [...list];
+    final item = copy.removeAt(oldIndex);
+    copy.insert(newIndex.clamp(0, copy.length), item);
+    return copy;
+  }
+
+  /// The view the app opens in (Settings › General).
+  Destination get startView => _startView;
+
+  /// Sets the view the app opens in.
+  Future<void> setStartView(Destination view) {
+    _startView = view;
+    notifyListeners();
+    return settings.setValue(_startViewKey, view.name);
+  }
+
   /// Opens [destination].
   void go(Destination destination) {
+    _navigated = true;
     _destination = destination;
     notifyListeners();
   }

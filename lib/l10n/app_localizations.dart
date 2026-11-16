@@ -1003,6 +1003,642 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Accent-colored text on panels'**
   String get contrastAccentTextOnPanel;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @exportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export for AI'**
+  String get exportTitle;
+
+  /// No description provided for @exportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste this into your AI with your request, then bring its reply back with Import.'**
+  String get exportSubtitle;
+
+  /// No description provided for @exportWhatToInclude.
+  ///
+  /// In en, this message translates to:
+  /// **'What to include'**
+  String get exportWhatToInclude;
+
+  /// No description provided for @exportOpenTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Open tasks'**
+  String get exportOpenTasks;
+
+  /// No description provided for @exportEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Events'**
+  String get exportEvents;
+
+  /// No description provided for @exportNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get exportNotes;
+
+  /// No description provided for @exportDoneItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Done items'**
+  String get exportDoneItems;
+
+  /// No description provided for @exportInstructionsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'My instructions'**
+  String get exportInstructionsHeading;
+
+  /// No description provided for @exportInstructionsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved for every export'**
+  String get exportInstructionsSaved;
+
+  /// No description provided for @exportInstructionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything your AI should always know. For example:\nBreak big tasks into steps under 2 hours.\nI\'m usually free after 4 PM on weekdays.\nTag school stuff with \"school\".'**
+  String get exportInstructionsHint;
+
+  /// No description provided for @exportPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'What gets copied'**
+  String get exportPreview;
+
+  /// No description provided for @exportRulesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Format rules · set by Wayfinch'**
+  String get exportRulesLabel;
+
+  /// No description provided for @exportRulesHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Format rules'**
+  String get exportRulesHeading;
+
+  /// No description provided for @exportListHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'My list'**
+  String get exportListHeading;
+
+  /// The locked format rules sent to the AI. Keep the JSON keys and values in English exactly as written. {skeleton} is the top-level JSON shape.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re helping me manage my Wayfinch to-do list. Today is {today}.\nReply with ONLY valid JSON in the Wayfinch format, with no other text:\n{skeleton}\nEach item has \"type\" (\"task\" or \"event\") and \"title\". It can also have \"notes\", \"priority\" (\"none\", \"low\", \"medium\" or \"high\"), \"tags\" (a list of names), \"recurrence\" (an iCal RRULE like \"FREQ=WEEKLY\", or null) and \"children\" (subtasks, same shape).\nTasks: \"due\" as \"YYYY-MM-DD\" or \"YYYY-MM-DDTHH:mm\" (or null), and \"done\": true when finished.\nEvents: \"start\" and \"end\" as \"YYYY-MM-DDTHH:mm\".\nKeep every existing \"id\" exactly as it is. New items: leave \"id\" out.\nDon\'t remove items unless I ask you to. Don\'t add any other fields.'**
+  String exportRules(String today, String skeleton);
+
+  /// No description provided for @exportSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{items, plural, =1{1 item} other{{items} items}} · about {words} words'**
+  String exportSummary(int items, int words);
+
+  /// No description provided for @exportSaveFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as file'**
+  String get exportSaveFile;
+
+  /// No description provided for @exportCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy to clipboard'**
+  String get exportCopy;
+
+  /// No description provided for @exportCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied! Paste it into your AI.'**
+  String get exportCopied;
+
+  /// No description provided for @exportSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved.'**
+  String get exportSaved;
+
+  /// No description provided for @importTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get importTitle;
+
+  /// No description provided for @importSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste your AI\'s whole reply. Extra text around the list is fine.'**
+  String get importSubtitle;
+
+  /// No description provided for @importPaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste from clipboard'**
+  String get importPaste;
+
+  /// No description provided for @importOpenFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Open file...'**
+  String get importOpenFile;
+
+  /// No description provided for @importReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review changes'**
+  String get importReview;
+
+  /// No description provided for @importUndoLast.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo last import ({when})'**
+  String importUndoLast(String when);
+
+  /// No description provided for @importUndoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo the last import?'**
+  String get importUndoTitle;
+
+  /// No description provided for @importUndoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your list goes back to exactly how it was before that import. Anything you changed since will be lost.'**
+  String get importUndoBody;
+
+  /// No description provided for @importUndoConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo import'**
+  String get importUndoConfirm;
+
+  /// No description provided for @importErrorsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This reply can\'t be imported yet:'**
+  String get importErrorsTitle;
+
+  /// No description provided for @importErrorsTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: ask your AI to fix these and reply with only the JSON.'**
+  String get importErrorsTip;
+
+  /// No description provided for @importWhereList.
+  ///
+  /// In en, this message translates to:
+  /// **'The list'**
+  String get importWhereList;
+
+  /// No description provided for @importWhereItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Item {n}'**
+  String importWhereItem(int n);
+
+  /// No description provided for @importWhereSubtask.
+  ///
+  /// In en, this message translates to:
+  /// **'subtask {n}'**
+  String importWhereSubtask(int n);
+
+  /// No description provided for @importErrorNoJson.
+  ///
+  /// In en, this message translates to:
+  /// **'No Wayfinch list found in this text. Paste the AI\'s whole reply.'**
+  String get importErrorNoJson;
+
+  /// No description provided for @importErrorInvalidJson.
+  ///
+  /// In en, this message translates to:
+  /// **'The JSON is broken: {detail}'**
+  String importErrorInvalidJson(String detail);
+
+  /// No description provided for @importErrorNotObject.
+  ///
+  /// In en, this message translates to:
+  /// **'The reply should be one JSON object (the Wayfinch list), not a list or plain text.'**
+  String get importErrorNotObject;
+
+  /// No description provided for @importErrorWrongFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'This isn\'t a Wayfinch list (\"format\" should be \"wayfinch\").'**
+  String get importErrorWrongFormat;
+
+  /// No description provided for @importErrorVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'This list was made for a different version of Wayfinch.'**
+  String get importErrorVersion;
+
+  /// No description provided for @importErrorMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'{where}: \"{field}\" is missing.'**
+  String importErrorMissing(String where, String field);
+
+  /// No description provided for @importErrorWrongType.
+  ///
+  /// In en, this message translates to:
+  /// **'{where}: \"{field}\" has the wrong kind of value.'**
+  String importErrorWrongType(String where, String field);
+
+  /// No description provided for @importErrorUnknownField.
+  ///
+  /// In en, this message translates to:
+  /// **'{where}: unknown field \"{field}\".'**
+  String importErrorUnknownField(String where, String field);
+
+  /// No description provided for @importErrorType.
+  ///
+  /// In en, this message translates to:
+  /// **'{where}: \"type\" must be \"task\" or \"event\".'**
+  String importErrorType(String where);
+
+  /// No description provided for @importErrorEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{where}: the title is empty.'**
+  String importErrorEmptyTitle(String where);
+
+  /// No description provided for @importErrorDate.
+  ///
+  /// In en, this message translates to:
+  /// **'{where}: \"{field}\" should look like 2026-12-05 or 2026-12-05T17:30.'**
+  String importErrorDate(String where, String field);
+
+  /// No description provided for @importErrorPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'{where}: \"priority\" must be none, low, medium or high.'**
+  String importErrorPriority(String where);
+
+  /// No description provided for @importErrorRecurrence.
+  ///
+  /// In en, this message translates to:
+  /// **'{where}: \"recurrence\" isn\'t a valid repeat rule.'**
+  String importErrorRecurrence(String where);
+
+  /// No description provided for @importErrorFieldForType.
+  ///
+  /// In en, this message translates to:
+  /// **'{where}: \"{field}\" doesn\'t belong on this kind of item.'**
+  String importErrorFieldForType(String where, String field);
+
+  /// No description provided for @importErrorEventTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'{where}: events need a \"{field}\".'**
+  String importErrorEventTimes(String where, String field);
+
+  /// No description provided for @importErrorEndBeforeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'{where}: the event ends before it starts.'**
+  String importErrorEndBeforeStart(String where);
+
+  /// No description provided for @importErrorDuplicateId.
+  ///
+  /// In en, this message translates to:
+  /// **'{where}: the id \"{id}\" is used twice.'**
+  String importErrorDuplicateId(String where, String id);
+
+  /// No description provided for @importReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review your import'**
+  String get importReviewTitle;
+
+  /// No description provided for @importValid.
+  ///
+  /// In en, this message translates to:
+  /// **'Wayfinch format · looks good'**
+  String get importValid;
+
+  /// No description provided for @importHow.
+  ///
+  /// In en, this message translates to:
+  /// **'How should this be imported?'**
+  String get importHow;
+
+  /// No description provided for @importAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to my list'**
+  String get importAdd;
+
+  /// No description provided for @importAddBody.
+  ///
+  /// In en, this message translates to:
+  /// **'New items get added. Nothing is changed or removed.'**
+  String get importAddBody;
+
+  /// No description provided for @importReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace my list'**
+  String get importReplace;
+
+  /// No description provided for @importReplaceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your list becomes your AI\'s version. History is kept for matching items, and done items stay.'**
+  String get importReplaceBody;
+
+  /// No description provided for @importNewCount.
+  ///
+  /// In en, this message translates to:
+  /// **'+ {count} new'**
+  String importNewCount(int count);
+
+  /// No description provided for @importChangedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} changed'**
+  String importChangedCount(int count);
+
+  /// No description provided for @importRemovedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} removed'**
+  String importRemovedCount(int count);
+
+  /// No description provided for @importDoneUntouched.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 done item unaffected} other{{count} done items unaffected}}'**
+  String importDoneUntouched(int count);
+
+  /// No description provided for @importRemovedWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Your AI removed 1 item. Make sure that\'s on purpose.} other{Your AI removed {count} items. Make sure that\'s on purpose.}}'**
+  String importRemovedWarning(int count);
+
+  /// No description provided for @importNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to change. Your list already matches.'**
+  String get importNothing;
+
+  /// No description provided for @importBadgeNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get importBadgeNew;
+
+  /// No description provided for @importBadgeChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed'**
+  String get importBadgeChanged;
+
+  /// No description provided for @importBadgeRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed'**
+  String get importBadgeRemoved;
+
+  /// No description provided for @importBadgeKept.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept'**
+  String get importBadgeKept;
+
+  /// No description provided for @importKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep this item'**
+  String get importKeep;
+
+  /// No description provided for @importRemoveAnyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove it'**
+  String get importRemoveAnyway;
+
+  /// No description provided for @importBackupNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current list is backed up first. You can undo this.'**
+  String get importBackupNote;
+
+  /// No description provided for @importBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get importBack;
+
+  /// No description provided for @importApply.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Nothing to import} =1{Import 1 change} other{Import {count} changes}}'**
+  String importApply(int count);
+
+  /// No description provided for @importDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Imported 1 change} other{Imported {count} changes}}'**
+  String importDone(int count);
+
+  /// No description provided for @importNoDate.
+  ///
+  /// In en, this message translates to:
+  /// **'no date'**
+  String get importNoDate;
+
+  /// No description provided for @importWasDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Was due {when}'**
+  String importWasDue(String when);
+
+  /// No description provided for @importRenamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Renamed from \"{from}\"'**
+  String importRenamed(String from);
+
+  /// No description provided for @importDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due {from} → {to}'**
+  String importDue(String from, String to);
+
+  /// No description provided for @importStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts {from} → {to}'**
+  String importStart(String from, String to);
+
+  /// No description provided for @importEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends {from} → {to}'**
+  String importEnd(String from, String to);
+
+  /// No description provided for @importPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority {from} → {to}'**
+  String importPriority(String from, String to);
+
+  /// No description provided for @importTagsAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags added: {names}'**
+  String importTagsAdded(String names);
+
+  /// No description provided for @importTagsRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags removed: {names}'**
+  String importTagsRemoved(String names);
+
+  /// No description provided for @importNotesChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes changed'**
+  String get importNotesChanged;
+
+  /// No description provided for @importRepeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat: {from} → {to}'**
+  String importRepeat(String from, String to);
+
+  /// No description provided for @importMarkedDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked done'**
+  String get importMarkedDone;
+
+  /// No description provided for @importReopened.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopened'**
+  String get importReopened;
+
+  /// No description provided for @importNowEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Now an event'**
+  String get importNowEvent;
+
+  /// No description provided for @importNowTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Now a task'**
+  String get importNowTask;
+
+  /// No description provided for @importMovedTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to the top level'**
+  String get importMovedTop;
+
+  /// No description provided for @importMovedUnder.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved under \"{parent}\"'**
+  String importMovedUnder(String parent);
+
+  /// No description provided for @settingsGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get settingsGeneral;
+
+  /// No description provided for @settingStartView.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Wayfinch in'**
+  String get settingStartView;
+
+  /// No description provided for @settingsImportHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Import history'**
+  String get settingsImportHistory;
+
+  /// No description provided for @settingsImportHistoryHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Your list is backed up before every import. Restore any of the last {count} backups; your current list is backed up first, so you can change your mind.'**
+  String settingsImportHistoryHelp(int count);
+
+  /// No description provided for @importHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No backups yet. One is made before each import.'**
+  String get importHistoryEmpty;
+
+  /// No description provided for @backupBeforeImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Before an import'**
+  String get backupBeforeImport;
+
+  /// No description provided for @backupBeforeImportMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Before an import ({mode})'**
+  String backupBeforeImportMode(String mode);
+
+  /// No description provided for @backupBeforeImportDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Before an import ({mode}, 1 change)} other{Before an import ({mode}, {count} changes)}}'**
+  String backupBeforeImportDetail(String mode, int count);
+
+  /// No description provided for @backupBeforeRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Before a restore'**
+  String get backupBeforeRestore;
+
+  /// No description provided for @backupItemCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}}'**
+  String backupItemCount(int count);
+
+  /// No description provided for @backupRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get backupRestore;
+
+  /// No description provided for @backupRestoreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore this backup?'**
+  String get backupRestoreTitle;
+
+  /// No description provided for @backupRestoreBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your list goes back to exactly how it was at that point. Your current list is backed up first, so you can undo this from Import history.'**
+  String get backupRestoreBody;
+
+  /// No description provided for @backupRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup restored.'**
+  String get backupRestored;
 }
 
 class _AppLocalizationsDelegate

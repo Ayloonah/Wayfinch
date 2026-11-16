@@ -141,3 +141,18 @@ class Settings extends Table {
   @override
   Set<Column<Object>> get primaryKey => {key};
 }
+
+/// Snapshots of the whole list taken right before each import, so "Undo
+/// import" can put it back. Stored in the database so they're encrypted
+/// with it. Added in schema version 3.
+@DataClassName('ImportBackupRow')
+class ImportBackups extends Table {
+  /// Row id (newest = highest).
+  IntColumn get id => integer().autoIncrement()();
+
+  /// When the backup was taken.
+  DateTimeColumn get createdAt => dateTime()();
+
+  /// The snapshot: items, tags, tag links and reminders, as JSON.
+  TextColumn get payload => text()();
+}

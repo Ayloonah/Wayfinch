@@ -4,15 +4,20 @@
 //
 //   flutter run -d windows -t dev/demo_main.dart
 
+import 'dart:io';
+
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:wayfinch/data/database.dart';
+import 'package:wayfinch/data/import_repository.dart';
 import 'package:wayfinch/data/items_repository.dart';
 import 'package:wayfinch/data/settings_repository.dart';
 import 'package:wayfinch/data/tags_repository.dart';
 import 'package:wayfinch/domain/dates.dart';
 import 'package:wayfinch/domain/item_enums.dart';
 import 'package:wayfinch/ui/app.dart';
+import 'package:wayfinch/ui/exchange/export_dialog.dart';
+import 'package:wayfinch/ui/exchange/import_dialog.dart';
 import 'package:wayfinch/ui/home/home_controller.dart';
 import 'package:wayfinch/ui/theme/appearance_controller.dart';
 import 'package:wayfinch/ui/theme/tokens.dart';
@@ -24,18 +29,22 @@ Future<void> main() async {
   final tags = TagsRepository(db);
   await _seed(items, tags);
   final settings = SettingsRepository(db);
-  // Optional look for screenshots, e.g.
+  // Optional look for screenshots, as environment variables or defines:
   //   --dart-define=DEMO_MODE=dark --dart-define=DEMO_ACCENT=honey
-  //   --dart-define=DEMO_VIEW=settings
-  const mode = String.fromEnvironment('DEMO_MODE');
-  const accent = String.fromEnvironment('DEMO_ACCENT');
-  const view = String.fromEnvironment('DEMO_VIEW');
+  //   --dart-define=DEMO_VIEW=settings   (or export / import)
+  final mode = _option('DEMO_MODE', const String.fromEnvironment('DEMO_MODE'));
+  final accent = _option(
+    'DEMO_ACCENT',
+    const String.fromEnvironment('DEMO_ACCENT'),
+  );
+  final view = _option('DEMO_VIEW', const String.fromEnvironment('DEMO_VIEW'));
   if (mode.isNotEmpty) await settings.setValue('theme.mode', mode);
   if (accent.isNotEmpty) await settings.setValue('theme.accent', accent);
   final controller = HomeController(
     items: items,
     tags: tags,
     settings: settings,
+    imports: ImportRepository(db, items),
   );
   final id = await _firstParent(items);
   controller.select(id);
@@ -44,6 +53,11 @@ Future<void> main() async {
     WayfinchApp(
       controller: controller,
       appearance: AppearanceController(settings),
+      onReady: switch (view) {
+        'export' => showExportDialog,
+        'import' => showImportDialog,
+        _ => null,
+      },
     ),
   );
 }
@@ -151,4 +165,11 @@ Future<void> _seed(ItemsRepository items, TagsRepository tags) async {
     priority: Priority.low,
     tagIds: [errands],
   );
+}
+
+/// A demo option from an environment variable (so one build can show any
+/// view), falling back to the `--dart-define` value.
+String _option(String name, String fromDefine) {
+  final env = Platform.environment[name];
+  return env == null || env.isEmpty ? fromDefine : env;
 }

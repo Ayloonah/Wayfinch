@@ -10,16 +10,31 @@ import 'home_controller.dart';
 /// The three-pane layout: sidebar | list | detail panel.
 class HomeScreen extends StatefulWidget {
   /// Creates the screen around [controller].
-  const HomeScreen({super.key, required this.controller});
+  const HomeScreen({super.key, required this.controller, this.onReady});
 
   /// App state and actions.
   final HomeController controller;
+
+  /// Called once, after the first frame with data, with a context inside
+  /// the screen (used by the dev demo to open a dialog for screenshots).
+  final void Function(BuildContext context)? onReady;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool _readyCalled = false;
+
+  void _maybeReady(BuildContext context) {
+    final onReady = widget.onReady;
+    if (onReady == null || _readyCalled) return;
+    _readyCalled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) onReady(context);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
             if (!controller.loaded) return const SizedBox.shrink();
             final view = controller.destination.view;
             final selected = controller.selected;
+            _maybeReady(context);
             return Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

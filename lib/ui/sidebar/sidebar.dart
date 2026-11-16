@@ -4,6 +4,8 @@ import '../../domain/views.dart';
 import '../../l10n/app_localizations.dart';
 import '../home/home_controller.dart';
 import '../theme/tokens.dart';
+import '../exchange/export_dialog.dart';
+import '../exchange/import_dialog.dart';
 import '../widgets/finch_logo.dart';
 import '../widgets/tag_color_dialog.dart';
 
@@ -29,34 +31,21 @@ class Sidebar extends StatelessWidget {
         children: [
           _Header(now: controller.now),
           const SizedBox(height: 24),
-          _NavButton(
-            destination: Destination.today,
-            icon: Icons.wb_sunny_outlined,
-            label: l10n.navToday,
-            trailing: '${controller.view(AppView.today).count}',
-          ),
-          _NavButton(
-            destination: Destination.upcoming,
-            icon: Icons.calendar_month_outlined,
-            label: l10n.navUpcoming,
-            trailing: '${controller.view(AppView.upcoming).count}',
-          ),
-          _NavButton(
-            destination: Destination.all,
-            icon: Icons.format_list_bulleted,
-            label: l10n.navAll,
-            trailing: '${controller.view(AppView.all).count}',
-          ),
-          _NavButton(
-            destination: Destination.done,
-            icon: Icons.check_circle_outline,
-            label: l10n.navDone,
-            trailing: l10n.doneThisWeekShort(
-              controller.view(AppView.done).doneThisWeek,
-            ),
-          ),
+          const _ViewList(),
           const SizedBox(height: 20),
           const Expanded(child: _TagList()),
+          const SizedBox(height: 12),
+          _ActionButton(
+            icon: Icons.auto_awesome_outlined,
+            label: l10n.exportTitle,
+            highlighted: true,
+            onTap: () => showExportDialog(context),
+          ),
+          _ActionButton(
+            icon: Icons.download_outlined,
+            label: l10n.importTitle,
+            onTap: () => showImportDialog(context),
+          ),
           _NavButton(
             destination: Destination.settings,
             icon: Icons.tune,
@@ -68,8 +57,85 @@ class Sidebar extends StatelessWidget {
   }
 }
 
-/// "TAGS": one row per tag with its open-item count, then the overdue auto
-/// tag. Scrolls when there are many.
+/// How a dragged sidebar row looks while it moves: lifted, with a shadow.
+///
+/// The dragged copy is drawn in an overlay above the home screen, outside
+/// [HomeScope], so it gets its own scope with the same [controller].
+ReorderItemProxyDecorator _dragProxy(HomeController controller) =>
+    (child, index, animation) => HomeScope(
+      controller: controller,
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: (context, child) => Material(
+          elevation: 6 * animation.value,
+          color: WayfinchColors.of(context).sidebar,
+          borderRadius: BorderRadius.circular(12),
+          child: child,
+        ),
+        child: child,
+      ),
+    );
+
+/// Today / Upcoming / All / Done, in the user's order. Click to open,
+/// click and drag to move.
+class _ViewList extends StatelessWidget {
+  const _ViewList();
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = HomeScope.of(context);
+    final l10n = AppLocalizations.of(context);
+    final views = controller.viewOrder;
+    (IconData, String, String) meta(Destination d) => switch (d) {
+      Destination.today => (
+        Icons.wb_sunny_outlined,
+        l10n.navToday,
+        '${controller.view(AppView.today).count}',
+      ),
+      Destination.upcoming => (
+        Icons.calendar_month_outlined,
+        l10n.navUpcoming,
+        '${controller.view(AppView.upcoming).count}',
+      ),
+      Destination.all => (
+        Icons.format_list_bulleted,
+        l10n.navAll,
+        '${controller.view(AppView.all).count}',
+      ),
+      _ => (
+        Icons.check_circle_outline,
+        l10n.navDone,
+        l10n.doneThisWeekShort(controller.view(AppView.done).doneThisWeek),
+      ),
+    };
+    return ReorderableListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      buildDefaultDragHandles: false,
+      proxyDecorator: _dragProxy(controller),
+      onReorderItem: controller.moveView,
+      children: [
+        for (final (i, view) in views.indexed)
+          ReorderableDragStartListener(
+            key: ValueKey(view),
+            index: i,
+            child: Builder(
+              builder: (context) {
+                final (icon, label, trailing) = meta(view);
+                return _NavButton(
+                  destination: view,
+                  icon: icon,
+                  label: label,
+                  trailing: trailing,
+                );
+              },
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 /// The overdue auto tag's dot: the user's color, or the theme's warning
 /// color by default.
 Color _overdueDot(HomeController controller, WayfinchColors colors) {
@@ -77,6 +143,9 @@ Color _overdueDot(HomeController controller, WayfinchColors colors) {
   return picked == null ? colors.warningText : colors.tagColor(picked);
 }
 
+/// "TAGS": every tag plus the overdue auto tag, in the user's order, with
+/// open-item counts. Click to open, click and drag to move. Scrolls when
+/// there are many.
 class _TagList extends StatelessWidget {
   const _TagList();
 
@@ -85,12 +154,36 @@ class _TagList extends StatelessWidget {
     final controller = HomeScope.of(context);
     final colors = WayfinchColors.of(context);
     final l10n = AppLocalizations.of(context);
-    final tags = controller.tagsById.values.toList()
-      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    final ids = controller.sidebarTagIds;
     final selectedTag = controller.destination == Destination.tag
         ? controller.tagFilter
         : null;
-    return ListView(
+
+    Widget row(String id) {
+      if (id == overdueTagId) {
+        return _TagRow(
+          label: l10n.overdueTag,
+          dot: _overdueDot(controller, colors),
+          count: controller.overdueCount,
+          selected: selectedTag == overdueTagId,
+          auto: true,
+          onTap: () => controller.openTag(overdueTagId),
+          onChangeColor: () => changeOverdueTagColor(context),
+        );
+      }
+      final tag = controller.tagsById[id]!;
+      return _TagRow(
+        label: tag.name,
+        dot: colors.tagColor(tag.color),
+        count: controller.tagCount(tag.id),
+        selected: selectedTag == tag.id,
+        onTap: () => controller.openTag(tag.id),
+        onChangeColor: () => changeTagColor(context, tag),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
@@ -104,23 +197,20 @@ class _TagList extends StatelessWidget {
             ),
           ),
         ),
-        for (final tag in tags)
-          _TagRow(
-            label: tag.name,
-            dot: colors.tagColor(tag.color),
-            count: controller.tagCount(tag.id),
-            selected: selectedTag == tag.id,
-            onTap: () => controller.openTag(tag.id),
-            onChangeColor: () => changeTagColor(context, tag),
+        Expanded(
+          child: ReorderableListView(
+            buildDefaultDragHandles: false,
+            proxyDecorator: _dragProxy(controller),
+            onReorderItem: controller.moveTag,
+            children: [
+              for (final (i, id) in ids.indexed)
+                ReorderableDragStartListener(
+                  key: ValueKey(id),
+                  index: i,
+                  child: row(id),
+                ),
+            ],
           ),
-        _TagRow(
-          label: l10n.overdueTag,
-          dot: _overdueDot(controller, colors),
-          count: controller.overdueCount,
-          selected: selectedTag == overdueTagId,
-          auto: true,
-          onTap: () => controller.openTag(overdueTagId),
-          onChangeColor: () => changeOverdueTagColor(context),
         ),
       ],
     );
@@ -373,4 +463,91 @@ class _NavButton extends StatelessWidget {
       ),
     );
   }
+}
+
+/// "Export for AI" (dashed accent outline, as in the mockup) and "Import".
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.highlighted = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool highlighted;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = WayfinchColors.of(context);
+    final color = highlighted ? colors.accentText : colors.text;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: CustomPaint(
+        foregroundPainter: highlighted ? _DashedBorder(color) : null,
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: onTap,
+            child: SizedBox(
+              height: 44,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  children: [
+                    Icon(icon, size: 20, color: color),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        label,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: color,
+                          fontWeight: highlighted
+                              ? FontWeight.w800
+                              : FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DashedBorder extends CustomPainter {
+  _DashedBorder(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rrect = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      const Radius.circular(12),
+    ).deflate(0.75);
+    final path = Path()..addRRect(rrect);
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    for (final metric in path.computeMetrics()) {
+      for (var d = 0.0; d < metric.length; d += 9) {
+        canvas.drawPath(metric.extractPath(d, d + 5), paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedBorder old) => old.color != color;
 }
