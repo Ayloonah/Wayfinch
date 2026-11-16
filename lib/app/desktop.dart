@@ -41,13 +41,17 @@ class Desktop with TrayListener, WindowListener {
 
   /// Sets everything up before the app runs. A second launch hands over to
   /// the running copy (which shows its window) and exits.
+  ///
+  /// [instanceName] identifies "one running copy"; dev entry points pass
+  /// their own so they never hand over to an installed Wayfinch.
   static Future<Desktop> start(
     List<String> args, {
     bool manageStartup = true,
+    String instanceName = 'wayfinch_single_instance',
   }) async {
     await WindowsSingleInstance.ensureSingleInstance(
       args,
-      'wayfinch_single_instance',
+      instanceName,
       onSecondWindow: (_) => _instance?.showWindow(),
     );
     await windowManager.ensureInitialized();

@@ -15,7 +15,13 @@ Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   // Tray, close-to-tray and toasts as in the real app, but never touching
   // the "start with Windows" registry entry.
-  final desktop = await Desktop.start(args, manageStartup: false);
+  // Its own single-instance name, so it runs next to an installed Wayfinch
+  // instead of handing over to it.
+  final desktop = await Desktop.start(
+    args,
+    manageStartup: false,
+    instanceName: 'wayfinch_fresh_dev',
+  );
   final dir = Directory.systemTemp.createTempSync('wayfinch_fresh_');
   final session = AppSession(dataDir: dir);
   desktop.attach(session);

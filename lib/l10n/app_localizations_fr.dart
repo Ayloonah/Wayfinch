@@ -579,11 +579,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get close => 'Fermer';
 
   @override
-  String get exportTitle => 'Exporter pour l’IA';
+  String get exportTitle => 'Exporter';
 
   @override
   String get exportSubtitle =>
-      'Colle ceci dans ton IA avec ta demande, puis ramène sa réponse avec Importer.';
+      'Enregistre ou copie ta liste, ou tes événements en fichier de calendrier.';
 
   @override
   String get exportWhatToInclude => 'Quoi inclure';
@@ -601,16 +601,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get exportDoneItems => 'Éléments faits';
 
   @override
-  String get exportInstructionsHeading => 'Mes instructions';
-
-  @override
-  String get exportInstructionsSaved => 'Gardées pour chaque export';
-
-  @override
-  String get exportInstructionsHint =>
-      'Ce que ton IA devrait toujours savoir. Par exemple :\nDécoupe les grosses tâches en étapes de moins de 2 heures.\nJe suis souvent libre après 16 h en semaine.\nMets l’étiquette « école » sur les trucs d’école.';
-
-  @override
   String get exportPreview => 'Ce qui est copié';
 
   @override
@@ -621,6 +611,37 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get exportListHeading => 'Ma liste';
+
+  @override
+  String get exportFormatList => 'Ta liste (JSON)';
+
+  @override
+  String get exportFormatCalendar => 'Calendrier (.ics)';
+
+  @override
+  String get exportCalendarOptions => 'Options';
+
+  @override
+  String exportItemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count éléments',
+      one: '1 élément',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String exportCalendarCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count événements de calendrier',
+      one: '1 événement de calendrier',
+    );
+    return '$_temp0';
+  }
 
   @override
   String exportRules(String today, String skeleton) {
@@ -653,6 +674,19 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get exportSaved => 'Enregistré.';
+
+  @override
+  String get exportCopiedPlain => 'Copié.';
+
+  @override
+  String get aiMessageButton => 'Message pour ton IA';
+
+  @override
+  String get aiMessageTitle => 'Message pour ton IA';
+
+  @override
+  String get aiMessageSubtitle =>
+      'Copie ceci et colle-le dans ton IA, puis dis-lui ce que tu veux (« planifie mon projet final »). Ramène sa réponse ici.';
 
   @override
   String get importTitle => 'Importer';
@@ -1049,7 +1083,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get navHelp => 'Aide';
+  String get navHelp => 'Instructions pour l’IA';
 
   @override
   String get onboardingStart => 'C’est parti';
@@ -1061,41 +1095,47 @@ class AppLocalizationsFr extends AppLocalizations {
   String get onboardingBack => 'Retour';
 
   @override
-  String get onboardingSkip => 'Plus tard';
+  String get onboardingFinish => 'Allons-y !';
 
   @override
-  String get onboardingFinish => 'Allons-y !';
+  String get onboardingSkipSetup => 'Passer la configuration';
 
   @override
   String get onboardingWelcomeTitle => 'Salut, moi c’est Wayfinch !';
 
   @override
   String get onboardingWelcomeBody =>
-      'Une liste de tâches tranquille qui marche avec ton IA. Demande à ton IA de planifier quelque chose, ramène le plan ici, et je t’aide à suivre tout ça. La configuration prend environ une minute.';
+      'Une liste de tâches tranquille qui fonctionne avec ton IA. Demande à ton IA de planifier quelque chose, ramène le plan ici, et je t’aide à le suivre. La configuration prend environ une minute, ou passe-la et commence tout de suite.';
 
   @override
-  String get onboardingNameTitle => 'Comment je t’appelle ?';
+  String get onboardingAboutTitle => 'Un peu sur toi';
 
   @override
-  String get onboardingNameBody =>
-      'Juste ton prénom. Il sert aux salutations et reste sur cet ordinateur.';
+  String get onboardingAboutBody =>
+      'Les deux sont facultatifs, et tu peux les changer plus tard dans les Paramètres.';
+
+  @override
+  String get onboardingNameOptional => 'Prénom (facultatif)';
+
+  @override
+  String get onboardingPasswordOptional => 'Mot de passe (facultatif)';
 
   @override
   String get onboardingNameLabel => 'Prénom';
 
   @override
-  String get onboardingPasswordTitle => 'Un mot de passe ?';
-
-  @override
   String get onboardingPasswordBody =>
-      'C’est facultatif. Avec un mot de passe, ta liste est chiffrée sur le disque : personne ne peut lire le fichier sans lui. Tu peux en ajouter ou en retirer un plus tard dans les Paramètres.';
+      'Avec un mot de passe, ta liste est chiffrée sur le disque : personne ne peut lire le fichier sans lui.';
 
   @override
   String get onboardingVibeTitle => 'Choisis ton style';
 
   @override
-  String get onboardingVibeBody =>
-      'Clair ou sombre, et une couleur que tu aimes. Tu pourras créer ton propre thème plus tard dans les Paramètres.';
+  String get onboardingLookTitle => 'À ton goût';
+
+  @override
+  String get onboardingLookBody =>
+      'Choisis un style et comment Wayfinch te rappelle les choses. Tu peux tout changer plus tard dans les Paramètres.';
 
   @override
   String get onboardingPreviewLabel => 'Aperçu de l’app dans ces couleurs';
@@ -1113,10 +1153,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get onboardingNotifTitle => 'Rappels';
 
   @override
-  String get onboardingNotifBody =>
-      'De petits rappels avant les échéances. Tu peux tout changer plus tard, et élément par élément.';
-
-  @override
   String get onboardingAiTitle => 'Comment l’utiliser avec ton IA';
 
   @override
@@ -1124,11 +1160,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'Wayfinch ne parle à aucune IA tout seul : c’est toi qui décides de ce qui est partagé.';
 
   @override
-  String get aiLoopStep1Title => '1. Exporter pour l’IA';
+  String get aiLoopStep1Title => '1. Copie le message';
 
   @override
   String get aiLoopStep1Body =>
-      'Copie ta liste avec les règles du format et tes instructions.';
+      'Dans Importer, « Message pour ton IA » copie les règles du format et ta liste.';
 
   @override
   String get aiLoopStep2Title => '2. Demande à ton IA';
@@ -1357,6 +1393,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Si tu oublies ton mot de passe, ce code ouvre ta liste à sa place. Il n’est affiché qu’une fois : garde-le en lieu sûr (un gestionnaire de mots de passe, ou imprimé et rangé).';
 
   @override
+  String get recoveryAdvice =>
+      'Si tu perds à la fois ton mot de passe et ce code, ta liste ne peut pas être récupérée. Tu peux changer ton mot de passe ou obtenir un nouveau code à tout moment dans Paramètres › Profil.';
+
+  @override
   String get recoveryCopy => 'Copier';
 
   @override
@@ -1492,100 +1532,32 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ouvre cette étape (ou « Premiers pas ») et clique sur « + Étiquette » dans ses détails. Choisis une étiquette ou tapes-en une nouvelle.';
 
   @override
-  String get tutorialExport => 'Exporte ta liste pour l’IA';
+  String get tutorialExport => 'Obtiens le message pour ton IA';
 
   @override
   String get tutorialExportNotes =>
-      'Clique sur « Exporter pour l’IA » dans la barre latérale, puis Copier. Colle-la dans ton IA avec une demande, et ramène la réponse avec Importer.';
-
-  @override
-  String get helpSearch => 'Chercher dans l’aide';
-
-  @override
-  String get helpNoResults => 'Rien trouvé. Essaie un autre mot.';
-
-  @override
-  String get helpBasicsTitle => 'Se repérer';
-
-  @override
-  String get helpBasicsBody =>
-      'Aujourd’hui montre d’abord les éléments en retard, puis ce qui est dû ou prévu aujourd’hui. À venir montre les 7 prochains jours, Tout montre l’ensemble en arbre, et Fait garde ce que tu as terminé, avec ton total de la semaine. Fais glisser les vues et les étiquettes dans la barre latérale pour les réordonner, et choisis la vue d’ouverture dans Paramètres › Général.\n\nL’ajout rapide comprend les dates, heures, étiquettes et priorités, en français et en anglais : essaie « Rapport vendredi 17h #école !haute » ou « Lab report Friday 5pm #school !high ».';
-
-  @override
-  String get helpItemsTitle => 'Tâches et événements';
-
-  @override
-  String get helpItemsBody =>
-      'Les tâches ont une échéance (avec une heure facultative) ; les événements vont d’un début à une fin. Clique sur un élément pour le modifier dans le panneau de droite ; tout s’enregistre au fur et à mesure. La date et l’heure se choisissent ensemble. Supprimer affiche Annuler pendant 10 secondes.';
-
-  @override
-  String get helpNestingTitle => 'Sous-tâches';
-
-  @override
-  String get helpNestingBody =>
-      'Découpe autant que tu veux : « + Ajouter une sous-tâche » dans les détails, ou le + sur une ligne. Certaines situations demandent d’abord : repousser la date d’un parent quand une sous-tâche la dépasse, fermer les sous-tâches ouvertes quand un parent est fait, et marquer un parent comme fait quand sa dernière sous-tâche l’est. Coche « ne plus demander » pour retenir ta réponse ; change-la quand tu veux dans Paramètres › Confirmations.';
-
-  @override
-  String get helpRecurringTitle => 'Éléments répétés';
-
-  @override
-  String get helpRecurringBody =>
-      'Utilise Répéter dans les détails : tous les jours, en semaine, chaque semaine, toutes les 2 semaines, chaque mois ou chaque année. Terminer une tâche répétée crée la suivante, avec de nouvelles copies de ses sous-tâches. Les événements répétés avancent tout seuls une fois finis.';
-
-  @override
-  String get helpTagsTitle => 'Étiquettes et retards';
-
-  @override
-  String get helpTagsBody =>
-      'Ajoute des étiquettes depuis les détails d’un élément. Clique sur une étiquette dans la barre latérale pour voir tout ce qui la porte. Change sa couleur avec son point dans la barre latérale, par clic droit, ou depuis le menu d’une pastille. Les éléments en retard reçoivent l’étiquette automatique « en retard », et une bannière propose de les revoir ou de la masquer jusqu’à demain.';
+      'Clique sur Importer dans la barre latérale, puis « Message pour ton IA » et Copier. Colle-le dans ton IA avec une demande, et ramène la réponse avec Importer.';
 
   @override
   String get helpAiTitle => 'Utiliser Wayfinch avec ton IA';
 
   @override
   String get helpAiBody =>
-      'Exporter pour l’IA copie ta liste avec les règles du format ci-dessous et tes propres instructions. Colle-la dans n’importe quelle IA avec une demande (« planifie mon projet final »), puis colle la réponse dans Importer. Tu vois ce qui est nouveau, modifié et supprimé avant que quoi que ce soit change. Ajouter ajoute seulement les nouveaux éléments ; Remplacer aligne ta liste sur la version de l’IA (les éléments faits ne sont jamais supprimés). Ta liste est sauvegardée d’abord, et tu peux annuler.';
+      'Wayfinch ne parle à aucune IA tout seul : tu gardes le contrôle de ce qui est partagé. Dans Importer, clique sur « Message pour ton IA » : il copie les règles du format ci-dessous et ta liste. Colle-le dans n’importe quelle IA avec ta propre demande (« planifie mon projet final »), puis colle la réponse de l’IA dans Importer. Tu verras ce qui est nouveau, modifié et retiré avant que quoi que ce soit se passe. Ajouter ajoute seulement les nouveaux éléments ; Remplacer aligne ta liste sur la version de l’IA (les éléments faits ne sont jamais retirés). Ta liste est sauvegardée avant, et tu peux annuler.';
 
   @override
-  String get helpNotificationsTitle => 'Rappels et notifications';
+  String get helpAiRulesTitle => 'Les règles du format';
 
   @override
-  String get helpNotificationsBody =>
-      'Les tâches avec une heure te le rappellent 1 heure avant, les événements 15 minutes avant ; change ces réglages dans Paramètres › Notifications, ou choisis les rappels d’un élément dans ses détails. Les tâches sans heure apparaissent plutôt dans le résumé du matin. Reporte un rappel depuis sa notification. Pendant les heures calmes, les rappels attendent la fin. Fermer la fenêtre garde Wayfinch dans la zone de notification pour que les rappels arrivent ; clic droit sur l’icône pour quitter.';
-
-  @override
-  String get helpThemesTitle => 'Thèmes';
-
-  @override
-  String get helpThemesBody =>
-      'Paramètres › Apparence propose clair, sombre ou système, cinq couleurs d’accent et un créateur de thème qui te prévient quand le texte risque d’être difficile à lire.';
-
-  @override
-  String get helpPasswordTitle => 'Mot de passe et code de récupération';
-
-  @override
-  String get helpPasswordBody =>
-      'Un mot de passe chiffre ta liste sur cet ordinateur. Quand tu en choisis un, tu reçois un code de récupération : il ouvre ta liste si tu oublies le mot de passe. Si tu perds les deux, ta liste est perdue. Gère les deux dans Paramètres › Profil.';
-
-  @override
-  String get helpBackupsTitle => 'Sauvegardes et annulation';
-
-  @override
-  String get helpBackupsBody =>
-      'Wayfinch sauvegarde toute ta liste une fois par jour et garde les 7 dernières sauvegardes, dans un dossier que tu peux changer dans Paramètres › Sauvegardes (choisis OneDrive ou une clé USB pour garder une copie hors de cet ordinateur). Avec un mot de passe, les sauvegardes sont chiffrées aussi. Ta liste est aussi sauvegardée avant chaque import : annule le dernier depuis la fenêtre Importer, ou restaure l’un des 10 derniers depuis Paramètres › Historique des imports. Restaurer sauvegarde d’abord ta liste actuelle, donc tu peux changer d’avis.';
+  String get helpAiRulesBody =>
+      'Voici ce qu’on dit à ton IA sur le format. Wayfinch l’ajoute au message pour toi.';
 
   @override
   String get importCalendar => 'Importer un calendrier (.ics)...';
 
   @override
-  String get calendarExportTitle => 'Exporter vers un calendrier';
-
-  @override
   String get calendarExportBody =>
       'Enregistre tes événements dans un fichier .ics, puis importe-le dans ton app de calendrier.';
-
-  @override
-  String get calendarSaveFile => 'Enregistrer le .ics';
 
   @override
   String get calendarExportTasks => 'Exporter aussi les tâches';
@@ -1593,9 +1565,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get calendarExportTasksBody =>
       'Les tâches ouvertes deviennent de courts événements à leur échéance (des calendriers comme Google ignorent les tâches).';
-
-  @override
-  String get calendarExported => 'Fichier de calendrier enregistré.';
 
   @override
   String get calendarNotIcs =>
@@ -1740,11 +1709,4 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get backupsOldPasswordBody =>
       'Cette sauvegarde a été faite avec un autre mot de passe. Entre le mot de passe (ou le code de récupération) que tu avais à ce moment-là.';
-
-  @override
-  String get helpCalendarTitle => 'Calendriers (.ics)';
-
-  @override
-  String get helpCalendarBody =>
-      'Pour importer des événements, utilise Importer et choisis « Importer un calendrier (.ics) » (ou ouvre simplement un fichier .ics exporté de Google, Outlook ou Apple Calendar) : les événements déjà terminés sont laissés de côté sauf si tu les inclus, et réimporter le même calendrier met les événements à jour au lieu de les ajouter deux fois. Rien n’est jamais retiré, et tu peux annuler. Les événements d’une journée entière arrivent comme des événements de minuit à minuit. « Exporter vers un calendrier » dans la barre latérale enregistre tes événements dans un fichier .ics ; active « Exporter aussi les tâches » pour inclure les tâches ouvertes comme de courts événements à leur échéance.';
 }

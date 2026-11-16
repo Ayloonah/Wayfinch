@@ -23,15 +23,15 @@ Get **`WayfinchSetup-1.0.0.exe`** from the [latest release](https://github.com/A
 ## How the AI loop works
 
 ```
-+--------------+   Export for AI   +---------------+
-|   Wayfinch   | ----------------> |    Your AI    |
-|  (your list) |                   | (any chatbot) |
-|              | <---------------- |               |
-+--------------+      Import       +---------------+
++--------------+  Message for your AI  +---------------+
+|   Wayfinch   | --------------------> |    Your AI    |
+|  (your list) |                       | (any chatbot) |
+|              | <-------------------- |               |
++--------------+        Import         +---------------+
 ```
- 
-1. **Export for AI.** Wayfinch builds one copyable block: the format rules your AI needs to follow, your own instructions ("break tasks into steps under 2 hours"), and your list.
-2. **Ask your AI.** Paste it into ChatGPT, Claude, Gemini or whatever you use, along with your request ("I have a final project due Dec 5, plan it out").
+
+1. **Copy the message.** In Import, "Message for your AI" copies one block: the format rules your AI needs to follow, and your list.
+2. **Ask your AI.** Paste it into ChatGPT, Claude, Gemini or whatever you use, along with your own request ("I have a final project due Dec 5, plan it out").
 3. **Import.** Paste the reply back. Wayfinch shows you what's new, changed and removed, then you choose to **add** it to your list or **replace** your list.
 
 Your current list is always backed up before a replace, and you can undo any import.
@@ -117,8 +117,8 @@ This builds the app and writes `build/installer/WayfinchSetup-<version>.exe` (th
 - [x] **Foundation:** project setup, encrypted database, data model, EN/FR
 - [x] **Core list:** views, nesting, completing items, recurrence, quick add
 - [x] **Look and feel:** themes, accents, custom theme builder, tags, overdue banner
-- [x] **AI loop:** Export for AI, Import with preview, add vs replace, undo
-- [x] **Onboarding and Help:** setup, optional password with encryption and recovery code, tutorial, Help
+- [x] **AI loop:** message for your AI, Import with preview, add vs replace, undo
+- [x] **Onboarding and AI instructions:** setup (skippable), optional password with encryption and recovery code, tutorial, AI instructions
 - [x] **Notifications:** reminders, daily digest, quiet hours, snooze, tray
 - [x] **Calendar and backups:** `.ics` import/export, daily backups
 - [x] **Windows installer**

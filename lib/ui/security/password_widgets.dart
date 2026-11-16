@@ -11,10 +11,19 @@ import '../theme/tokens.dart';
 /// match and aren't empty, else null.
 class PasswordFields extends StatefulWidget {
   /// Creates the fields.
-  const PasswordFields({super.key, required this.onChanged, this.onSubmit});
+  const PasswordFields({
+    super.key,
+    required this.onChanged,
+    this.onSubmit,
+    this.autofocus = true,
+  });
 
   /// Called with the valid password, or null.
   final ValueChanged<String?> onChanged;
+
+  /// Whether the first field takes focus (off when another field comes
+  /// first, as in setup).
+  final bool autofocus;
 
   /// Called when Enter is pressed in the confirmation field.
   final VoidCallback? onSubmit;
@@ -52,7 +61,7 @@ class _PasswordFieldsState extends State<PasswordFields> {
         TextField(
           controller: _password,
           obscureText: !_show,
-          autofocus: true,
+          autofocus: widget.autofocus,
           onChanged: (_) => _changed(),
           decoration: InputDecoration(
             labelText: l10n.passwordLabel,
@@ -140,10 +149,14 @@ class RecoveryCodeView extends StatelessWidget {
     final colors = WayfinchColors.of(context);
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.maybeOf(context);
+    // min: in a dialog, only as tall as the content.
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(l10n.recoveryExplain),
+        const SizedBox(height: 8),
+        Text(l10n.recoveryAdvice, style: TextStyle(color: colors.muted)),
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),

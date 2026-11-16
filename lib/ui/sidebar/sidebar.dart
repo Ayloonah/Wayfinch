@@ -4,7 +4,6 @@ import '../../domain/views.dart';
 import '../../l10n/app_localizations.dart';
 import '../home/home_controller.dart';
 import '../theme/tokens.dart';
-import '../exchange/calendar_dialog.dart';
 import '../exchange/export_dialog.dart';
 import '../exchange/import_dialog.dart';
 import '../widgets/finch_logo.dart';
@@ -37,24 +36,20 @@ class Sidebar extends StatelessWidget {
           const Expanded(child: _TagList()),
           const SizedBox(height: 12),
           _ActionButton(
-            icon: Icons.auto_awesome_outlined,
+            icon: Icons.upload_outlined,
             label: l10n.exportTitle,
-            highlighted: true,
             onTap: () => showExportDialog(context),
           ),
+          // Import is where the AI loop starts and ends, so it stands out.
           _ActionButton(
             icon: Icons.download_outlined,
             label: l10n.importTitle,
+            highlighted: true,
             onTap: () => showImportDialog(context),
-          ),
-          _ActionButton(
-            icon: Icons.event_outlined,
-            label: l10n.calendarExportTitle,
-            onTap: () => showCalendarExportDialog(context),
           ),
           _NavButton(
             destination: Destination.help,
-            icon: Icons.help_outline,
+            icon: Icons.auto_awesome_outlined,
             label: l10n.navHelp,
           ),
           _NavButton(
@@ -488,7 +483,7 @@ class _NavButton extends StatelessWidget {
   }
 }
 
-/// "Export for AI" (dashed accent outline, as in the mockup) and "Import".
+/// "Export" and "Import" (Import gets the dashed accent outline).
 class _ActionButton extends StatelessWidget {
   const _ActionButton({
     required this.icon,

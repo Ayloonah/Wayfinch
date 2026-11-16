@@ -31,7 +31,8 @@ Future<void> main() async {
   final settings = SettingsRepository(db);
   // Optional look for screenshots, as environment variables or defines:
   //   --dart-define=DEMO_MODE=dark --dart-define=DEMO_ACCENT=honey
-  //   --dart-define=DEMO_VIEW=settings   (or export / import)
+  //   --dart-define=DEMO_VIEW=settings   (or ai / export / import /
+  //   aimessage)
   final mode = _option('DEMO_MODE', const String.fromEnvironment('DEMO_MODE'));
   final accent = _option(
     'DEMO_ACCENT',
@@ -49,6 +50,7 @@ Future<void> main() async {
   final id = await _firstParent(items);
   controller.select(id);
   if (view == 'settings') controller.go(Destination.settings);
+  if (view == 'ai') controller.go(Destination.help);
   runApp(
     WayfinchApp(
       controller: controller,
@@ -56,6 +58,7 @@ Future<void> main() async {
       onReady: switch (view) {
         'export' => showExportDialog,
         'import' => showImportDialog,
+        'aimessage' => showAiMessageDialog,
         _ => null,
       },
     ),

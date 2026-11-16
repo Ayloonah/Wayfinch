@@ -15,6 +15,7 @@ import 'package:wayfinch/domain/item_enums.dart';
 import 'package:wayfinch/domain/views.dart' show overdueTagId;
 import 'package:wayfinch/domain/item_rules.dart';
 import 'package:wayfinch/ui/app.dart';
+import 'package:wayfinch/ui/exchange/export_dialog.dart' show AiMessageDialog;
 import 'package:wayfinch/ui/home/home_controller.dart';
 import 'package:wayfinch/ui/theme/appearance_controller.dart';
 import 'package:wayfinch/ui/theme/tokens.dart';
@@ -645,9 +646,8 @@ void main() {
     await finish(tester, h);
   });
 
-  testWidgets('Export for AI shows rules, instructions and the list; copies', (
-    tester,
-  ) async {
+  /// Captures what gets copied to the clipboard; returns a getter.
+  String? Function() captureClipboard(WidgetTester tester) {
     String? copied;
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -658,36 +658,64 @@ void main() {
         return null;
       },
     );
-    final h = await pumpApp(
-      tester,
-      seed: (h) async {
-        await h.items.create(type: ItemType.task, title: 'Write report');
-        final done = await h.items.create(type: ItemType.task, title: 'Old');
-        await h.items.save(done.copyWith(doneAt: _now));
-      },
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
     );
-    await tester.tap(find.text('Export for AI'));
+    return () => copied;
+  }
+
+  Future<_Harness> pumpWithReport(WidgetTester tester) => pumpApp(
+    tester,
+    seed: (h) async {
+      await h.items.create(type: ItemType.task, title: 'Write report');
+      final done = await h.items.create(type: ItemType.task, title: 'Old');
+      await h.items.save(done.copyWith(doneAt: _now));
+      await h.items.create(
+        type: ItemType.event,
+        title: 'Team meeting',
+        start: DateTime(2026, 11, 16, 9),
+        end: DateTime(2026, 11, 16, 10),
+      );
+    },
+  );
+
+  testWidgets('Message for your AI (in Import) shows the rules and the list', (
+    tester,
+  ) async {
+    final copied = captureClipboard(tester);
+    final h = await pumpWithReport(tester);
+    await tester.tap(find.text('Import'));
+    await settle(tester);
+    await tester.tap(find.text('Message for your AI'));
     await settle(tester);
     expect(find.text('WHAT GETS COPIED'), findsOneWidget);
     expect(selectable('"title": "Write report"'), findsOneWidget);
     expect(selectable('"title": "Old"'), findsNothing);
     expect(selectable('Today is 2026-11-15'), findsOneWidget);
+    // No instructions field any more: the user writes their own request.
+    expect(find.text('My instructions'), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byType(AiMessageDialog),
+        matching: find.byType(TextField),
+      ),
+      findsNothing,
+    );
 
-    // Include done items: they show up, and the choice is saved.
+    // Include done items: they show up, and the choice is saved (shared
+    // with Export).
     await tester.tap(find.textContaining('Done items', findRichText: true));
     await settle(tester);
     expect(selectable('"title": "Old"'), findsOneWidget);
 
-    await tester.enterText(dialogField(), 'Break things into small steps.');
-    await tester.pump();
     await tester.tap(find.text('Copy to clipboard'));
     await settle(tester);
-    expect(copied, contains('## Format rules'));
-    expect(
-      copied,
-      contains('## My instructions\nBreak things into small steps.'),
-    );
-    expect(copied, contains('"format": "wayfinch"'));
+    expect(copied(), startsWith('## Format rules'));
+    expect(copied(), contains('## My list\n{'));
+    expect(copied(), isNot(contains('My instructions')));
     expect(find.text('Copied! Paste it into your AI.'), findsOneWidget);
     expect(
       ExportOptions.decode(
@@ -695,11 +723,39 @@ void main() {
       ).doneItems,
       isTrue,
     );
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-      SystemChannels.platform,
-      null,
-    );
-    await tester.pump(const Duration(seconds: 1)); // flush instruction save
+    await finish(tester, h);
+  });
+
+  testWidgets('Export: the list as JSON (data only), or a calendar file', (
+    tester,
+  ) async {
+    final copied = captureClipboard(tester);
+    final h = await pumpWithReport(tester);
+    await tester.tap(find.text('Export'));
+    await settle(tester);
+    expect(find.text('Your list (JSON)'), findsOneWidget);
+    expect(selectable('"title": "Write report"'), findsOneWidget);
+    // Only the data: no format rules.
+    expect(selectable('Today is'), findsNothing);
+    expect(find.text('2 items'), findsOneWidget);
+
+    await tester.tap(find.text('Copy to clipboard'));
+    await settle(tester);
+    expect(copied(), startsWith('{'));
+    expect(copied(), contains('"format": "wayfinch"'));
+    expect(find.text('Copied.'), findsOneWidget);
+
+    // The calendar format: events as .ics, tasks optional.
+    await tester.tap(find.text('Calendar (.ics)'));
+    await settle(tester);
+    expect(selectable('BEGIN:VCALENDAR'), findsOneWidget);
+    expect(selectable('SUMMARY:Team meeting'), findsOneWidget);
+    expect(selectable('SUMMARY:Write report'), findsNothing);
+    expect(find.text('1 calendar event'), findsOneWidget);
+    await tester.tap(find.text('Also export tasks'));
+    await settle(tester);
+    // "Write report" has no due date, so it still stays out.
+    expect(selectable('SUMMARY:Write report'), findsNothing);
     await finish(tester, h);
   });
 
@@ -864,22 +920,28 @@ void main() {
         await h.tags.findOrCreate('beta', colorFor: (_) => 0xFF0C8599);
       },
     );
-    expect(h.controller.viewOrder.first, Destination.today);
+    // Default order: All, Today, Upcoming, Done.
+    expect(h.controller.viewOrder, [
+      Destination.all,
+      Destination.today,
+      Destination.upcoming,
+      Destination.done,
+    ]);
 
-    // Drag "All" (3rd) above "Today" (1st).
+    // Drag "Upcoming" (3rd) above "All" (1st).
+    final upcoming = tester.getCenter(find.text('Upcoming'));
     final all = tester.getCenter(find.text('All'));
-    final today = tester.getCenter(find.text('Today').first);
-    final drag = await tester.startGesture(all);
+    final drag = await tester.startGesture(upcoming);
     await tester.pump(const Duration(milliseconds: 50));
     await drag.moveBy(const Offset(0, -20));
     await tester.pump();
-    await dragTo(tester, drag, from: all, to: today - const Offset(0, 24));
+    await dragTo(tester, drag, from: upcoming, to: all - const Offset(0, 24));
     await drag.up();
     await settle(tester);
-    expect(h.controller.viewOrder.first, Destination.all);
+    expect(h.controller.viewOrder.first, Destination.upcoming);
     expect(
       await pumpUntilDone(tester, h.settings.getValue('sidebar.viewOrder')),
-      startsWith('all,'),
+      startsWith('upcoming,'),
     );
 
     // Tags: drag "overdue" (last) above "alpha" (first).
@@ -896,9 +958,9 @@ void main() {
     expect(h.controller.sidebarTagIds.first, overdueTagId);
 
     // A plain click still opens a view.
-    await tester.tap(find.text('Upcoming'));
+    await tester.tap(find.text('Done').first);
     await settle(tester);
-    expect(h.controller.destination, Destination.upcoming);
+    expect(h.controller.destination, Destination.done);
     await finish(tester, h);
   });
 
@@ -991,15 +1053,14 @@ void main() {
     await finish(tester, h);
   });
 
-  testWidgets('Export to a calendar opens from the sidebar; Import offers '
-      'calendars', (tester) async {
+  testWidgets('the sidebar has Export, Import and AI instructions; Import '
+      'offers calendars', (tester) async {
     final h = await pumpApp(tester);
-    await tester.tap(find.text('Export to a calendar'));
-    await settle(tester);
-    expect(find.text('Also export tasks'), findsOneWidget);
-    expect(find.text('Save .ics file'), findsOneWidget);
-    await tester.tap(find.byTooltip('Close'));
-    await settle(tester);
+    expect(find.text('Export'), findsOneWidget);
+    expect(find.text('AI instructions'), findsOneWidget);
+    expect(find.text('Export to a calendar'), findsNothing);
+    expect(find.text('Export for AI'), findsNothing);
+    expect(find.text('Help'), findsNothing);
 
     await tester.tap(find.text('Import'));
     await settle(tester);
