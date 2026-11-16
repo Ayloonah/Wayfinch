@@ -1561,5 +1561,172 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpBackupsBody =>
-      'Your list is backed up before every import. Undo the last import from the Import dialog, or restore any of the last 10 backups from Settings › Import history. Restoring backs up your current list first, so you can change your mind.';
+      'Wayfinch backs up your whole list once a day and keeps the last 7, in a folder you can change in Settings › Backups (pick OneDrive or a USB drive to keep a copy off this computer). With a password, backups are encrypted too. Your list is also backed up before every import: undo the last one from the Import dialog, or restore any of the last 10 from Settings › Import history. Restoring backs up your current list first, so you can change your mind.';
+
+  @override
+  String get importCalendar => 'Import a calendar (.ics)...';
+
+  @override
+  String get calendarExportTitle => 'Export to a calendar';
+
+  @override
+  String get calendarExportBody =>
+      'Save your events as an .ics file, then import it in your calendar app.';
+
+  @override
+  String get calendarSaveFile => 'Save .ics file';
+
+  @override
+  String get calendarExportTasks => 'Also export tasks';
+
+  @override
+  String get calendarExportTasksBody =>
+      'Open tasks become short events at their due time (calendars like Google ignore to-dos).';
+
+  @override
+  String get calendarExported => 'Calendar file saved.';
+
+  @override
+  String get calendarNotIcs =>
+      'That doesn\'t look like a calendar (.ics) file.';
+
+  @override
+  String get calendarNoEvents => 'There are no events in that file.';
+
+  @override
+  String get calendarUntitled => 'Untitled event';
+
+  @override
+  String get calendarReviewTitle => 'Review the calendar import';
+
+  @override
+  String calendarReviewSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count events in the file',
+      one: '1 event in the file',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String calendarUpdatedCount(int count) {
+    return '$count updated';
+  }
+
+  @override
+  String calendarUnchanged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count already up to date',
+      one: '1 already up to date',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get calendarIncludePast => 'Include past events';
+
+  @override
+  String calendarPastLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count events that already ended are left out.',
+      one: '1 event that already ended is left out.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String calendarSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cancelled or one-off changed events were skipped.',
+      one: '1 cancelled or one-off changed event was skipped.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get calendarNothing =>
+      'Everything in this file is already in your list.';
+
+  @override
+  String calendarImported(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Imported $count events',
+      one: 'Imported 1 event',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupBeforeCalendar(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Before a calendar import ($count changes)',
+      one: 'Before a calendar import (1 change)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsBackups => 'Backups';
+
+  @override
+  String settingsBackupsHelp(int count) {
+    return 'Wayfinch backs up your whole list once a day and keeps the last $count. With a password, backups are encrypted too.';
+  }
+
+  @override
+  String get backupsFolder => 'Backup folder';
+
+  @override
+  String get backupsChangeFolder => 'Change';
+
+  @override
+  String get backupsUseDefault => 'Use default';
+
+  @override
+  String get backupsNow => 'Back up now';
+
+  @override
+  String get backupsDone => 'Backed up.';
+
+  @override
+  String get backupsFailed =>
+      'Couldn\'t back up to that folder. Try another one.';
+
+  @override
+  String get backupsEmpty =>
+      'No daily backups yet. The first one happens today.';
+
+  @override
+  String backupsSize(int kb) {
+    return '$kb KB';
+  }
+
+  @override
+  String get backupsUnreadable => 'That backup couldn\'t be opened.';
+
+  @override
+  String get backupsOldPasswordTitle => 'Password for this backup';
+
+  @override
+  String get backupsOldPasswordBody =>
+      'This backup was made with a different password. Enter the password (or recovery code) you had back then.';
+
+  @override
+  String get helpCalendarTitle => 'Calendars (.ics)';
+
+  @override
+  String get helpCalendarBody =>
+      'To bring in events, use Import and pick \"Import a calendar (.ics)\" (or just open an .ics file exported from Google, Outlook or Apple Calendar): events that already ended are left out unless you include them, and importing the same calendar again updates events instead of adding them twice. Nothing is ever removed, and you can undo. All-day events come in as events from midnight to midnight. \"Export to calendar\" in the sidebar saves your events as an .ics file; turn on \"Also export tasks\" to include open tasks as short events at their due time.';
 }

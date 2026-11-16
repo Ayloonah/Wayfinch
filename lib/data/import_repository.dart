@@ -16,7 +16,25 @@ enum BackupReason {
 
   /// Right before restoring an older backup (so the restore can be undone).
   restore,
+
+  /// Right before a calendar (.ics) import.
+  calendar,
 }
+
+/// The whole list in [db] (items, tags, tag links, reminders) as the JSON
+/// snapshot that backups store and [ImportRepository.restoreSnapshot] reads.
+Future<String> snapshotDatabase(
+  WayfinchDatabase db, {
+  Map<String, Object> meta = const {},
+}) async => jsonEncode({
+  'meta': meta,
+  'items': [for (final r in await db.select(db.items).get()) r.toJson()],
+  'tags': [for (final r in await db.select(db.tags).get()) r.toJson()],
+  'itemTags': [for (final r in await db.select(db.itemTags).get()) r.toJson()],
+  'reminders': [
+    for (final r in await db.select(db.reminders).get()) r.toJson(),
+  ],
+});
 
 /// Info about one stored backup.
 class ImportBackupInfo {
@@ -88,6 +106,34 @@ class ImportRepository {
         deletedIds: changes.deletedIds,
       );
       return changes.total;
+    });
+  }
+
+  /// Backs up the list, then applies a calendar import's [changes] (adds and
+  /// updates only) in one transaction. Returns the number of items touched.
+  Future<int> applyCalendar(ImportChanges changes) {
+    return _db.transaction(() async {
+      await _backup(
+        _clock(),
+        reason: BackupReason.calendar,
+        changes: changes.total,
+      );
+      await _items.applyInTransaction(
+        updated: changes.updated,
+        created: changes.created,
+        deletedIds: changes.deletedIds,
+      );
+      return changes.total;
+    });
+  }
+
+  /// Replaces the list with [payload] (a snapshot, e.g. read from a daily
+  /// backup file). The current list is backed up first, so this can be
+  /// undone from Import history.
+  Future<void> restoreSnapshot(String payload) {
+    return _db.transaction(() async {
+      await _backup(_clock(), reason: BackupReason.restore);
+      await _restore(payload);
     });
   }
 
@@ -210,17 +256,8 @@ class ImportRepository {
     }
   }
 
-  Future<String> _snapshot(Map<String, Object> meta) async => jsonEncode({
-    'meta': meta,
-    'items': [for (final r in await _db.select(_db.items).get()) r.toJson()],
-    'tags': [for (final r in await _db.select(_db.tags).get()) r.toJson()],
-    'itemTags': [
-      for (final r in await _db.select(_db.itemTags).get()) r.toJson(),
-    ],
-    'reminders': [
-      for (final r in await _db.select(_db.reminders).get()) r.toJson(),
-    ],
-  });
+  Future<String> _snapshot(Map<String, Object> meta) =>
+      snapshotDatabase(_db, meta: meta);
 
   Future<void> _restore(String payload) async {
     final data = jsonDecode(payload) as Map<String, dynamic>;

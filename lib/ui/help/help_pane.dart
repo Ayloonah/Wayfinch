@@ -77,6 +77,11 @@ List<HelpSection> helpSections(BuildContext context, DateTime now) {
       code: formatRules(context, now),
     ),
     HelpSection(
+      icon: Icons.event_outlined,
+      title: l10n.helpCalendarTitle,
+      body: l10n.helpCalendarBody,
+    ),
+    HelpSection(
       icon: Icons.notifications_none,
       title: l10n.helpNotificationsTitle,
       body: l10n.helpNotificationsBody,

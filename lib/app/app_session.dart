@@ -5,6 +5,7 @@ import 'dart:isolate';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 
+import '../data/daily_backups.dart';
 import '../data/database.dart';
 import '../data/database_opener.dart';
 import '../data/encryption/db_conversion.dart';
@@ -57,6 +58,7 @@ class AppSession extends ChangeNotifier {
     BackgroundRunner? runInBackground,
     this.clock,
     DatabaseOpener? openDatabase,
+    this.enableDailyBackups = true,
   }) : _run = runInBackground ?? _isolateRunner,
        _openDb = openDatabase ?? _defaultOpener;
 
@@ -68,6 +70,9 @@ class AppSession extends ChangeNotifier {
 
   /// Clock for timestamps (injectable for tests).
   final DateTime Function()? clock;
+
+  /// Whether to run daily backups (off in tests that don't need them).
+  final bool enableDailyBackups;
   final BackgroundRunner _run;
   final DatabaseOpener _openDb;
 
@@ -83,6 +88,7 @@ class AppSession extends ChangeNotifier {
   SessionPhase get phase => _phase;
 
   WayfinchDatabase? _db;
+  DailyBackupService? _backups;
   HomeController? _home;
   AppearanceController? _appearance;
   bool _needsOnboarding = false;
@@ -258,13 +264,30 @@ class AppSession extends ChangeNotifier {
     final clock = this.clock;
     final items = ItemsRepository(db, clock: clock);
     final settings = SettingsRepository(db);
+    final imports = ImportRepository(db, items, clock: clock);
     _db = db;
     _needsOnboarding = await settings.getValue(onboardingDoneKey) != 'true';
+    final backups = enableDailyBackups
+        ? DailyBackupService(
+            db: db,
+            settings: settings,
+            imports: imports,
+            defaultFolder: Directory(p.join(dataDir.path, 'backups')),
+            key: key,
+            vaultFile: key == null ? null : vaultFile,
+            shouldRun: () => !_needsOnboarding,
+            runInBackground: _run,
+            clock: clock,
+          )
+        : null;
+    _backups = backups;
+    backups?.start();
     _home = HomeController(
       items: items,
       tags: TagsRepository(db, clock: clock),
       settings: settings,
-      imports: ImportRepository(db, items, clock: clock),
+      imports: imports,
+      dailyBackups: backups,
       clock: clock,
     );
     if (returnTo != null) _home!.go(returnTo);
@@ -277,6 +300,8 @@ class AppSession extends ChangeNotifier {
     final home = _home;
     final appearance = _appearance;
     final db = _db;
+    final backups = _backups;
+    _backups = null;
     _home = null;
     _appearance = null;
     _db = null;
@@ -286,6 +311,7 @@ class AppSession extends ChangeNotifier {
     await Future<void>.delayed(Duration.zero);
     home?.dispose();
     appearance?.dispose();
+    backups?.dispose();
     await db?.close();
   }
 
@@ -294,6 +320,7 @@ class AppSession extends ChangeNotifier {
 
   @override
   void dispose() {
+    _backups?.dispose();
     _home?.dispose();
     _appearance?.dispose();
     _db?.close();

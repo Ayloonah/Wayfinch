@@ -172,15 +172,25 @@ The exchange format is JSON, validated strictly against a schema. Only the forma
    - The Import dialog also offers "Undo last import" (with a confirmation, since it also drops anything changed since). Undo restores the snapshot exactly.
    - **Settings › Import history** lists every stored backup (when, Add or Replace, how many changes, how many items) with a **Restore** button.
      - Restoring first backs up the current list as a "Before a restore" entry, so a restore can be undone the same way.
-     - This is separate from the daily auto-backups, which come with milestone 7.
+     - This is separate from the daily auto-backups (see "Security, profile and backups").
 
 ## Calendar import and export
 
 Calendars come in and go out as .ics files. Direct Google/Outlook sync waits for the online phase.
 
+- **Where:** importing goes through the regular Import dialog: an "Import a calendar (.ics)..." button, and any .ics file opened (or pasted) there goes to the calendar review. Exporting has its own sidebar action, "Export to a calendar", under Export for AI and Import (so nothing in the sidebar looks like it opens a calendar view).
 - **Import:** .ics events become Wayfinch events, recurring ones included (RRULE). Only events from today forward by default, with an option to include past ones.
-- **Re-import:** events are matched by their ICS UID, so they update instead of duplicating. The same preview screen as AI import shows counts ("8 new, 2 updated").
-- **Export:** events go out as VEVENTs. A toggle (off by default) also exports tasks as short events at their due time, since Google Calendar ignores VTODO.
+  - A repeating event counts as past only once its rule has run out.
+  - All-day events come in as events from midnight to midnight (a 3-day trip runs from day 1 00:00 to day 4 00:00).
+  - Times in UTC or a named zone (IANA names, or the Windows names Outlook writes) are converted to local time; times without a zone are taken as local.
+  - Not carried over: exceptions to repeating events (EXDATE, single changed occurrences), cancelled events, to-dos (VTODO) and alarms. The preview says how many were skipped.
+  - Imported events are top-level, with source `ics-import` and their ICS UID.
+- **Re-import:** events are matched by their ICS UID, so they update instead of duplicating. The preview (same rows as AI import) shows counts ("8 new, 2 updated", "3 already up to date").
+  - A match updates title, start, end, notes and repeat rule; tags, priority, reminders and subtasks stay. Nothing is ever removed.
+  - A file exported by Wayfinch matches the original items too (its UIDs are `<id>@wayfinch`).
+  - The list is backed up first (it shows in Import history as "Before a calendar import"), and "Imported N events · Undo" stays up for 15 seconds.
+- **Export:** events go out as VEVENTs, saved as an .ics file. A toggle (off by default) also exports open tasks as short (30-minute) events at their due time, or all-day for date-only tasks, since Google Calendar ignores VTODO.
+  - Midnight-to-midnight events export as all-day events. One-off times are written in UTC; repeating events in local "floating" time so "every Monday at 9" stays at 9 across daylight-saving changes.
 
 ## Security, profile and backups
 
@@ -195,6 +205,10 @@ The password is optional, but when it's set the database is encrypted. A forgott
 - **Unlock screen** at start when a password is set: password, or "Use your recovery code". After a recovery-code unlock, the app asks for a new password (or "Keep my old password").
 - **Recovery code:** shown once after the password is set, with an "I saved it" checkbox before continuing (Copy and Save as file offered). It can also unlock the database.
 - **Daily auto-backups:** the last 7 are kept, in a folder the user picks. Backups are encrypted the same way as the database.
+  - By default they go to a `backups` folder next to the database (in AppData). Settings › Backups shows the folder with "Change" (and "Use default"), "Back up now", and the stored backups with Restore.
+  - One backup per day (`wayfinch-backup-YYYY-MM-DD.db`), checked at startup and every 30 minutes; "Back up now" replaces today's. Not during setup.
+  - Each is a full copy of the database encrypted with the same key (plain when no password is set). With a password, a copy of that day's key vault sits next to it, so a backup made before a password change can still be opened with the password (or recovery code) from back then; Restore asks for it when needed.
+  - Restoring replaces the list and first backs up the current one in Import history, so it can be undone.
 - **Pre-import backup:** taken before every Replace import, separate from the daily ones.
 - Windows Hello unlock is a possible later convenience.
 
@@ -218,7 +232,7 @@ Then a short **"How to use it with your AI"** screen showing the copy → paste 
 - **Skippable:** marking the parent done closes the whole tutorial (through the usual parent-completion prompt). No nagging.
 - **Not replayable.** The Help page covers everything instead: basics, nesting, AI import/export (including the exact format rules the AI receives), calendar, themes, backups.
   - Help is a sidebar destination with searchable, expandable sections; searching opens the matches.
-  - It has a Notifications section; the calendar section comes with that feature.
+  - It has Calendar and Notifications sections.
 
 ## Notifications
 

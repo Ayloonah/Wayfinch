@@ -4,6 +4,7 @@ import '../../domain/views.dart';
 import '../../l10n/app_localizations.dart';
 import '../home/home_controller.dart';
 import '../theme/tokens.dart';
+import '../exchange/calendar_dialog.dart';
 import '../exchange/export_dialog.dart';
 import '../exchange/import_dialog.dart';
 import '../widgets/finch_logo.dart';
@@ -45,6 +46,11 @@ class Sidebar extends StatelessWidget {
             icon: Icons.download_outlined,
             label: l10n.importTitle,
             onTap: () => showImportDialog(context),
+          ),
+          _ActionButton(
+            icon: Icons.event_outlined,
+            label: l10n.calendarExportTitle,
+            onTap: () => showCalendarExportDialog(context),
           ),
           _NavButton(
             destination: Destination.help,
