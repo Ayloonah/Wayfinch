@@ -1,0 +1,8 @@
+{
+  "@@locale": "fr",
+  "appTitle": "Wayfinch",
+  "homeGreeting": "Salut !",
+  "homeGettingReady": "Wayfinch se prépare. Tes listes vont bientôt vivre ici.",
+  "homeItemCount": "{count, plural, =0{Aucun élément pour l’instant} =1{1 élément} other{{count} éléments}}",
+  "databaseOpenError": "Oups, Wayfinch n’arrive pas à ouvrir tes données. Essaie de redémarrer l’app."
+}

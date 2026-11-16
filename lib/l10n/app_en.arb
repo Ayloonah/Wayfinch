@@ -1,0 +1,28 @@
+{
+  "@@locale": "en",
+  "appTitle": "Wayfinch",
+  "@appTitle": {
+    "description": "The app name, shown in the window title."
+  },
+  "homeGreeting": "Hi there!",
+  "@homeGreeting": {
+    "description": "Friendly greeting on the placeholder home screen."
+  },
+  "homeGettingReady": "Wayfinch is getting ready. Your lists will live here soon.",
+  "@homeGettingReady": {
+    "description": "Placeholder home screen message while the app is being built."
+  },
+  "homeItemCount": "{count, plural, =0{No items yet} =1{1 item} other{{count} items}}",
+  "@homeItemCount": {
+    "description": "How many items are stored in the database.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "databaseOpenError": "Hmm, Wayfinch couldn't open your data. Try restarting the app.",
+  "@databaseOpenError": {
+    "description": "Shown when the local database fails to open."
+  }
+}
