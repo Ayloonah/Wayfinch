@@ -8,11 +8,11 @@ Ask your AI to break a big project into steps, and Wayfinch turns its answer int
 
 Offline-first, private by default, and designed to keep you on track without stressing you out.
 
-> ✅ **Version 1.0 for Windows is here.** Everything planned for the first version is in: the to-do list with subtasks and recurrence, the full AI loop, themes, an optional password that encrypts your data, reminders, calendar import/export and daily backups. See [what's next](#coming-in-future-versions).
+> ✅ **Version 1.1 for Windows is here.** Everything planned for the first version is in: the to-do list with subtasks and recurrence, the full AI loop, themes, an optional password that encrypts your data, reminders, calendar import/export and daily backups. 1.1 makes the AI loop simpler and setup skippable. See [what's next](#coming-in-future-versions).
 
 ## Download
 
-Get **`WayfinchSetup-1.0.0.exe`** from the [latest release](https://github.com/Ayloonah/Wayfinch/releases/latest) and run it. It works on Windows 10 and 11 (64-bit).
+Get **`WayfinchSetup-<version>.exe`** from the [latest release](https://github.com/Ayloonah/Wayfinch/releases/latest) and run it. It works on Windows 10 and 11 (64-bit). Installing a new version over an older one updates it and keeps your list.
 
 - It installs just for you by default (no admin needed), or for everyone on the PC if you prefer.
 - The installer isn't code-signed yet, so Windows may say "Windows protected your PC". Click **More info**, then **Run anyway**.
@@ -112,7 +112,7 @@ This builds the app and writes `build/installer/WayfinchSetup-<version>.exe` (th
 
 ## Roadmap
 
-### In version 1.0
+### In version 1.x
 
 - [x] **Foundation:** project setup, encrypted database, data model, EN/FR
 - [x] **Core list:** views, nesting, completing items, recurrence, quick add
