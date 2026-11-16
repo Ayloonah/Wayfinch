@@ -1207,6 +1207,130 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get reminderAtTime => 'À l’heure prévue';
+
+  @override
+  String reminderDefault(String label) {
+    return '$label (par défaut)';
+  }
+
+  @override
+  String get reminderRemove => 'Retirer le rappel';
+
+  @override
+  String get reminderAdd => 'Ajouter un rappel';
+
+  @override
+  String get reminderAddButton => '+ Rappel';
+
+  @override
+  String get reminderUseDefault => 'Par défaut';
+
+  @override
+  String get remindersDateOnly =>
+      'Ajoute une heure pour avoir un rappel. Les tâches sans heure sont dans le résumé du matin.';
+
+  @override
+  String get remindersNeedDate => 'Ajoute d’abord une date.';
+
+  @override
+  String get fieldReminders => 'Rappels';
+
+  @override
+  String get settingsNotifications => 'Notifications';
+
+  @override
+  String get notifQuietHours => 'Heures calmes';
+
+  @override
+  String get notifQuietHoursBody =>
+      'Les rappels attendent la fin des heures calmes.';
+
+  @override
+  String get notifQuietFromTo => 'De / à';
+
+  @override
+  String get notifSnooze10 => '10 min';
+
+  @override
+  String get notifSnooze60 => '1 heure';
+
+  @override
+  String get notifSnoozeTomorrow => 'Demain';
+
+  @override
+  String notifDueAt(String time) {
+    return 'À faire pour $time';
+  }
+
+  @override
+  String notifDueOn(String day, String time) {
+    return 'À faire pour $day à $time';
+  }
+
+  @override
+  String notifStartsAt(String time) {
+    return 'Commence à $time';
+  }
+
+  @override
+  String notifStartsOn(String day, String time) {
+    return 'Commence $day à $time';
+  }
+
+  @override
+  String digestTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count choses aujourd’hui',
+      one: '1 chose aujourd’hui',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String digestTitleName(String name, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Bonjour $name ! $count choses aujourd’hui',
+      one: 'Bonjour $name ! 1 chose aujourd’hui',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String digestMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+ $count autres',
+      one: '+ 1 autre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get digestNothing => 'Journée libre';
+
+  @override
+  String get digestNothingBody => 'Rien de prévu aujourd’hui. Profites-en !';
+
+  @override
+  String get trayOpen => 'Ouvrir Wayfinch';
+
+  @override
+  String get trayQuit => 'Quitter';
+
+  @override
+  String get trayHintTitle => 'Wayfinch est toujours là';
+
+  @override
+  String get trayHintBody =>
+      'Il reste dans la zone de notification pour que les rappels arrivent. Clic droit sur l’icône pour quitter.';
+
+  @override
   String get passwordLabel => 'Mot de passe';
 
   @override
@@ -1421,6 +1545,13 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get helpAiBody =>
       'Exporter pour l’IA copie ta liste avec les règles du format ci-dessous et tes propres instructions. Colle-la dans n’importe quelle IA avec une demande (« planifie mon projet final »), puis colle la réponse dans Importer. Tu vois ce qui est nouveau, modifié et supprimé avant que quoi que ce soit change. Ajouter ajoute seulement les nouveaux éléments ; Remplacer aligne ta liste sur la version de l’IA (les éléments faits ne sont jamais supprimés). Ta liste est sauvegardée d’abord, et tu peux annuler.';
+
+  @override
+  String get helpNotificationsTitle => 'Rappels et notifications';
+
+  @override
+  String get helpNotificationsBody =>
+      'Les tâches avec une heure te le rappellent 1 heure avant, les événements 15 minutes avant ; change ces réglages dans Paramètres › Notifications, ou choisis les rappels d’un élément dans ses détails. Les tâches sans heure apparaissent plutôt dans le résumé du matin. Reporte un rappel depuis sa notification. Pendant les heures calmes, les rappels attendent la fin. Fermer la fenêtre garde Wayfinch dans la zone de notification pour que les rappels arrivent ; clic droit sur l’icône pour quitter.';
 
   @override
   String get helpThemesTitle => 'Thèmes';

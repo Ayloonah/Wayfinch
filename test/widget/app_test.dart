@@ -193,6 +193,7 @@ void main() {
 
     await tester.tap(find.text('Settings'));
     await settle(tester);
+    await scrollSettingsTo(tester, find.text('Leave the parent open'));
     expect(find.text('Leave the parent open'), findsOneWidget);
     expect(find.text('Ask me'), findsNWidgets(2));
 
@@ -538,6 +539,7 @@ void main() {
     final h = await pumpApp(tester);
     await tester.tap(find.text('Settings'));
     await settle(tester);
+    await scrollSettingsTo(tester, find.text('Import history'));
     final dropdowns = find.byType(DropdownButton<PromptAnswer?>);
     expect(dropdowns, findsNWidgets(3));
     final rights = [
@@ -833,6 +835,7 @@ void main() {
 
     await tester.tap(find.text('Settings'));
     await settle(tester);
+    await scrollSettingsTo(tester, find.text('Import history'));
     expect(find.text('Import history'), findsOneWidget);
     expect(
       find.textContaining('Before an import (Replace my list, 2 changes)'),
@@ -917,6 +920,74 @@ void main() {
         id == overdueTagId ? 'overdue' : h.controller.tagsById[id]!.name,
     ];
     expect(names, ['overdue', 'beta', 'alpha']);
+    await finish(tester, h);
+  });
+
+  testWidgets('an item follows the default reminders until it gets its own', (
+    tester,
+  ) async {
+    final h = await pumpApp(
+      tester,
+      seed: (h) => h.items.create(
+        type: ItemType.task,
+        title: 'Call mom',
+        due: DateTime(2026, 11, 15, 18),
+        dueHasTime: true,
+      ),
+    );
+    await tester.tap(find.text('Call mom'));
+    await settle(tester);
+    expect(find.text('1 hour before (default)'), findsOneWidget);
+
+    await tester.tap(find.text('+ Reminder'));
+    await settle(tester);
+    await tester.tap(find.text('15 minutes before'));
+    await settle(tester);
+    expect(find.text('15 minutes before'), findsOneWidget);
+    expect(find.text('1 hour before'), findsOneWidget);
+    expect(h.controller.selected!.customReminders, isTrue);
+    expect(h.controller.selected!.reminderOffsets, [15, 60]);
+
+    await tester.tap(find.text('Use default'));
+    await settle(tester);
+    expect(find.text('1 hour before (default)'), findsOneWidget);
+    expect(h.controller.selected!.customReminders, isFalse);
+    await finish(tester, h);
+  });
+
+  testWidgets('date-only tasks point to the digest instead of reminders', (
+    tester,
+  ) async {
+    final h = await pumpApp(
+      tester,
+      seed: (h) => h.items.create(
+        type: ItemType.task,
+        title: 'Laundry',
+        due: DateTime(2026, 11, 15),
+      ),
+    );
+    await tester.tap(find.text('Laundry'));
+    await settle(tester);
+    expect(find.textContaining('morning digest'), findsOneWidget);
+    expect(find.text('+ Reminder'), findsNothing);
+    await finish(tester, h);
+  });
+
+  testWidgets('Settings › Notifications turns on quiet hours', (tester) async {
+    final h = await pumpApp(tester);
+    await tester.tap(find.text('Settings'));
+    await settle(tester);
+    await scrollSettingsTo(tester, find.text('Quiet hours'));
+    expect(find.text('From / to'), findsNothing);
+
+    await tester.tap(find.text('Quiet hours'));
+    await settle(tester);
+    expect(h.controller.notificationPrefs.quietEnabled, isTrue);
+    expect(find.text('From / to'), findsOneWidget);
+    expect(
+      await pumpUntilDone(tester, h.settings.getValue('notif.quietStart')),
+      '22:00',
+    );
     await finish(tester, h);
   });
 

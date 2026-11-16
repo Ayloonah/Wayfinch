@@ -164,11 +164,30 @@ class ItemsRepository {
     return all.where((i) => i.id == id).firstOrNull;
   }
 
-  /// All items with their tags.
-  Future<List<Item>> loadAll() => _allQuery().get().then(_group);
+  /// All items with their tags and reminders.
+  Future<List<Item>> loadAll() async {
+    final reminders = <String, List<int>>{};
+    final rows = await (_db.select(
+      _db.reminders,
+    )..orderBy([(r) => OrderingTerm.asc(r.offsetMinutes)])).get();
+    for (final r in rows) {
+      (reminders[r.itemId] ??= []).add(r.offsetMinutes);
+    }
+    return _group(await _allQuery().get(), reminders);
+  }
 
-  /// All items with their tags, updated live.
-  Stream<List<Item>> watchAll() => _allQuery().watch().map(_group);
+  /// All items with their tags and reminders, updated live.
+  ///
+  /// Built on a Drift watch query (which fires on changes to any of the
+  /// three tables and copes with the database closing) that reloads
+  /// everything each time.
+  Stream<List<Item>> watchAll() => _db
+      .customSelect(
+        'SELECT 1',
+        readsFrom: {_db.items, _db.itemTags, _db.reminders},
+      )
+      .watch()
+      .asyncMap((_) => loadAll());
 
   JoinedSelectStatement<HasResultSet, dynamic> _allQuery() =>
       _db.select(_db.items).join([
@@ -178,7 +197,7 @@ class ItemsRepository {
         ),
       ]);
 
-  List<Item> _group(List<TypedResult> rows) {
+  List<Item> _group(List<TypedResult> rows, Map<String, List<int>> reminders) {
     final items = <String, ItemRow>{};
     final tags = <String, List<String>>{};
     for (final row in rows) {
@@ -189,7 +208,8 @@ class ItemsRepository {
       if (link != null) list.add(link.tagId);
     }
     return [
-      for (final row in items.values) _toItem(row, tags[row.id] ?? const []),
+      for (final row in items.values)
+        _toItem(row, tags[row.id] ?? const [], reminders[row.id] ?? const []),
     ];
   }
 
@@ -209,6 +229,22 @@ class ItemsRepository {
   Future<void> _insert(Item item) async {
     await _db.into(_db.items).insert(_toCompanion(item, withId: true));
     await _writeTags(item);
+    await _writeReminders(item);
+  }
+
+  /// Stores [item]'s own reminders (none unless [Item.customReminders]).
+  Future<void> _writeReminders(Item item) async {
+    await (_db.delete(
+      _db.reminders,
+    )..where((r) => r.itemId.equals(item.id))).go();
+    if (!item.customReminders) return;
+    for (final offset in item.reminderOffsets.toSet()) {
+      await _db
+          .into(_db.reminders)
+          .insert(
+            RemindersCompanion.insert(itemId: item.id, offsetMinutes: offset),
+          );
+    }
   }
 
   Future<void> _update(Item item) async {
@@ -218,6 +254,7 @@ class ItemsRepository {
         );
     if (count == 0) throw StateError('No item with id ${item.id}');
     await _writeTags(item);
+    await _writeReminders(item);
   }
 
   Future<void> _writeTags(Item item) async {
@@ -248,12 +285,13 @@ class ItemsRepository {
       doneAt: Value(item.doneAt),
       source: Value(item.source),
       icsUid: Value(item.icsUid),
+      customReminders: Value(item.customReminders),
       createdAt: withId ? Value(item.createdAt) : const Value.absent(),
       updatedAt: Value(item.updatedAt),
     );
   }
 
-  Item _toItem(ItemRow row, List<String> tagIds) => Item(
+  Item _toItem(ItemRow row, List<String> tagIds, List<int> reminders) => Item(
     id: row.id,
     type: row.type,
     title: row.title,
@@ -272,5 +310,7 @@ class ItemsRepository {
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     tagIds: tagIds,
+    customReminders: row.customReminders,
+    reminderOffsets: reminders,
   );
 }

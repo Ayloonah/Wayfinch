@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wayfinch/data/database.dart';
@@ -140,6 +143,47 @@ void main() {
     expect(history.first.itemCount, 1);
     await imports.undoLatest();
     expect((await items.loadAll()).map((i) => i.title), ['Only import 2']);
+  });
+
+  test('Undo brings back custom reminders', () async {
+    final dentist = await items.create(
+      type: ItemType.task,
+      title: 'Dentist',
+      due: DateTime(2026, 11, 20, 14),
+      dueHasTime: true,
+    );
+    await items.save(
+      dentist.copyWith(customReminders: true, reminderOffsets: [30]),
+    );
+    final p = await plan('{"type":"task","title":"Only"}', ImportMode.replace);
+    await imports.apply(p, colorFor: (_) => 0);
+    expect(await db.select(db.reminders).get(), isEmpty);
+
+    await imports.undoLatest();
+    final back = (await items.getById(dentist.id))!;
+    expect(back.customReminders, isTrue);
+    expect(back.reminderOffsets, [30]);
+  });
+
+  test('backups from before reminders existed still restore', () async {
+    await items.create(type: ItemType.task, title: 'Old');
+    final p = await plan('{"type":"task","title":"New"}', ImportMode.replace);
+    await imports.apply(p, colorFor: (_) => 0);
+    // Make the stored backup look like one taken by schema v3.
+    final row = (await db.select(db.importBackups).get()).single;
+    final data = jsonDecode(row.payload) as Map<String, dynamic>;
+    for (final item in data['items'] as List) {
+      (item as Map<String, dynamic>).remove('customReminders');
+    }
+    data.remove('reminders');
+    data['reminders'] = <Object>[];
+    await (db.update(db.importBackups)..where((b) => b.id.equals(row.id)))
+        .write(ImportBackupsCompanion(payload: Value(jsonEncode(data))));
+
+    expect(await imports.undoLatest(), isTrue);
+    final all = await items.loadAll();
+    expect(all.map((i) => i.title), ['Old']);
+    expect(all.single.customReminders, isFalse);
   });
 
   test('only the last $maxImportBackups backups are kept', () async {

@@ -6,7 +6,7 @@ Ask your AI to break a big project into steps, and Wayfinch turns its answer int
 
 Offline-first, private by default, and designed to keep you on track without stressing you out.
 
-> 🚧 **Status:** early development, Windows desktop first. The core to-do list works (Today, Upcoming, All, Done and Tags views, subtasks, recurrence, quick add), along with light/dark themes, accents and a custom theme builder, the full AI loop (Export for AI, Import with preview, Add or Replace, undo), and first-run setup with an optional password that encrypts your data. Notifications are next (see the [roadmap](#roadmap)).
+> 🚧 **Status:** early development, Windows desktop first. The core to-do list works (Today, Upcoming, All, Done and Tags views, subtasks, recurrence, quick add), along with light/dark themes, accents and a custom theme builder, the full AI loop (Export for AI, Import with preview, Add or Replace, undo), first-run setup with an optional password that encrypts your data, and reminders with a morning digest, quiet hours and snooze (Wayfinch keeps running in the system tray). Calendar import/export and daily backups are next (see the [roadmap](#roadmap)).
 
 ---
 
@@ -57,7 +57,7 @@ Wayfinch has no accounts, no servers and no tracking. Your data lives on your co
 **Requirements**
 
 - Flutter SDK (stable channel) with Windows desktop support enabled
-- Visual Studio with the "Desktop development with C++" workload
+- Visual Studio with the "Desktop development with C++" workload, including the **C++ ATL** component (needed for Windows notifications)
 
 **Run it**
 
@@ -99,7 +99,7 @@ flutter test
 - [x] **Look and feel:** themes, accents, custom theme builder, tags, overdue banner
 - [x] **AI loop:** Export for AI, Import with preview, add vs replace, undo
 - [x] **Onboarding and Help:** setup, optional password with encryption and recovery code, tutorial, Help
-- [ ] **Notifications:** reminders, daily digest, tray
+- [x] **Notifications:** reminders, daily digest, quiet hours, snooze, tray
 - [ ] **Calendar and backups:** `.ics` import/export, daily backups
 
 Later: calendar view, Android/iOS/macOS/web, sync.

@@ -236,7 +236,9 @@ class ImportRepository {
     await _db.batch((b) {
       b.insertAll(_db.tags, [for (final r in rows('tags')) TagRow.fromJson(r)]);
       b.insertAll(_db.items, [
-        for (final r in rows('items')) ItemRow.fromJson(r),
+        // Backups from before reminders (schema v3) lack customReminders.
+        for (final r in rows('items'))
+          ItemRow.fromJson({'customReminders': false, ...r}),
       ]);
       b.insertAll(_db.itemTags, [
         for (final r in rows('itemTags')) ItemTagRow.fromJson(r),

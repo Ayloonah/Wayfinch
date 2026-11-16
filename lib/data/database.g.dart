@@ -162,6 +162,21 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, ItemRow> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _customRemindersMeta = const VerificationMeta(
+    'customReminders',
+  );
+  @override
+  late final GeneratedColumn<bool> customReminders = GeneratedColumn<bool>(
+    'custom_reminders',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("custom_reminders" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -203,6 +218,7 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, ItemRow> {
     doneAt,
     source,
     icsUid,
+    customReminders,
     createdAt,
     updatedAt,
   ];
@@ -292,6 +308,15 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, ItemRow> {
         icsUid.isAcceptableOrUnknown(data['ics_uid']!, _icsUidMeta),
       );
     }
+    if (data.containsKey('custom_reminders')) {
+      context.handle(
+        _customRemindersMeta,
+        customReminders.isAcceptableOrUnknown(
+          data['custom_reminders']!,
+          _customRemindersMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -379,6 +404,10 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, ItemRow> {
         DriftSqlType.string,
         data['${effectivePrefix}ics_uid'],
       ),
+      customReminders: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}custom_reminders'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -449,6 +478,10 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
   /// The VEVENT UID for items from an .ics import, used to match re-imports.
   final String? icsUid;
 
+  /// Whether this item has its own reminders (rows in [Reminders], possibly
+  /// none). When false it follows the global defaults. Added in schema 4.
+  final bool customReminders;
+
   /// When the item was created.
   final DateTime createdAt;
 
@@ -470,6 +503,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     this.doneAt,
     required this.source,
     this.icsUid,
+    required this.customReminders,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -517,6 +551,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     if (!nullToAbsent || icsUid != null) {
       map['ics_uid'] = Variable<String>(icsUid);
     }
+    map['custom_reminders'] = Variable<bool>(customReminders);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -551,6 +586,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
       icsUid: icsUid == null && nullToAbsent
           ? const Value.absent()
           : Value(icsUid),
+      customReminders: Value(customReminders),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -583,6 +619,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
         serializer.fromJson<String>(json['source']),
       ),
       icsUid: serializer.fromJson<String?>(json['icsUid']),
+      customReminders: serializer.fromJson<bool>(json['customReminders']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -612,6 +649,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
         $ItemsTable.$convertersource.toJson(source),
       ),
       'icsUid': serializer.toJson<String?>(icsUid),
+      'customReminders': serializer.toJson<bool>(customReminders),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -633,6 +671,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     Value<DateTime?> doneAt = const Value.absent(),
     ItemSource? source,
     Value<String?> icsUid = const Value.absent(),
+    bool? customReminders,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => ItemRow(
@@ -651,6 +690,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     doneAt: doneAt.present ? doneAt.value : this.doneAt,
     source: source ?? this.source,
     icsUid: icsUid.present ? icsUid.value : this.icsUid,
+    customReminders: customReminders ?? this.customReminders,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -675,6 +715,9 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
       doneAt: data.doneAt.present ? data.doneAt.value : this.doneAt,
       source: data.source.present ? data.source.value : this.source,
       icsUid: data.icsUid.present ? data.icsUid.value : this.icsUid,
+      customReminders: data.customReminders.present
+          ? data.customReminders.value
+          : this.customReminders,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -698,6 +741,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
           ..write('doneAt: $doneAt, ')
           ..write('source: $source, ')
           ..write('icsUid: $icsUid, ')
+          ..write('customReminders: $customReminders, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -721,6 +765,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     doneAt,
     source,
     icsUid,
+    customReminders,
     createdAt,
     updatedAt,
   );
@@ -743,6 +788,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
           other.doneAt == this.doneAt &&
           other.source == this.source &&
           other.icsUid == this.icsUid &&
+          other.customReminders == this.customReminders &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -763,6 +809,7 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
   final Value<DateTime?> doneAt;
   final Value<ItemSource> source;
   final Value<String?> icsUid;
+  final Value<bool> customReminders;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -782,6 +829,7 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
     this.doneAt = const Value.absent(),
     this.source = const Value.absent(),
     this.icsUid = const Value.absent(),
+    this.customReminders = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -802,6 +850,7 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
     this.doneAt = const Value.absent(),
     this.source = const Value.absent(),
     this.icsUid = const Value.absent(),
+    this.customReminders = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -823,6 +872,7 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
     Expression<DateTime>? doneAt,
     Expression<String>? source,
     Expression<String>? icsUid,
+    Expression<bool>? customReminders,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -843,6 +893,7 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
       if (doneAt != null) 'done_at': doneAt,
       if (source != null) 'source': source,
       if (icsUid != null) 'ics_uid': icsUid,
+      if (customReminders != null) 'custom_reminders': customReminders,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -865,6 +916,7 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
     Value<DateTime?>? doneAt,
     Value<ItemSource>? source,
     Value<String?>? icsUid,
+    Value<bool>? customReminders,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
@@ -885,6 +937,7 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
       doneAt: doneAt ?? this.doneAt,
       source: source ?? this.source,
       icsUid: icsUid ?? this.icsUid,
+      customReminders: customReminders ?? this.customReminders,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -945,6 +998,9 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
     if (icsUid.present) {
       map['ics_uid'] = Variable<String>(icsUid.value);
     }
+    if (customReminders.present) {
+      map['custom_reminders'] = Variable<bool>(customReminders.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -975,6 +1031,7 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
           ..write('doneAt: $doneAt, ')
           ..write('source: $source, ')
           ..write('icsUid: $icsUid, ')
+          ..write('customReminders: $customReminders, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -2373,6 +2430,7 @@ typedef $$ItemsTableCreateCompanionBuilder = ItemsCompanion Function({
   Value<DateTime?> doneAt,
   Value<ItemSource> source,
   Value<String?> icsUid,
+  Value<bool> customReminders,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<int> rowid,
@@ -2393,6 +2451,7 @@ typedef $$ItemsTableUpdateCompanionBuilder = ItemsCompanion Function({
   Value<DateTime?> doneAt,
   Value<ItemSource> source,
   Value<String?> icsUid,
+  Value<bool> customReminders,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<int> rowid,
@@ -2535,6 +2594,11 @@ class $$ItemsTableFilterComposer
 
   ColumnFilters<String> get icsUid => $composableBuilder(
     column: $table.icsUid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get customReminders => $composableBuilder(
+    column: $table.customReminders,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2701,6 +2765,11 @@ class $$ItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get customReminders => $composableBuilder(
+    column: $table.customReminders,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -2789,6 +2858,11 @@ class $$ItemsTableAnnotationComposer
 
   GeneratedColumn<String> get icsUid =>
       $composableBuilder(column: $table.icsUid, builder: (column) => column);
+
+  GeneratedColumn<bool> get customReminders => $composableBuilder(
+    column: $table.customReminders,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -2917,6 +2991,7 @@ class $$ItemsTableTableManager
                 Value<DateTime?> doneAt = const Value.absent(),
                 Value<ItemSource> source = const Value.absent(),
                 Value<String?> icsUid = const Value.absent(),
+                Value<bool> customReminders = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -2936,6 +3011,7 @@ class $$ItemsTableTableManager
                 doneAt: doneAt,
                 source: source,
                 icsUid: icsUid,
+                customReminders: customReminders,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -2957,6 +3033,7 @@ class $$ItemsTableTableManager
                 Value<DateTime?> doneAt = const Value.absent(),
                 Value<ItemSource> source = const Value.absent(),
                 Value<String?> icsUid = const Value.absent(),
+                Value<bool> customReminders = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -2976,6 +3053,7 @@ class $$ItemsTableTableManager
                 doneAt: doneAt,
                 source: source,
                 icsUid: icsUid,
+                customReminders: customReminders,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,

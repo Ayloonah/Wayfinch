@@ -1,9 +1,8 @@
+import '../domain/reminders.dart';
 import 'settings_repository.dart';
 
-/// Notification choices made during setup (and later in Settings).
-///
-/// Milestone 5 only stores these; milestone 6 uses them for reminders, the
-/// daily digest and launching at startup.
+/// Notification choices: default reminders, the morning digest, quiet hours
+/// and launching with Windows. Set during setup and in Settings.
 class NotificationPrefs {
   /// Creates preferences. Defaults follow the spec.
   const NotificationPrefs({
@@ -12,6 +11,9 @@ class NotificationPrefs {
     this.digestEnabled = true,
     this.digestHour = 8,
     this.digestMinute = 0,
+    this.quietEnabled = false,
+    this.quietStartMinutes = 22 * 60,
+    this.quietEndMinutes = 7 * 60,
     this.launchAtStartup = true,
   });
 
@@ -30,6 +32,15 @@ class NotificationPrefs {
   /// Digest time (minute).
   final int digestMinute;
 
+  /// Whether quiet hours are on (off by default).
+  final bool quietEnabled;
+
+  /// Quiet hours start (minutes after midnight).
+  final int quietStartMinutes;
+
+  /// Quiet hours end (minutes after midnight).
+  final int quietEndMinutes;
+
   /// Whether Wayfinch starts with Windows.
   final bool launchAtStartup;
 
@@ -40,7 +51,21 @@ class NotificationPrefs {
   static const _event = 'notif.eventReminderMinutes';
   static const _digest = 'notif.digestEnabled';
   static const _digestTime = 'notif.digestTime';
+  static const _quiet = 'notif.quietEnabled';
+  static const _quietStart = 'notif.quietStart';
+  static const _quietEnd = 'notif.quietEnd';
   static const _startup = 'app.launchAtStartup';
+
+  /// The global default reminders.
+  ReminderDefaults get defaults => ReminderDefaults(
+    taskMinutes: taskReminderMinutes,
+    eventMinutes: eventReminderMinutes,
+  );
+
+  /// The quiet window, or null when quiet hours are off.
+  QuietHours? get quietHours => quietEnabled
+      ? QuietHours(startMinutes: quietStartMinutes, endMinutes: quietEndMinutes)
+      : null;
 
   /// Returns a copy with some fields changed.
   NotificationPrefs copyWith({
@@ -49,6 +74,9 @@ class NotificationPrefs {
     bool? digestEnabled,
     int? digestHour,
     int? digestMinute,
+    bool? quietEnabled,
+    int? quietStartMinutes,
+    int? quietEndMinutes,
     bool? launchAtStartup,
   }) => NotificationPrefs(
     taskReminderMinutes: taskReminderMinutes ?? this.taskReminderMinutes,
@@ -56,37 +84,51 @@ class NotificationPrefs {
     digestEnabled: digestEnabled ?? this.digestEnabled,
     digestHour: digestHour ?? this.digestHour,
     digestMinute: digestMinute ?? this.digestMinute,
+    quietEnabled: quietEnabled ?? this.quietEnabled,
+    quietStartMinutes: quietStartMinutes ?? this.quietStartMinutes,
+    quietEndMinutes: quietEndMinutes ?? this.quietEndMinutes,
     launchAtStartup: launchAtStartup ?? this.launchAtStartup,
   );
 
-  /// Reads stored preferences (defaults for anything missing).
-  static Future<NotificationPrefs> load(SettingsRepository settings) async {
+  /// Reads preferences from stored settings (defaults for anything missing).
+  factory NotificationPrefs.fromMap(Map<String, String> values) {
     const d = NotificationPrefs();
-    final time = (await settings.getValue(_digestTime) ?? '').split(':');
+    final time = (values[_digestTime] ?? '').split(':');
+    int minutes(String? hhmm, int fallback) {
+      final parts = (hhmm ?? '').split(':');
+      if (parts.length != 2) return fallback;
+      final h = int.tryParse(parts[0]);
+      final m = int.tryParse(parts[1]);
+      return h == null || m == null ? fallback : h * 60 + m;
+    }
+
     return NotificationPrefs(
       taskReminderMinutes:
-          int.tryParse(await settings.getValue(_task) ?? '') ??
-          d.taskReminderMinutes,
+          int.tryParse(values[_task] ?? '') ?? d.taskReminderMinutes,
       eventReminderMinutes:
-          int.tryParse(await settings.getValue(_event) ?? '') ??
-          d.eventReminderMinutes,
-      digestEnabled:
-          (await settings.getValue(_digest) ?? '${d.digestEnabled}') == 'true',
+          int.tryParse(values[_event] ?? '') ?? d.eventReminderMinutes,
+      digestEnabled: (values[_digest] ?? '${d.digestEnabled}') == 'true',
       digestHour: time.length == 2
           ? int.tryParse(time[0]) ?? d.digestHour
           : d.digestHour,
       digestMinute: time.length == 2
           ? int.tryParse(time[1]) ?? d.digestMinute
           : d.digestMinute,
-      launchAtStartup:
-          (await settings.getValue(_startup) ?? '${d.launchAtStartup}') ==
-          'true',
+      quietEnabled: (values[_quiet] ?? '${d.quietEnabled}') == 'true',
+      quietStartMinutes: minutes(values[_quietStart], d.quietStartMinutes),
+      quietEndMinutes: minutes(values[_quietEnd], d.quietEndMinutes),
+      launchAtStartup: (values[_startup] ?? '${d.launchAtStartup}') == 'true',
     );
   }
+
+  /// Reads stored preferences.
+  static Future<NotificationPrefs> load(SettingsRepository settings) async =>
+      NotificationPrefs.fromMap(await settings.watchAll().first);
 
   /// Stores these preferences.
   Future<void> save(SettingsRepository settings) async {
     String two(int n) => n.toString().padLeft(2, '0');
+    String hhmm(int minutes) => '${two(minutes ~/ 60)}:${two(minutes % 60)}';
     await settings.setValue(_task, '$taskReminderMinutes');
     await settings.setValue(_event, '$eventReminderMinutes');
     await settings.setValue(_digest, '$digestEnabled');
@@ -94,6 +136,9 @@ class NotificationPrefs {
       _digestTime,
       '${two(digestHour)}:${two(digestMinute)}',
     );
+    await settings.setValue(_quiet, '$quietEnabled');
+    await settings.setValue(_quietStart, hhmm(quietStartMinutes));
+    await settings.setValue(_quietEnd, hhmm(quietEndMinutes));
     await settings.setValue(_startup, '$launchAtStartup');
   }
 }

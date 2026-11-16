@@ -64,6 +64,11 @@ class Items extends Table {
   /// The VEVENT UID for items from an .ics import, used to match re-imports.
   TextColumn get icsUid => text().nullable()();
 
+  /// Whether this item has its own reminders (rows in [Reminders], possibly
+  /// none). When false it follows the global defaults. Added in schema 4.
+  BoolColumn get customReminders =>
+      boolean().withDefault(const Constant(false))();
+
   /// When the item was created.
   DateTimeColumn get createdAt => dateTime().clientDefault(DateTime.now)();
 

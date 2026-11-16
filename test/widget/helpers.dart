@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wayfinch/ui/settings/settings_pane.dart';
 
 /// Lets database work (real async) and the UI catch up.
 Future<void> settle(WidgetTester tester) async {
@@ -59,6 +60,21 @@ Future<void> dragTo(
     await gesture.moveBy(step);
     await tester.pump(const Duration(milliseconds: 16));
   }
+}
+
+/// Scrolls the open Settings page until [finder] is built and on screen.
+Future<void> scrollSettingsTo(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(
+    finder,
+    300,
+    scrollable: find
+        .descendant(
+          of: find.byType(SettingsPane),
+          matching: find.byType(Scrollable),
+        )
+        .first,
+  );
+  await tester.pumpAndSettle();
 }
 
 /// Pumps until [finder] finds something (slow work such as key derivation
